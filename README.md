@@ -1,4 +1,4 @@
-# flutter_getcli
+# edutech
 
 A new Flutter project.
 
