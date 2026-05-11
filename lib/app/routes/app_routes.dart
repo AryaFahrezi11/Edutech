@@ -3,4 +3,5 @@ abstract class Routes {
   static const HOME = '/home'; // Untuk nanti
   static const REGISTER = '/register';
   static const LEADERBOARD = '/leaderboard';
+  static const WRITING = '/writing';
 }
