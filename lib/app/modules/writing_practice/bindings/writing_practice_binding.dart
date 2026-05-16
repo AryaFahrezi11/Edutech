@@ -1,5 +1,5 @@
 import 'package:get/get.dart';
-import 'writing_practice_controller.dart';
+import '../controllers/writing_practice_controller.dart';
 
 class WritingPracticeBinding extends Bindings {
   @override

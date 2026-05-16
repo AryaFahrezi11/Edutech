@@ -1,6 +1,9 @@
+import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'home_controller.dart';
+import '../../routes/app_routes.dart';
+import '../leaderboard/views/leaderboard_view.dart';
 
 class HomeView extends GetView<HomeController> {
   const HomeView({Key? key}) : super(key: key);
@@ -8,280 +11,345 @@ class HomeView extends GetView<HomeController> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
-      // SafeArea agar tidak nabrak notch/kamera depan
-      body: SafeArea(
-        child: Column(
-          children: [
-            // 1. Header (Profil & Notifikasi)
-            _buildHeader(),
-            
-            // Garis pembatas biru tipis di bawah header
-            Container(height: 1, color: Colors.blue.withOpacity(0.2)),
-
-            // 2. Konten Utama (Bisa discroll)
-            Expanded(
-              child: SingleChildScrollView(
-                padding: const EdgeInsets.all(20),
-                child: Column(
-                  children: [
-                    _buildGiftCard(),
-                    const SizedBox(height: 20),
-                    _buildRankingCard(),
-                    const SizedBox(height: 20),
-                    _buildMenuGrid(),
-                  ],
-                ),
-              ),
-            ),
-          ],
-        ),
-      ),
-      // 3. Bottom Navigation
+      backgroundColor: const Color(0xFFF0F4FF),
+      body: Obx(() => IndexedStack(
+        index: controller.tabIndex.value,
+        children: [
+          _buildHomeContent(),
+          const Center(child: Text("Halaman Belajar (Segera Hadir)", style: TextStyle(fontSize: 18, color: Colors.black54))),
+          const Center(child: Text("Halaman Ujian (Segera Hadir)", style: TextStyle(fontSize: 18, color: Colors.black54))),
+          const LeaderboardView(),
+          const Center(child: Text("Halaman Profil (Segera Hadir)", style: TextStyle(fontSize: 18, color: Colors.black54))),
+        ],
+      )),
       bottomNavigationBar: _buildBottomNav(),
     );
   }
 
-  // --- WIDGET HEADER ---
-  Widget _buildHeader() {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 15),
-      child: Row(
-        children: [
-          // Foto Profil
-          CircleAvatar(
-            radius: 25,
-            backgroundColor: Colors.blue[100],
-            child: Image.network('https://api.dicebear.com/7.x/avataaars/png?seed=Amrull', width: 40),
-          ),
-          const SizedBox(width: 15),
-          // Teks Nama & Subtitle
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const Text(
-                  "Edutech",
-                  style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: Color(0xFF1E52D0)),
-                ),
-                Text(
-                  "Halo! Yuk Belajar!",
-                  style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: Colors.blue[800]),
-                ),
-              ],
-            ),
-          ),
-          // Tombol Notifikasi
-          Container(
-            padding: const EdgeInsets.all(8),
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              border: Border.all(color: Colors.blue.withOpacity(0.2), width: 1.5),
-            ),
-            child: const Icon(Icons.notifications_outlined, color: Colors.blue),
-          )
-        ],
-      ),
-    );
-  }
-
-  // --- WIDGET GIFT CARD ---
-  Widget _buildGiftCard() {
-    return Container(
-      padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(24),
-        border: Border.all(color: Colors.grey.withOpacity(0.1)),
-        boxShadow: [
-          BoxShadow(color: Colors.blue.withOpacity(0.05), blurRadius: 20, spreadRadius: 5, offset: const Offset(0, 10))
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              const Icon(Icons.card_giftcard, color: Color(0xFFFFC107), size: 28),
-              const SizedBox(width: 10),
-              const Text("Hadiah Hari Ini", style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700, color: Colors.black87)),
-              const Spacer(),
-              Row(children: List.generate(3, (index) => const Icon(Icons.star_rounded, color: Color(0xFFFFC107), size: 20))),
-            ],
-          ),
-          const SizedBox(height: 15),
-          // Progress Bar
-          ClipRRect(
-            borderRadius: BorderRadius.circular(10),
-            child: LinearProgressIndicator(
-              value: 0.66,
-              backgroundColor: Colors.grey[200],
-              color: const Color(0xFF4CAF50),
-              minHeight: 12,
-            ),
-          ),
-          const SizedBox(height: 20),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              const Text("2 dari 3 tugas\nselesai!", style: TextStyle(color: Colors.black54, height: 1.5, fontWeight: FontWeight.w500)),
-              ElevatedButton(
-                onPressed: () {},
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFF0056D2), // Biru gelap
-                  padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-                  elevation: 0,
-                ),
-                child: Column(
-                  children: const [
-                    Text("Lihat Ranking", style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
-                    Icon(Icons.arrow_forward, color: Colors.white, size: 16),
-                  ],
-                ),
-              )
-            ],
-          )
-        ],
-      ),
-    );
-  }
-
-  // --- WIDGET RANKING CARD ---
-  Widget _buildRankingCard() {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 15),
-      decoration: BoxDecoration(
-        color: const Color(0xFFFFD54F), // Kuning
-        borderRadius: BorderRadius.circular(24),
-        boxShadow: [
-          BoxShadow(color: Colors.orange.withOpacity(0.2), blurRadius: 10, offset: const Offset(0, 5))
-        ]
-      ),
-      child: Row(
-        children: [
-          Container(
-            padding: const EdgeInsets.all(10),
-            decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(15)),
-            child: const Icon(Icons.emoji_events, color: Color(0xFF795548), size: 30),
-          ),
-          const SizedBox(width: 15),
-          const Text("Papan Peringkat", style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Color(0xFF5D4037))),
-          const Spacer(),
-          const Icon(Icons.arrow_forward_ios, color: Color(0xFF5D4037), size: 18),
-        ],
-      ),
-    );
-  }
-
-  // --- WIDGET GRID MENU (4 Kotak) ---
-  Widget _buildMenuGrid() {
-    return GridView.count(
-      crossAxisCount: 2,
-      crossAxisSpacing: 15,
-      mainAxisSpacing: 15,
-      shrinkWrap: true, // Penting agar bisa di dalam SingleChildScrollView
-      physics: const NeverScrollableScrollPhysics(),
-      childAspectRatio: 0.75, // Mengatur agar kotaknya memanjang ke bawah (potrait)
-      children: [
-        _buildMenuCardItem(
-          bgColor: const Color(0xFFFFE082), // Kuning muda
-          iconBgColor: const Color(0xFFFFCA28),
-          title: "Latihan\nMengeja",
-          subtitle: "Mengeja itu\nseru!",
-          iconText: "ABC",
-          textColor: const Color(0xFF5D4037),
-          onTap: () => Get.toNamed('/spelling'),
-        ),
-        _buildMenuCardItem(
-          bgColor: const Color(0xFFFFCDD2), // Merah muda
-          iconBgColor: const Color(0xFFD32F2F),
-          title: "Ujian\nMengeja",
-          subtitle: "Tebak\nsuaranya!",
-          iconData: Icons.mic_none,
-          textColor: const Color(0xFFB71C1C),
-          onTap: () {}, // Tambahkan fungsi onTap jika ingin ada aksi saat diklik
-        ),
-        _buildMenuCardItem(
-          bgColor: const Color(0xFFE3F2FD), // Biru muda
-          iconBgColor: const Color(0xFF1976D2),
-          title: "Latihan\nMenulis",
-          subtitle: "Yuk nulis!",
-          iconData: Icons.edit,
-          textColor: const Color(0xFF0D47A1),
-          onTap: () => Get.toNamed('/writing'),
-        ),
-        _buildMenuCardItem(
-          bgColor: const Color(0xFFC8E6C9), // Hijau muda
-          iconBgColor: const Color(0xFF388E3C),
-          title: "Ujian Menulis",
-          subtitle: "Uji\nkemampuanmu!",
-          iconData: Icons.insert_drive_file_outlined,
-          textColor: const Color(0xFF1B5E20),
-          onTap: () {}, // Tambahkan fungsi onTap jika ingin ada aksi saat diklik
-        ),
-      ],
-    );
-  }
-
-  // Komponen Item untuk Grid
-  // Komponen Item untuk Grid
-  Widget _buildMenuCardItem({
-    required Color bgColor,
-    required Color iconBgColor,
-    required String title,
-    required String subtitle,
-    required Color textColor,
-    IconData? iconData,
-    String? iconText,
-    required VoidCallback onTap, // <--- 1. Tambahkan parameter ini
-  }) {
-    return GestureDetector( // <--- 2. Bungkus Container dengan GestureDetector
-      onTap: onTap, // <--- 3. Panggil fungsi onTap di sini
-      child: Container(
-        decoration: BoxDecoration(
-          color: bgColor,
-          borderRadius: BorderRadius.circular(24),
-          border: Border.all(color: Colors.black.withOpacity(0.05)),
-          boxShadow: [
-            BoxShadow(color: bgColor.withOpacity(0.5), blurRadius: 10, offset: const Offset(0, 5))
-          ]
-        ),
+  Widget _buildHomeContent() {
+    return SafeArea(
+      child: SingleChildScrollView(
         child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Container(
-              height: 60,
-              width: 60,
-              decoration: BoxDecoration(
-                color: iconBgColor,
-                shape: BoxShape.circle,
-                boxShadow: [
-                  BoxShadow(color: Colors.black.withOpacity(0.1), blurRadius: 5, offset: const Offset(0, 3))
-                ]
-              ),
-              child: Center(
-                child: iconData != null 
-                    ? Icon(iconData, color: Colors.white, size: 30)
-                    : Text(iconText!, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 18)),
+            _buildHeroBanner(),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 18),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const SizedBox(height: 22),
+                  _buildStreakCard(),
+                  const SizedBox(height: 22),
+                  _buildSectionTitle("🎮 Pilih Aktivitas", color: const Color(0xFF4A3F8F)),
+                  const SizedBox(height: 14),
+                  _buildActivityGrid(),
+                  const SizedBox(height: 22),
+                  _buildSectionTitle("🏆 Pencapaianmu", color: const Color(0xFF4A3F8F)),
+                  const SizedBox(height: 14),
+                  _buildBadgesRow(),
+                  const SizedBox(height: 22),
+                  _buildSectionTitle("📣 Tantangan Hari Ini", color: const Color(0xFF4A3F8F)),
+                  const SizedBox(height: 14),
+                  _buildDailyChallenge(),
+                  const SizedBox(height: 28),
+                ],
               ),
             ),
-            const SizedBox(height: 15),
-            Text(title, textAlign: TextAlign.center, style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: textColor)),
-            const SizedBox(height: 8),
-            Text(subtitle, textAlign: TextAlign.center, style: TextStyle(fontSize: 12, color: textColor.withOpacity(0.8))),
           ],
         ),
       ),
     );
   }
 
-  // --- CUSTOM BOTTOM NAVIGATION BAR ---
+  // --- HERO BANNER (gradient + avatar + stars) ---
+  Widget _buildHeroBanner() {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.fromLTRB(22, 18, 22, 30),
+      decoration: const BoxDecoration(
+        gradient: LinearGradient(
+          colors: [Color(0xFF6C63FF), Color(0xFF48C6EF)],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+        borderRadius: BorderRadius.vertical(bottom: Radius.circular(36)),
+      ),
+      child: Column(
+        children: [
+          // Top row: greeting + notification
+          Row(
+            children: [
+              // Avatar
+              Container(
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  border: Border.all(color: Colors.white, width: 3),
+                  boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.15), blurRadius: 10, offset: const Offset(0, 4))],
+                ),
+                child: CircleAvatar(
+                  radius: 26,
+                  backgroundColor: Colors.white,
+                  child: Image.network('https://api.dicebear.com/7.x/avataaars/png?seed=Amrull', width: 44),
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: const [
+                    Text("Halo, Bintang Kecil! ⭐", style: TextStyle(fontSize: 18, fontWeight: FontWeight.w800, color: Colors.white)),
+                    SizedBox(height: 2),
+                    Text("Hari ini kita belajar lagi, yuk!", style: TextStyle(fontSize: 13, color: Colors.white70)),
+                  ],
+                ),
+              ),
+              // Notif button
+              _AnimatedBellButton(),
+            ],
+          ),
+          const SizedBox(height: 24),
+          // XP Progress bar
+          Container(
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: Colors.white.withOpacity(0.18),
+              borderRadius: BorderRadius.circular(20),
+            ),
+            child: Column(
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Row(children: const [
+                      Text("⚡", style: TextStyle(fontSize: 18)),
+                      SizedBox(width: 6),
+                      Text("Level 5 - Pemberani", style: TextStyle(color: Colors.white, fontWeight: FontWeight.w700)),
+                    ]),
+                    const Text("660 / 1000 XP", style: TextStyle(color: Colors.white70, fontSize: 12, fontWeight: FontWeight.w600)),
+                  ],
+                ),
+                const SizedBox(height: 10),
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(10),
+                  child: LinearProgressIndicator(
+                    value: 0.66,
+                    backgroundColor: Colors.white.withOpacity(0.2),
+                    valueColor: const AlwaysStoppedAnimation<Color>(Color(0xFFFFD700)),
+                    minHeight: 12,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // --- STREAK CARD ---
+  Widget _buildStreakCard() {
+    return TweenAnimationBuilder<double>(
+      tween: Tween(begin: 0, end: 1),
+      duration: const Duration(milliseconds: 700),
+      curve: Curves.easeOut,
+      builder: (ctx, v, child) => Opacity(opacity: v, child: Transform.translate(offset: Offset(0, 20 * (1 - v)), child: child)),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+        decoration: BoxDecoration(
+          gradient: const LinearGradient(colors: [Color(0xFFFF6B6B), Color(0xFFFF8E53)], begin: Alignment.topLeft, end: Alignment.bottomRight),
+          borderRadius: BorderRadius.circular(24),
+          boxShadow: [BoxShadow(color: const Color(0xFFFF6B6B).withOpacity(0.35), blurRadius: 15, offset: const Offset(0, 6))],
+        ),
+        child: Row(
+          children: [
+            const Text("🔥", style: TextStyle(fontSize: 40)),
+            const SizedBox(width: 14),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: const [
+                  Text("7 Hari Beruntun!", style: TextStyle(fontSize: 20, fontWeight: FontWeight.w900, color: Colors.white)),
+                  SizedBox(height: 2),
+                  Text("Kamu keren banget! Jangan berhenti ya 💪", style: TextStyle(color: Colors.white70, fontSize: 13)),
+                ],
+              ),
+            ),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+              decoration: BoxDecoration(color: Colors.white.withOpacity(0.2), borderRadius: BorderRadius.circular(14)),
+              child: const Text("STREAK", style: TextStyle(color: Colors.white, fontWeight: FontWeight.w800, fontSize: 12)),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildSectionTitle(String title, {Color color = Colors.black87}) {
+    return Text(title, style: TextStyle(fontSize: 18, fontWeight: FontWeight.w800, color: color));
+  }
+
+  // --- ACTIVITY GRID ---
+  Widget _buildActivityGrid() {
+    final activities = [
+      _ActivityData(emoji: "🔤", title: "Latihan\nMenulis", subtitle: "Nulis itu seru!", gradient: [const Color(0xFF11998E), const Color(0xFF38EF7D)], onTap: () => Get.toNamed(Routes.WRITING_CATEGORY)),
+      _ActivityData(emoji: "📖", title: "Latihan\nMengeja", subtitle: "Baca kata yuk!", gradient: [const Color(0xFF6C63FF), const Color(0xFF9D4EDD)], onTap: () {}),
+      _ActivityData(emoji: "✏️", title: "Ujian\nMenulis", subtitle: "Uji kemampuanmu!", gradient: [const Color(0xFFf7971e), const Color(0xFFffd200)], onTap: () => Get.toNamed(Routes.WRITING_EXAM_CATEGORY)),
+      _ActivityData(emoji: "🎙️", title: "Ujian\nMengeja", subtitle: "Dengerin suara!", gradient: [const Color(0xFFFF416C), const Color(0xFFFF4B2B)], onTap: () {}),
+    ];
+    return GridView.builder(
+      shrinkWrap: true,
+      physics: const NeverScrollableScrollPhysics(),
+      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+        crossAxisCount: 2,
+        crossAxisSpacing: 14,
+        mainAxisSpacing: 14,
+        childAspectRatio: 0.9,
+      ),
+      itemCount: activities.length,
+      itemBuilder: (ctx, i) {
+        final a = activities[i];
+        return TweenAnimationBuilder<double>(
+          tween: Tween(begin: 0, end: 1),
+          duration: Duration(milliseconds: 500 + i * 120),
+          curve: Curves.easeOutBack,
+          builder: (ctx, v, child) => Transform.scale(scale: v, child: child),
+          child: _ActivityCard(data: a),
+        );
+      },
+    );
+  }
+
+  // --- BADGES ROW ---
+  Widget _buildBadgesRow() {
+    final badges = [
+      {"emoji": "🌟", "label": "Bintang\nPertama", "earned": true},
+      {"emoji": "📚", "label": "Rajin\nBaca", "earned": true},
+      {"emoji": "✍️", "label": "Jago\nMenulis", "earned": true},
+      {"emoji": "🏅", "label": "Juara\nKelas", "earned": false},
+      {"emoji": "🚀", "label": "Roket\nBelajar", "earned": false},
+    ];
+
+    return SizedBox(
+      height: 110,
+      child: ListView.separated(
+        scrollDirection: Axis.horizontal,
+        itemCount: badges.length,
+        separatorBuilder: (_, __) => const SizedBox(width: 12),
+        itemBuilder: (ctx, i) {
+          final b = badges[i];
+          final earned = b["earned"] as bool;
+          return Column(
+            children: [
+              Container(
+                width: 60,
+                height: 60,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  gradient: earned
+                      ? const LinearGradient(colors: [Color(0xFFFFD700), Color(0xFFFFAA00)])
+                      : null,
+                  color: earned ? null : Colors.grey[200],
+                  boxShadow: earned ? [BoxShadow(color: const Color(0xFFFFD700).withOpacity(0.45), blurRadius: 10)] : null,
+                ),
+                child: Center(child: Text(b["emoji"] as String, style: TextStyle(fontSize: 28, color: earned ? null : const Color(0xFFCCCCCC)))),
+              ),
+              const SizedBox(height: 6),
+              Text(b["label"] as String, textAlign: TextAlign.center, style: TextStyle(fontSize: 10, fontWeight: FontWeight.w700, color: earned ? const Color(0xFF4A3F8F) : Colors.grey[400])),
+            ],
+          );
+        },
+      ),
+    );
+  }
+
+  // --- DAILY CHALLENGE ---
+  Widget _buildDailyChallenge() {
+    return TweenAnimationBuilder<double>(
+      tween: Tween(begin: 0, end: 1),
+      duration: const Duration(milliseconds: 800),
+      curve: Curves.easeOut,
+      builder: (ctx, v, child) => Opacity(opacity: v, child: child),
+      child: Container(
+        padding: const EdgeInsets.all(20),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(24),
+          boxShadow: [BoxShadow(color: const Color(0xFF6C63FF).withOpacity(0.12), blurRadius: 20, offset: const Offset(0, 8))],
+          border: Border.all(color: const Color(0xFF6C63FF).withOpacity(0.15)),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(10),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFF6C63FF).withOpacity(0.1),
+                    borderRadius: BorderRadius.circular(14),
+                  ),
+                  child: const Text("🎯", style: TextStyle(fontSize: 22)),
+                ),
+                const SizedBox(width: 12),
+                const Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text("Tantangan: Eja Kata Baru!", style: TextStyle(fontWeight: FontWeight.w800, fontSize: 16, color: Color(0xFF4A3F8F))),
+                      SizedBox(height: 2),
+                      Text("Selesaikan 3 soal mengeja hari ini", style: TextStyle(color: Colors.black54, fontSize: 12)),
+                    ],
+                  ),
+                ),
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                  decoration: BoxDecoration(color: const Color(0xFF6C63FF).withOpacity(0.12), borderRadius: BorderRadius.circular(10)),
+                  child: const Text("+50 XP", style: TextStyle(color: Color(0xFF6C63FF), fontWeight: FontWeight.w800, fontSize: 12)),
+                ),
+              ],
+            ),
+            const SizedBox(height: 16),
+            Row(
+              children: List.generate(3, (i) => Expanded(
+                child: Container(
+                  margin: EdgeInsets.only(right: i < 2 ? 8 : 0),
+                  height: 10,
+                  decoration: BoxDecoration(
+                    color: i < 2 ? const Color(0xFF6C63FF) : Colors.grey[200],
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                ),
+              )),
+            ),
+            const SizedBox(height: 8),
+            const Text("2 dari 3 selesai!", style: TextStyle(color: Color(0xFF6C63FF), fontSize: 12, fontWeight: FontWeight.w700)),
+            const SizedBox(height: 16),
+            SizedBox(
+              width: double.infinity,
+              child: ElevatedButton(
+                onPressed: () {},
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color(0xFF6C63FF),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                  padding: const EdgeInsets.symmetric(vertical: 14),
+                  elevation: 0,
+                ),
+                child: const Text("Lanjut Tantangan! 🚀", style: TextStyle(fontSize: 15, fontWeight: FontWeight.w800, color: Colors.white)),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  // --- CUSTOM BOTTOM NAV ---
   Widget _buildBottomNav() {
     return Container(
       decoration: BoxDecoration(
         color: Colors.white,
-        border: Border(top: BorderSide(color: Colors.blue.withOpacity(0.2), width: 2)),
+        boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.08), blurRadius: 20, offset: const Offset(0, -4))],
       ),
       child: Obx(() => BottomNavigationBar(
         currentIndex: controller.tabIndex.value,
@@ -289,25 +357,182 @@ class HomeView extends GetView<HomeController> {
         type: BottomNavigationBarType.fixed,
         backgroundColor: Colors.transparent,
         elevation: 0,
-        selectedItemColor: Colors.blue[700],
+        selectedItemColor: const Color(0xFF6C63FF),
         unselectedItemColor: Colors.grey[400],
-        selectedLabelStyle: const TextStyle(fontWeight: FontWeight.bold, fontSize: 10),
-        unselectedLabelStyle: const TextStyle(fontWeight: FontWeight.bold, fontSize: 10),
+        selectedLabelStyle: const TextStyle(fontWeight: FontWeight.w800, fontSize: 10),
+        unselectedLabelStyle: const TextStyle(fontWeight: FontWeight.w600, fontSize: 10),
         items: [
           BottomNavigationBarItem(
-            icon: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-              decoration: BoxDecoration(color: controller.tabIndex.value == 0 ? Colors.blue[100] : Colors.transparent, borderRadius: BorderRadius.circular(10)),
-              child: Icon(Icons.home, color: controller.tabIndex.value == 0 ? Colors.blue[700] : Colors.grey[400]),
-            ),
-            label: 'HOME',
+            icon: _NavIcon(icon: Icons.home_rounded, selected: controller.tabIndex.value == 0),
+            label: 'Beranda',
           ),
-          const BottomNavigationBarItem(icon: Icon(Icons.school_outlined), label: 'BELAJAR'),
-          const BottomNavigationBarItem(icon: Icon(Icons.quiz_outlined), label: 'UJIAN'),
-          const BottomNavigationBarItem(icon: Icon(Icons.emoji_events_outlined), label: 'RANKING'),
-          const BottomNavigationBarItem(icon: Icon(Icons.person_outline), label: 'PROFILE'),
+          BottomNavigationBarItem(
+            icon: _NavIcon(icon: Icons.menu_book_rounded, selected: controller.tabIndex.value == 1),
+            label: 'Belajar',
+          ),
+          BottomNavigationBarItem(
+            icon: _NavIcon(icon: Icons.quiz_rounded, selected: controller.tabIndex.value == 2),
+            label: 'Ujian',
+          ),
+          BottomNavigationBarItem(
+            icon: _NavIcon(icon: Icons.emoji_events_rounded, selected: controller.tabIndex.value == 3),
+            label: 'Ranking',
+          ),
+          BottomNavigationBarItem(
+            icon: _NavIcon(icon: Icons.person_rounded, selected: controller.tabIndex.value == 4),
+            label: 'Profil',
+          ),
         ],
       )),
+    );
+  }
+}
+
+// --- SUB WIDGETS ---
+
+class _NavIcon extends StatelessWidget {
+  final IconData icon;
+  final bool selected;
+  const _NavIcon({required this.icon, required this.selected});
+
+  @override
+  Widget build(BuildContext context) {
+    return AnimatedContainer(
+      duration: const Duration(milliseconds: 250),
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
+      decoration: BoxDecoration(
+        color: selected ? const Color(0xFF6C63FF).withOpacity(0.12) : Colors.transparent,
+        borderRadius: BorderRadius.circular(14),
+      ),
+      child: Icon(icon, size: 24, color: selected ? const Color(0xFF6C63FF) : Colors.grey[400]),
+    );
+  }
+}
+
+class _AnimatedBellButton extends StatefulWidget {
+  @override
+  State<_AnimatedBellButton> createState() => _AnimatedBellButtonState();
+}
+
+class _AnimatedBellButtonState extends State<_AnimatedBellButton> with SingleTickerProviderStateMixin {
+  late AnimationController _ctrl;
+  late Animation<double> _shake;
+
+  @override
+  void initState() {
+    super.initState();
+    _ctrl = AnimationController(vsync: this, duration: const Duration(milliseconds: 500));
+    _shake = Tween<double>(begin: 0, end: 1).animate(CurvedAnimation(parent: _ctrl, curve: Curves.elasticIn));
+    Future.delayed(const Duration(seconds: 2), () {
+      if (mounted) _ctrl.repeat(reverse: true, period: const Duration(seconds: 3));
+    });
+  }
+
+  @override
+  void dispose() { _ctrl.dispose(); super.dispose(); }
+
+  @override
+  Widget build(BuildContext context) {
+    return AnimatedBuilder(
+      animation: _shake,
+      builder: (ctx, child) => Transform.rotate(
+        angle: sin(_shake.value * pi * 2) * 0.2,
+        child: child,
+      ),
+      child: Container(
+        padding: const EdgeInsets.all(10),
+        decoration: BoxDecoration(
+          color: Colors.white.withOpacity(0.2),
+          shape: BoxShape.circle,
+        ),
+        child: Stack(
+          clipBehavior: Clip.none,
+          children: [
+            const Icon(Icons.notifications_rounded, color: Colors.white, size: 24),
+            Positioned(
+              top: -4, right: -4,
+              child: Container(
+                width: 12, height: 12,
+                decoration: const BoxDecoration(color: Color(0xFFFF6B6B), shape: BoxShape.circle),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _ActivityData {
+  final String emoji;
+  final String title;
+  final String subtitle;
+  final List<Color> gradient;
+  final VoidCallback onTap;
+  const _ActivityData({required this.emoji, required this.title, required this.subtitle, required this.gradient, required this.onTap});
+}
+
+class _ActivityCard extends StatefulWidget {
+  final _ActivityData data;
+  const _ActivityCard({required this.data});
+
+  @override
+  State<_ActivityCard> createState() => _ActivityCardState();
+}
+
+class _ActivityCardState extends State<_ActivityCard> with SingleTickerProviderStateMixin {
+  late AnimationController _ctrl;
+  late Animation<double> _scale;
+
+  @override
+  void initState() {
+    super.initState();
+    _ctrl = AnimationController(vsync: this, duration: const Duration(milliseconds: 120), lowerBound: 0.0, upperBound: 0.04);
+    _scale = Tween<double>(begin: 1.0, end: 0.96).animate(_ctrl);
+  }
+
+  @override
+  void dispose() { _ctrl.dispose(); super.dispose(); }
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTapDown: (_) => _ctrl.forward(),
+      onTapUp: (_) { _ctrl.reverse(); widget.data.onTap(); },
+      onTapCancel: () => _ctrl.reverse(),
+      child: AnimatedBuilder(
+        animation: _scale,
+        builder: (ctx, child) => Transform.scale(scale: _scale.value, child: child),
+        child: Container(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(colors: widget.data.gradient, begin: Alignment.topLeft, end: Alignment.bottomRight),
+            borderRadius: BorderRadius.circular(24),
+            boxShadow: [BoxShadow(color: widget.data.gradient.last.withOpacity(0.4), blurRadius: 14, offset: const Offset(0, 6))],
+          ),
+          child: Padding(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(10),
+                  decoration: BoxDecoration(color: Colors.white.withOpacity(0.2), borderRadius: BorderRadius.circular(14)),
+                  child: Text(widget.data.emoji, style: const TextStyle(fontSize: 26)),
+                ),
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(widget.data.title, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w900, color: Colors.white)),
+                    const SizedBox(height: 4),
+                    Text(widget.data.subtitle, style: TextStyle(fontSize: 11, color: Colors.white.withOpacity(0.8))),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
     );
   }
 }
