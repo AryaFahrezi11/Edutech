@@ -21,6 +21,20 @@ class LeaderboardView extends GetView {
         type: BottomNavigationBarType.fixed,
         selectedItemColor: const Color(0xff3B82F6),
         unselectedItemColor: Colors.grey,
+        onTap: (index) {
+          // HOME
+          if (index == 0) {
+            Get.offNamed('/home');
+          }
+          // RANKING
+          else if (index == 3) {
+            return;
+          }
+          // PROFILE
+          else if (index == 4) {
+            Get.offNamed('/profile');
+          }
+        },
         items: const [
           BottomNavigationBarItem(
             icon: Icon(Icons.home_outlined),
@@ -51,11 +65,13 @@ class LeaderboardView extends GetView {
             children: [
               const SizedBox(height: 8),
 
-              // Appbar
               Row(
-                children: const [
-                  Icon(Icons.arrow_back_ios, size: 18),
-                  Expanded(
+                children: [
+                  GestureDetector(
+                    onTap: () => Get.offNamed('/home'),
+                    child: const Icon(Icons.arrow_back_ios, size: 18),
+                  ),
+                  const Expanded(
                     child: Center(
                       child: Text(
                         'Papan Peringkat',
@@ -67,13 +83,12 @@ class LeaderboardView extends GetView {
                       ),
                     ),
                   ),
-                  Icon(Icons.emoji_events_outlined),
+                  const Icon(Icons.emoji_events_outlined),
                 ],
               ),
 
               const SizedBox(height: 18),
 
-              // Banner
               Row(
                 children: [
                   ClipRRect(
@@ -111,7 +126,6 @@ class LeaderboardView extends GetView {
 
               const SizedBox(height: 24),
 
-              // Podium
               Row(
                 crossAxisAlignment: CrossAxisAlignment.end,
                 children: [
