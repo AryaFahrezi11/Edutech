@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import '../../routes/app_routes.dart';
 import 'login_controller.dart';
 
 class LoginView extends GetView<LoginController> {
@@ -14,161 +15,233 @@ class LoginView extends GetView<LoginController> {
           padding: const EdgeInsets.symmetric(horizontal: 22, vertical: 14),
           child: Column(
             children: [
-              const SizedBox(height: 12),
+              const SizedBox(height: 8),
 
-              const Text(
-                'Edutech',
-                style: TextStyle(
-                  fontSize: 26,
-                  fontWeight: FontWeight.w800,
-                  color: Color(0xff1565D8),
-                ),
-              ),
-
-              const SizedBox(height: 18),
-
-              ClipRRect(
-                borderRadius: BorderRadius.circular(12),
-                child: Image.asset(
-                  'assets/images/anak.png',
-                  height: 120,
-                  width: 120,
-                  fit: BoxFit.cover,
+              // Header Animasi
+              TweenAnimationBuilder(
+                tween: Tween<double>(begin: 0, end: 1),
+                duration: const Duration(milliseconds: 600),
+                builder: (context, value, child) {
+                  return Opacity(
+                    opacity: value,
+                    child: Transform.translate(
+                      offset: Offset(0, 20 * (1 - value)),
+                      child: child,
+                    ),
+                  );
+                },
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: const [
+                    Icon(
+                      Icons.face_retouching_natural,
+                      color: Color(0xff1E6DEB),
+                      size: 28,
+                    ),
+                    SizedBox(width: 8),
+                    Text(
+                      'Edutech',
+                      style: TextStyle(
+                        fontSize: 28,
+                        fontWeight: FontWeight.w800,
+                        color: Color(0xff1565D8),
+                      ),
+                    ),
+                  ],
                 ),
               ),
 
               const SizedBox(height: 20),
 
-              const Text(
-                'Selamat Datang\nKembali!',
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                  fontSize: 32,
-                  height: 1.1,
-                  fontWeight: FontWeight.w800,
-                  color: Colors.black87,
+              // Image dengan Animasi Scale
+              TweenAnimationBuilder(
+                tween: Tween<double>(begin: 0, end: 1),
+                duration: const Duration(milliseconds: 800),
+                curve: Curves.elasticOut,
+                builder: (context, value, child) {
+                  return Transform.scale(scale: value, child: child);
+                },
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(12),
+                  child: Image.asset(
+                    'assets/images/anak.png',
+                    height: 120,
+                    width: 120,
+                    fit: BoxFit.cover,
+                  ),
                 ),
               ),
 
-              const SizedBox(height: 8),
+              const SizedBox(height: 18),
 
-              const Text(
-                'Yuk lanjut belajar hari ini!',
-                style: TextStyle(fontSize: 15, color: Colors.black54),
-              ),
-
-              const SizedBox(height: 28),
-
-              Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 22,
-                  vertical: 24,
-                ),
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(28),
-                ),
+              TweenAnimationBuilder(
+                tween: Tween<double>(begin: 0, end: 1),
+                duration: const Duration(milliseconds: 600),
+                builder: (context, value, child) {
+                  return Opacity(
+                    opacity: value,
+                    child: Transform.translate(
+                      offset: Offset(0, 20 * (1 - value)),
+                      child: child,
+                    ),
+                  );
+                },
                 child: Column(
-                  children: [
-                    _buildInput(
-                      title: 'Email',
-                      hint: 'nama@anakhebat.com',
-                      icon: Icons.mail_outline,
-                      controller: controller.emailController,
-                      keyboardType: TextInputType.emailAddress,
+                  children: const [
+                    Text(
+                      'Selamat Datang Kembali!',
+                      style: TextStyle(
+                        fontSize: 26,
+                        fontWeight: FontWeight.w800,
+                        color: Color(0xff1565D8),
+                      ),
+                      textAlign: TextAlign.center,
                     ),
-
-                    const SizedBox(height: 18),
-
-                    _buildInput(
-                      title: 'Kata Sandi',
-                      hint: '••••••••',
-                      icon: Icons.lock_outline,
-                      controller: controller.passwordController,
-                      obscure: true,
+                    SizedBox(height: 6),
+                    Text(
+                      'Masuk untuk melanjutkan belajarmu!',
+                      style: TextStyle(fontSize: 14, color: Colors.black54),
                     ),
+                  ],
+                ),
+              ),
 
-                    const SizedBox(height: 22),
+              const SizedBox(height: 24),
 
-                    Obx(
-                      () => SizedBox(
+              // Container Form
+              TweenAnimationBuilder(
+                tween: Tween<double>(begin: 0, end: 1),
+                duration: const Duration(milliseconds: 700),
+                builder: (context, value, child) {
+                  return Opacity(
+                    opacity: value,
+                    child: Transform.translate(
+                      offset: Offset(0, 30 * (1 - value)),
+                      child: child,
+                    ),
+                  );
+                },
+                child: Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 22,
+                    vertical: 24,
+                  ),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(28),
+                  ),
+                  child: Column(
+                    children: [
+                      _buildInput(
+                        title: 'Email',
+                        hint: 'Masukkan alamat email',
+                        icon: Icons.email_outlined,
+                        controller: controller.emailController,
+                      ),
+                      const SizedBox(height: 16),
+
+                      _buildInput(
+                        title: 'Password',
+                        hint: 'Masukkan password',
+                        icon: Icons.lock_outline,
+                        obscure: true,
+                        controller: controller.passwordController,
+                      ),
+
+                      const SizedBox(height: 24),
+
+                      Obx(
+                        () => SizedBox(
+                          width: double.infinity,
+                          height: 54,
+                          child: controller.isLoading.value
+                              ? const Center(child: CircularProgressIndicator())
+                              : ElevatedButton(
+                                  onPressed: controller.loginProcess,
+                                  style: ElevatedButton.styleFrom(
+                                    backgroundColor: const Color(0xff2F80ED),
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(28),
+                                    ),
+                                    elevation: 3,
+                                  ),
+                                  child: const Text(
+                                    'Masuk',
+                                    style: TextStyle(
+                                      fontSize: 18,
+                                      fontWeight: FontWeight.w700,
+                                      color: Colors.white,
+                                    ),
+                                  ),
+                                ),
+                        ),
+                      ),
+
+                      const SizedBox(height: 20),
+                      const Text(
+                        "atau",
+                        style: TextStyle(
+                          color: Colors.black54,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      const SizedBox(height: 20),
+
+                      SizedBox(
                         width: double.infinity,
                         height: 54,
-                        child: controller.isLoading.value
-                            ? const Center(child: CircularProgressIndicator())
-                            : ElevatedButton(
-                                onPressed: controller.loginProcess,
-                                style: ElevatedButton.styleFrom(
-                                  backgroundColor: const Color(0xff1565D8),
-                                  elevation: 2,
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(28),
-                                  ),
-                                ),
-                                child: const Text(
-                                  'Masuk',
-                                  style: TextStyle(
-                                    fontSize: 17,
-                                    fontWeight: FontWeight.w700,
-                                    color: Colors.white,
-                                  ),
-                                ),
-                              ),
-                      ),
-                    ),
-
-                    const SizedBox(height: 22),
-
-                    Row(
-                      children: [
-                        Expanded(
-                          child: Container(
-                            height: 1,
-                            color: Colors.grey.shade300,
+                        child: OutlinedButton.icon(
+                          onPressed: controller.loginWithGoogle,
+                          icon: Image.network(
+                            'https://tse4.mm.bing.net/th/id/OIP.HgH-NjiOdFOrkmwjsZCCfAHaHl?rs=1&pid=ImgDetMain&o=7&rm=3',
+                            height: 24,
                           ),
-                        ),
-                        const Padding(
-                          padding: EdgeInsets.symmetric(horizontal: 14),
-                          child: Text(
-                            'Atau',
+                          label: const Text(
+                            "Masuk dengan Google",
                             style: TextStyle(
+                              color: Colors.black87,
                               fontWeight: FontWeight.w600,
-                              color: Colors.black54,
+                              fontSize: 16,
+                            ),
+                          ),
+                          style: OutlinedButton.styleFrom(
+                            backgroundColor: Colors.white,
+                            side: BorderSide(color: Colors.grey.shade300),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(28),
                             ),
                           ),
                         ),
-                        Expanded(
-                          child: Container(
-                            height: 1,
-                            color: Colors.grey.shade300,
-                          ),
-                        ),
-                      ],
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+
+              const SizedBox(height: 22),
+
+              TweenAnimationBuilder(
+                tween: Tween<double>(begin: 0, end: 1),
+                duration: const Duration(milliseconds: 800),
+                builder: (context, value, child) {
+                  return Opacity(opacity: value, child: child);
+                },
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    const Text(
+                      'Belum punya akun? ',
+                      style: TextStyle(color: Colors.black54),
                     ),
-
-                    const SizedBox(height: 18),
-
-                    SizedBox(
-                      width: double.infinity,
-                      height: 50,
-                      child: OutlinedButton.icon(
-                        onPressed: controller.loginWithGoogle,
-                        icon: Image.network(
-                          'https://upload.wikimedia.org/wikipedia/commons/thumb/5/53/Google_%22G%22_Logo.svg/2008px-Google_%22G%22_Logo.svg.png',
-                          height: 20,
-                        ),
-                        label: const Text(
-                          'Masuk dengan Google',
-                          style: TextStyle(
-                            color: Colors.black87,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                        style: OutlinedButton.styleFrom(
-                          side: BorderSide(color: Colors.grey.shade300),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(22),
-                          ),
+                    GestureDetector(
+                      onTap: () {
+                        Get.toNamed(Routes.REGISTER);
+                      },
+                      child: const Text(
+                        'Daftar Sekarang',
+                        style: TextStyle(
+                          color: Color(0xff1565D8),
+                          fontWeight: FontWeight.bold,
                         ),
                       ),
                     ),
@@ -176,30 +249,7 @@ class LoginView extends GetView<LoginController> {
                 ),
               ),
 
-              const SizedBox(height: 36),
-
-              const Text(
-                'Belum punya akun?',
-                style: TextStyle(color: Colors.black54, fontSize: 15),
-              ),
-
-              const SizedBox(height: 6),
-
-              GestureDetector(
-                onTap: () {
-                  Get.toNamed('/register');
-                },
-                child: const Text(
-                  'Daftar Sekarang',
-                  style: TextStyle(
-                    color: Color(0xff1565D8),
-                    fontWeight: FontWeight.w700,
-                    fontSize: 16,
-                  ),
-                ),
-              ),
-
-              const SizedBox(height: 20),
+              const SizedBox(height: 18),
             ],
           ),
         ),
@@ -211,31 +261,25 @@ class LoginView extends GetView<LoginController> {
     required String title,
     required String hint,
     required IconData icon,
-    required TextEditingController controller,
-    TextInputType keyboardType = TextInputType.text,
     bool obscure = false,
+    TextEditingController? controller,
   }) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
           title,
-          style: const TextStyle(
-            fontWeight: FontWeight.w700,
-            fontSize: 14,
-            color: Color(0xff1565D8),
-          ),
+          style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 14),
         ),
         const SizedBox(height: 8),
         TextField(
           controller: controller,
-          keyboardType: keyboardType,
           obscureText: obscure,
           decoration: InputDecoration(
             hintText: hint,
-            prefixIcon: Icon(icon, color: const Color(0xff5A88D9)),
+            prefixIcon: Icon(icon, color: const Color(0xff5AAE61)),
             filled: true,
-            fillColor: const Color(0xffF5F7FB),
+            fillColor: const Color(0xffF4F6FA),
             contentPadding: const EdgeInsets.symmetric(vertical: 14),
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(22),
