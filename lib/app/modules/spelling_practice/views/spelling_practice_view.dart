@@ -8,356 +8,453 @@ class SpellingPracticeView extends GetView<SpellingPracticeController> {
 
   @override
   Widget build(BuildContext context) {
-    final letters = [
-      {'upper': 'A', 'lower': 'a'},
-      {'upper': 'B', 'lower': 'b'},
-      {'upper': 'C', 'lower': 'c'},
-      {'upper': 'D', 'lower': 'd'},
-      {'upper': 'E', 'lower': 'e'},
-      {'upper': 'F', 'lower': 'f'},
-      {'upper': 'G', 'lower': 'g'},
-    ];
-    final currentIndex = 0.obs;
+    final type = Get.arguments?['type'] ?? 'letter';
 
-    // TAMBAHKAN INI
-    final PageController pageController = PageController();
+    // =========================================================
+    // MODE KATA MUDAH
+    // =========================================================
+
+    if (type == 'word') {
+      return Scaffold(
+        backgroundColor: const Color(0xFFFDF6EC),
+
+        body: SafeArea(
+          child: Obx(() {
+            final word = controller.currentWord;
+
+            // pecah ejaan
+            final spellParts = word['spell'].toString().split('•');
+
+            return Column(
+              children: [
+                _buildHeader(
+                  title: "🧩 Latihan Eja Kata",
+                  subtitle: "Belajar mengeja kata mudah",
+                ),
+
+                const SizedBox(height: 20),
+
+                Expanded(
+                  child: Padding(
+                    padding: const EdgeInsets.all(20),
+
+                    child: Container(
+                      width: double.infinity,
+
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(30),
+
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.orange.withOpacity(0.12),
+                            blurRadius: 20,
+                          ),
+                        ],
+                      ),
+
+                      child: Padding(
+                        padding: const EdgeInsets.all(24),
+
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+
+                          children: [
+                            const SizedBox(height: 35),
+
+                            // =================================================
+                            // KATA
+                            // =================================================
+                            Text(
+                              word['word'],
+                              style: const TextStyle(
+                                fontSize: 68,
+                                fontWeight: FontWeight.w900,
+                                color: Color(0xFFE65100),
+                              ),
+                            ),
+
+                            const SizedBox(height: 35),
+
+                            // =================================================
+                            // BOX EJAAN
+                            // =================================================
+                            Wrap(
+                              alignment: WrapAlignment.center,
+                              spacing: 14,
+                              runSpacing: 14,
+
+                              children: List.generate(spellParts.length, (
+                                index,
+                              ) {
+                                final part = spellParts[index].trim();
+
+                                return GestureDetector(
+                                  onTap: () {
+                                    Get.snackbar(
+                                      "🔊 Ejaan",
+                                      "Suara $part diputar",
+
+                                      snackPosition: SnackPosition.BOTTOM,
+
+                                      backgroundColor: Colors.orange,
+
+                                      colorText: Colors.white,
+                                    );
+                                  },
+
+                                  child: AnimatedContainer(
+                                    duration: const Duration(milliseconds: 250),
+
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 28,
+                                      vertical: 22,
+                                    ),
+
+                                    decoration: BoxDecoration(
+                                      gradient: const LinearGradient(
+                                        colors: [
+                                          Color(0xFFFF9800),
+                                          Color(0xFFFFC107),
+                                        ],
+                                      ),
+
+                                      borderRadius: BorderRadius.circular(24),
+
+                                      boxShadow: [
+                                        BoxShadow(
+                                          color: Colors.orange.withOpacity(
+                                            0.25,
+                                          ),
+
+                                          blurRadius: 14,
+
+                                          offset: const Offset(0, 6),
+                                        ),
+                                      ],
+                                    ),
+
+                                    child: Column(
+                                      children: [
+                                        const Icon(
+                                          Icons.volume_up,
+                                          color: Colors.white,
+                                          size: 28,
+                                        ),
+
+                                        const SizedBox(height: 8),
+
+                                        Text(
+                                          part,
+                                          style: const TextStyle(
+                                            fontSize: 34,
+
+                                            fontWeight: FontWeight.w900,
+
+                                            color: Colors.white,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                );
+                              }),
+                            ),
+
+                            const SizedBox(height: 45),
+
+                            // =================================================
+                            // BACA KATA
+                            // =================================================
+                            SizedBox(
+                              width: double.infinity,
+                              height: 58,
+
+                              child: ElevatedButton.icon(
+                                onPressed: controller.speakWord,
+
+                                icon: const Icon(Icons.record_voice_over),
+
+                                label: const Text(
+                                  "BACA KATA",
+                                  style: TextStyle(
+                                    fontWeight: FontWeight.bold,
+
+                                    fontSize: 16,
+                                  ),
+                                ),
+
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: Colors.deepOrange,
+
+                                  foregroundColor: Colors.white,
+
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(18),
+                                  ),
+                                ),
+                              ),
+                            ),
+
+                            const SizedBox(height: 38),
+
+                            // =================================================
+                            // NAVIGASI
+                            // =================================================
+                            Row(
+                              children: [
+                                Expanded(
+                                  child: ElevatedButton(
+                                    onPressed: controller.previousWord,
+
+                                    style: ElevatedButton.styleFrom(
+                                      backgroundColor: Colors.orange.shade100,
+
+                                      foregroundColor: Colors.deepOrange,
+                                    ),
+
+                                    child: const Text("⬅ Sebelumnya"),
+                                  ),
+                                ),
+
+                                const SizedBox(width: 12),
+
+                                Expanded(
+                                  child: ElevatedButton(
+                                    onPressed: controller.nextWord,
+
+                                    style: ElevatedButton.styleFrom(
+                                      backgroundColor: Colors.orange,
+
+                                      foregroundColor: Colors.white,
+                                    ),
+
+                                    child: const Text("Berikutnya ➡"),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            );
+          }),
+        ),
+      );
+    }
+
+    // =========================================================
+    // MODE HURUF
+    // =========================================================
+
+    final letters = controller.letters;
 
     return Scaffold(
       backgroundColor: const Color(0xFFFDF6EC),
 
       body: SafeArea(
-        child: Column(
-          children: [
-            _buildHeader(),
+        child: Obx(() {
+          final currentIndex = controller.currentIndex.value;
 
-            const SizedBox(height: 12),
+          final item = letters[currentIndex];
 
-            Expanded(
-              child: Stack(
-                children: [
-                  // PAGE VIEW
-                  PageView.builder(
-                    controller: pageController,
+          return Column(
+            children: [
+              _buildHeader(
+                title: "🔤 Latihan Huruf",
+                subtitle: "Belajar huruf A - Z",
+              ),
 
-                    // NONAKTIFKAN GESER MANUAL
-                    physics: const NeverScrollableScrollPhysics(),
+              const SizedBox(height: 20),
 
-                    itemCount: letters.length,
+              Expanded(
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 20),
 
-                    onPageChanged: (index) {
-                      currentIndex.value = index;
-                    },
+                  child: Container(
+                    width: double.infinity,
 
-                    itemBuilder: (context, index) {
-                      final item = letters[index];
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(30),
 
-                      return Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 18),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.orange.withOpacity(0.12),
 
-                        child: Container(
-                          decoration: BoxDecoration(
-                            color: const Color(0xFFFFF3E0),
-                            borderRadius: BorderRadius.circular(32),
+                          blurRadius: 20,
+                        ),
+                      ],
+                    ),
 
-                            boxShadow: [
-                              BoxShadow(
-                                color: Colors.orange.withOpacity(0.12),
-                                blurRadius: 20,
-                                offset: const Offset(0, 8),
+                    child: Padding(
+                      padding: const EdgeInsets.all(24),
+
+                      child: Column(
+                        children: [
+                          Container(
+                            width: double.infinity,
+                            padding: const EdgeInsets.all(20),
+
+                            decoration: BoxDecoration(
+                              gradient: const LinearGradient(
+                                colors: [Color(0xFFFF9800), Color(0xFFFFC107)],
                               ),
-                            ],
+
+                              borderRadius: BorderRadius.circular(24),
+                            ),
+
+                            child: Column(
+                              children: [
+                                const Text(
+                                  "🔤",
+                                  style: TextStyle(fontSize: 55),
+                                ),
+
+                                const SizedBox(height: 12),
+
+                                Text(
+                                  "Huruf ${item['upper']}",
+
+                                  style: const TextStyle(
+                                    fontSize: 26,
+                                    fontWeight: FontWeight.w900,
+
+                                    color: Colors.white,
+                                  ),
+                                ),
+                              ],
+                            ),
                           ),
 
-                          child: Stack(
+                          const Spacer(),
+
+                          // =================================================
+                          // HURUF BESAR
+                          // =================================================
+                          Container(
+                            height: 280,
+                            width: double.infinity,
+
+                            decoration: BoxDecoration(
+                              color: const Color(0xFFFFF3E0),
+
+                              borderRadius: BorderRadius.circular(30),
+                            ),
+
+                            child: Stack(
+                              children: [
+                                Center(
+                                  child: Text(
+                                    item['upper']!,
+
+                                    style: const TextStyle(
+                                      fontSize: 170,
+
+                                      fontWeight: FontWeight.w900,
+
+                                      color: Color(0xFFE65100),
+                                    ),
+                                  ),
+                                ),
+
+                                Positioned(
+                                  right: 28,
+                                  bottom: 24,
+
+                                  child: Text(
+                                    item['lower']!,
+
+                                    style: TextStyle(
+                                      fontSize: 60,
+
+                                      fontWeight: FontWeight.bold,
+
+                                      color: Colors.orange.shade400,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+
+                          const Spacer(),
+
+                          SizedBox(
+                            width: double.infinity,
+                            height: 56,
+
+                            child: ElevatedButton.icon(
+                              onPressed: controller.playSound,
+
+                              icon: const Icon(Icons.volume_up),
+
+                              label: const Text("DENGAR HURUF"),
+
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: Colors.orange,
+
+                                foregroundColor: Colors.white,
+                              ),
+                            ),
+                          ),
+
+                          const SizedBox(height: 20),
+
+                          // =================================================
+                          // NAVIGASI
+                          // =================================================
+                          Row(
                             children: [
-                              CustomPaint(
-                                painter: _SpellingBackgroundPainter(),
-                                child: const SizedBox.expand(),
+                              Expanded(
+                                child: ElevatedButton(
+                                  onPressed: controller.previousItem,
+
+                                  child: const Text("⬅ Sebelumnya"),
+                                ),
                               ),
 
-                              Padding(
-                                padding: const EdgeInsets.all(22),
+                              const SizedBox(width: 12),
 
-                                child: Column(
-                                  children: [
-                                    Container(
-                                      width: double.infinity,
-                                      padding: const EdgeInsets.all(20),
+                              Expanded(
+                                child: ElevatedButton(
+                                  onPressed: controller.nextItem,
 
-                                      decoration: BoxDecoration(
-                                        gradient: const LinearGradient(
-                                          colors: [
-                                            Color(0xFFFF9800),
-                                            Color(0xFFFFC107),
-                                          ],
-                                        ),
-
-                                        borderRadius: BorderRadius.circular(24),
-                                      ),
-
-                                      child: Column(
-                                        children: [
-                                          const Text(
-                                            "🔤",
-                                            style: TextStyle(fontSize: 55),
-                                          ),
-
-                                          const SizedBox(height: 12),
-
-                                          Text(
-                                            "Huruf ${item['upper']}",
-                                            style: const TextStyle(
-                                              fontSize: 26,
-                                              fontWeight: FontWeight.w900,
-                                              color: Colors.white,
-                                            ),
-                                          ),
-
-                                          const SizedBox(height: 6),
-
-                                          const Text(
-                                            "Tekan huruf untuk mendengar suara",
-                                            textAlign: TextAlign.center,
-                                            style: TextStyle(
-                                              color: Colors.white70,
-                                              fontSize: 13,
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                    ),
-
-                                    const Spacer(),
-
-                                    _buildLetterCard(
-                                      upperLetter: item['upper']!,
-                                      lowerLetter: item['lower']!,
-                                    ),
-
-                                    const Spacer(),
-
-                                    SizedBox(
-                                      width: double.infinity,
-                                      height: 56,
-
-                                      child: ElevatedButton.icon(
-                                        onPressed: () {
-                                          Get.snackbar(
-                                            "🔊 Audio Diputar",
-                                            "Suara huruf ${item['upper']} diputar ulang",
-                                            snackPosition: SnackPosition.BOTTOM,
-                                            backgroundColor: Colors.orange,
-                                            colorText: Colors.white,
-                                          );
-                                        },
-
-                                        icon: const Icon(
-                                          Icons.volume_up_rounded,
-                                        ),
-
-                                        label: const Text(
-                                          "ULANGI SUARA",
-                                          style: TextStyle(
-                                            fontWeight: FontWeight.bold,
-                                            fontSize: 16,
-                                          ),
-                                        ),
-
-                                        style: ElevatedButton.styleFrom(
-                                          elevation: 0,
-                                          backgroundColor: const Color(
-                                            0xFFFF9800,
-                                          ),
-
-                                          foregroundColor: Colors.white,
-
-                                          shape: RoundedRectangleBorder(
-                                            borderRadius: BorderRadius.circular(
-                                              18,
-                                            ),
-                                          ),
-                                        ),
-                                      ),
-                                    ),
-
-                                    const SizedBox(height: 20),
-
-                                    Obx(
-                                      () => Row(
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.center,
-
-                                        children: List.generate(
-                                          letters.length,
-                                          (dotIndex) {
-                                            final active =
-                                                currentIndex.value == dotIndex;
-
-                                            return AnimatedContainer(
-                                              duration: const Duration(
-                                                milliseconds: 300,
-                                              ),
-
-                                              margin:
-                                                  const EdgeInsets.symmetric(
-                                                    horizontal: 4,
-                                                  ),
-
-                                              width: active ? 22 : 8,
-                                              height: 8,
-
-                                              decoration: BoxDecoration(
-                                                color: active
-                                                    ? Colors.orange
-                                                    : Colors.orange.withOpacity(
-                                                        0.3,
-                                                      ),
-
-                                                borderRadius:
-                                                    BorderRadius.circular(20),
-                                              ),
-                                            );
-                                          },
-                                        ),
-                                      ),
-                                    ),
-                                  ],
+                                  child: const Text("Berikutnya ➡"),
                                 ),
                               ),
                             ],
                           ),
-                        ),
-                      );
-                    },
-                  ),
-
-                  // TOMBOL KIRI
-                  Positioned(
-                    left: 8,
-                    top: 0,
-                    bottom: 0,
-
-                    child: Center(
-                      child: Obx(() {
-                        final isFirst = currentIndex.value == 0;
-
-                        return GestureDetector(
-                          onTap: isFirst
-                              ? null
-                              : () {
-                                  pageController.previousPage(
-                                    duration: const Duration(milliseconds: 300),
-                                    curve: Curves.easeInOut,
-                                  );
-                                },
-
-                          child: AnimatedOpacity(
-                            duration: const Duration(milliseconds: 300),
-                            opacity: isFirst ? 0.4 : 1,
-
-                            child: Container(
-                              width: 52,
-                              height: 52,
-
-                              decoration: BoxDecoration(
-                                color: Colors.white,
-                                shape: BoxShape.circle,
-
-                                boxShadow: [
-                                  BoxShadow(
-                                    color: Colors.black.withOpacity(0.08),
-                                    blurRadius: 10,
-                                    offset: const Offset(0, 4),
-                                  ),
-                                ],
-                              ),
-
-                              child: const Icon(
-                                Icons.chevron_left_rounded,
-                                size: 34,
-                                color: Colors.orange,
-                              ),
-                            ),
-                          ),
-                        );
-                      }),
+                        ],
+                      ),
                     ),
                   ),
-
-                  // TOMBOL KANAN
-                  Positioned(
-                    right: 8,
-                    top: 0,
-                    bottom: 0,
-
-                    child: Center(
-                      child: Obx(() {
-                        final isLast = currentIndex.value == letters.length - 1;
-
-                        return GestureDetector(
-                          onTap: isLast
-                              ? null
-                              : () {
-                                  pageController.nextPage(
-                                    duration: const Duration(milliseconds: 300),
-                                    curve: Curves.easeInOut,
-                                  );
-                                },
-
-                          child: AnimatedOpacity(
-                            duration: const Duration(milliseconds: 300),
-                            opacity: isLast ? 0.4 : 1,
-
-                            child: Container(
-                              width: 52,
-                              height: 52,
-
-                              decoration: BoxDecoration(
-                                color: Colors.white,
-                                shape: BoxShape.circle,
-
-                                boxShadow: [
-                                  BoxShadow(
-                                    color: Colors.black.withOpacity(0.08),
-                                    blurRadius: 10,
-                                    offset: const Offset(0, 4),
-                                  ),
-                                ],
-                              ),
-
-                              child: const Icon(
-                                Icons.chevron_right_rounded,
-                                size: 34,
-                                color: Colors.orange,
-                              ),
-                            ),
-                          ),
-                        );
-                      }),
-                    ),
-                  ),
-                ],
+                ),
               ),
-            ),
 
-            const SizedBox(height: 14),
-          ],
-        ),
+              const SizedBox(height: 20),
+            ],
+          );
+        }),
       ),
     );
   }
 
-  // ───────────────── HEADER ─────────────────
-  // ───────────────── HEADER ─────────────────
-  Widget _buildHeader() {
+  // =========================================================
+  // HEADER
+  // =========================================================
+
+  Widget _buildHeader({required String title, required String subtitle}) {
     return Container(
       padding: const EdgeInsets.fromLTRB(6, 14, 12, 16),
 
       decoration: const BoxDecoration(
         gradient: LinearGradient(
           colors: [Color(0xFFFF9800), Color(0xFFFFC107)],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
         ),
 
         borderRadius: BorderRadius.vertical(bottom: Radius.circular(30)),
@@ -367,42 +464,34 @@ class SpellingPracticeView extends GetView<SpellingPracticeController> {
         children: [
           IconButton(
             onPressed: () => Get.back(),
-            constraints: const BoxConstraints(),
-            padding: const EdgeInsets.all(8),
 
             icon: const Icon(
               Icons.arrow_back_ios_new_rounded,
               color: Colors.white,
-              size: 20,
             ),
           ),
-
-          const SizedBox(width: 8),
 
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisSize: MainAxisSize.min,
 
-              children: const [
+              children: [
                 Text(
-                  "🔤 Latihan Mengeja",
-                  overflow: TextOverflow.ellipsis,
+                  title,
 
-                  style: TextStyle(
+                  style: const TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.w900,
                     color: Colors.white,
                   ),
                 ),
 
-                SizedBox(height: 2),
+                const SizedBox(height: 2),
 
                 Text(
-                  "Belajar huruf A - Z",
-                  overflow: TextOverflow.ellipsis,
+                  subtitle,
 
-                  style: TextStyle(color: Colors.white70, fontSize: 11),
+                  style: const TextStyle(color: Colors.white70, fontSize: 11),
                 ),
               ],
             ),
@@ -410,118 +499,5 @@ class SpellingPracticeView extends GetView<SpellingPracticeController> {
         ],
       ),
     );
-  }
-
-  // ───────────────── CARD HURUF ─────────────────
-  Widget _buildLetterCard({
-    required String upperLetter,
-    required String lowerLetter,
-  }) {
-    return GestureDetector(
-      onTap: () {
-        Get.snackbar(
-          "🔊 Audio Huruf",
-          "Suara huruf $upperLetter diputar",
-          snackPosition: SnackPosition.BOTTOM,
-          backgroundColor: Colors.orange,
-          colorText: Colors.white,
-        );
-      },
-
-      child: Container(
-        height: 300,
-        width: double.infinity,
-
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(30),
-
-          border: Border.all(color: Colors.orange.withOpacity(0.15), width: 2),
-
-          boxShadow: [
-            BoxShadow(
-              color: Colors.orange.withOpacity(0.08),
-              blurRadius: 12,
-              offset: const Offset(0, 5),
-            ),
-          ],
-        ),
-
-        child: Stack(
-          children: [
-            // ICON SUARA
-            Positioned(
-              top: 18,
-              right: 18,
-
-              child: Container(
-                padding: const EdgeInsets.all(10),
-
-                decoration: BoxDecoration(
-                  color: Colors.orange.withOpacity(0.1),
-                  shape: BoxShape.circle,
-                ),
-
-                child: Icon(
-                  Icons.volume_up_rounded,
-                  color: Colors.orange.shade400,
-                  size: 28,
-                ),
-              ),
-            ),
-
-            // HURUF BESAR
-            Center(
-              child: Text(
-                upperLetter,
-
-                style: const TextStyle(
-                  fontSize: 170,
-                  fontWeight: FontWeight.w900,
-                  color: Color(0xFFE65100),
-                ),
-              ),
-            ),
-
-            // HURUF KECIL
-            Positioned(
-              right: 28,
-              bottom: 24,
-
-              child: Text(
-                lowerLetter,
-
-                style: TextStyle(
-                  fontSize: 60,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.orange.shade400,
-                ),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-// ───────────────── BACKGROUND PAINTER ─────────────────
-class _SpellingBackgroundPainter extends CustomPainter {
-  @override
-  void paint(Canvas canvas, Size size) {
-    final paint = Paint()
-      ..color = Colors.white.withOpacity(0.35)
-      ..strokeWidth = 2;
-
-    const spacing = 40.0;
-
-    for (double y = spacing; y < size.height; y += spacing) {
-      canvas.drawLine(Offset(0, y), Offset(size.width, y), paint);
-    }
-  }
-
-  @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) {
-    return false;
   }
 }

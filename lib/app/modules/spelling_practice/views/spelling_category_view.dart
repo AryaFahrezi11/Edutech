@@ -37,7 +37,7 @@ class SpellingCategoryView extends StatelessWidget {
         title: "Kata Mudah",
         subtitle: "Bola, Buku ...",
         gradient: [const Color(0xFF7F7FD5), const Color(0xFF86A8E7)],
-        available: false,
+        available: true,
       ),
     ];
 
@@ -123,7 +123,7 @@ class SpellingCategoryView extends StatelessWidget {
                         SizedBox(height: 6),
 
                         Text(
-                          "Pilih kategori lalu mulai belajar huruf A sampai Z",
+                          "Pilih kategori lalu mulai belajar mengeja",
 
                           style: TextStyle(fontSize: 13, color: Colors.white70),
                         ),
@@ -194,6 +194,7 @@ class _CategoryCard extends StatefulWidget {
 class _CategoryCardState extends State<_CategoryCard>
     with SingleTickerProviderStateMixin {
   late AnimationController _controller;
+
   late Animation<double> _scaleAnimation;
 
   @override
@@ -217,10 +218,12 @@ class _CategoryCardState extends State<_CategoryCard>
   }
 
   void _handleTap() {
-    if (!widget.data.available) {
+    final d = widget.data;
+
+    if (!d.available) {
       Get.snackbar(
         "Coming Soon 🚀",
-        "${widget.data.title} akan segera tersedia",
+        "${d.title} akan segera tersedia",
 
         snackPosition: SnackPosition.BOTTOM,
         backgroundColor: const Color(0xFF4FACFE),
@@ -230,7 +233,11 @@ class _CategoryCardState extends State<_CategoryCard>
       return;
     }
 
-    Get.toNamed(Routes.SPELLING_PRACTICE);
+    Get.toNamed(
+      Routes.SPELLING_PRACTICE,
+
+      arguments: {'type': d.title == "Kata Mudah" ? 'word' : 'letter'},
+    );
   }
 
   @override
@@ -287,6 +294,7 @@ class _CategoryCardState extends State<_CategoryCard>
 
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
+
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
 
                   children: [
