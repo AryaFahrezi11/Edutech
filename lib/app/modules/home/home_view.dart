@@ -4,6 +4,7 @@ import 'package:get/get.dart';
 import 'home_controller.dart';
 import '../../routes/app_routes.dart';
 import '../leaderboard/views/leaderboard_view.dart';
+import '../profile/views/profile_view.dart';
 
 class HomeView extends GetView<HomeController> {
   const HomeView({Key? key}) : super(key: key);
@@ -17,25 +18,8 @@ class HomeView extends GetView<HomeController> {
           index: controller.tabIndex.value,
           children: [
             _buildHomeContent(),
-            const Center(
-              child: Text(
-                "Halaman Belajar (Segera Hadir)",
-                style: TextStyle(fontSize: 18, color: Colors.black54),
-              ),
-            ),
-            const Center(
-              child: Text(
-                "Halaman Ujian (Segera Hadir)",
-                style: TextStyle(fontSize: 18, color: Colors.black54),
-              ),
-            ),
             const LeaderboardView(),
-            const Center(
-              child: Text(
-                "Halaman Profil (Segera Hadir)",
-                style: TextStyle(fontSize: 18, color: Colors.black54),
-              ),
-            ),
+            const ProfileView(),
           ],
         ),
       ),
@@ -579,20 +563,6 @@ class HomeView extends GetView<HomeController> {
                 selected: controller.tabIndex.value == 0,
               ),
               label: 'Beranda',
-            ),
-            BottomNavigationBarItem(
-              icon: _NavIcon(
-                icon: Icons.menu_book_rounded,
-                selected: controller.tabIndex.value == 1,
-              ),
-              label: 'Belajar',
-            ),
-            BottomNavigationBarItem(
-              icon: _NavIcon(
-                icon: Icons.quiz_rounded,
-                selected: controller.tabIndex.value == 2,
-              ),
-              label: 'Ujian',
             ),
             BottomNavigationBarItem(
               icon: _NavIcon(

@@ -9,46 +9,7 @@ class ProfileView extends GetView {
     return Scaffold(
       backgroundColor: const Color(0xffF4F6FA),
 
-      // ================= BOTTOM NAVIGATION =================
-      bottomNavigationBar: BottomNavigationBar(
-        currentIndex: 4,
-        type: BottomNavigationBarType.fixed,
-        selectedItemColor: const Color(0xff3B82F6),
-        unselectedItemColor: Colors.grey,
-
-        onTap: (index) {
-          if (index == 0) {
-            Get.offNamed('/home');
-          } else if (index == 3) {
-            Get.offNamed('/leaderboard');
-          } else if (index == 4) {
-            return;
-          }
-        },
-
-        items: const [
-          BottomNavigationBarItem(
-            icon: Icon(Icons.home_outlined),
-            label: "HOME",
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.school_outlined),
-            label: "BELAJAR",
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.quiz_outlined),
-            label: "UJIAN",
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.emoji_events_outlined),
-            label: "RANKING",
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.person_outline),
-            label: "PROFILE",
-          ),
-        ],
-      ),
+      // Bottom navigation removed because it is handled by HomeView's IndexedStack
 
       body: SafeArea(
         child: SingleChildScrollView(
@@ -397,6 +358,29 @@ class ProfileView extends GetView {
                     ),
                   ),
                 ],
+              ),
+
+              const SizedBox(height: 14),
+
+              // ================= LOGOUT =================
+              SizedBox(
+                width: double.infinity,
+                height: 52,
+                child: ElevatedButton.icon(
+                  onPressed: () {
+                    // Navigate to Login page and remove all previous routes
+                    Get.offAllNamed('/login');
+                  },
+                  icon: const Icon(Icons.logout),
+                  label: const Text('Keluar (Logout)'),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xffEF4444), // Red color for logout
+                    foregroundColor: Colors.white,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(22),
+                    ),
+                  ),
+                ),
               ),
 
               const SizedBox(height: 20),
