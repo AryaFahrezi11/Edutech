@@ -289,7 +289,7 @@ class HomeView extends GetView<HomeController> {
         title: "Latihan\nMengeja",
         subtitle: "Baca kata yuk!",
         gradient: [const Color(0xFF6C63FF), const Color(0xFF9D4EDD)],
-        onTap: () {},
+        onTap: () => Get.toNamed(Routes.SPELLING_CATEGORY),
       ),
       _ActivityData(
         emoji: "✏️",
@@ -303,7 +303,7 @@ class HomeView extends GetView<HomeController> {
         title: "Ujian\nMengeja",
         subtitle: "Dengerin suara!",
         gradient: [const Color(0xFFFF416C), const Color(0xFFFF4B2B)],
-        onTap: () {},
+        onTap: () => Get.toNamed(Routes.SPELLING_EXAM_CATEGORY),
       ),
     ];
     return GridView.builder(
@@ -567,14 +567,14 @@ class HomeView extends GetView<HomeController> {
             BottomNavigationBarItem(
               icon: _NavIcon(
                 icon: Icons.emoji_events_rounded,
-                selected: controller.tabIndex.value == 3,
+                selected: controller.tabIndex.value == 1,
               ),
               label: 'Ranking',
             ),
             BottomNavigationBarItem(
               icon: _NavIcon(
                 icon: Icons.person_rounded,
-                selected: controller.tabIndex.value == 4,
+                selected: controller.tabIndex.value == 2,
               ),
               label: 'Profil',
             ),
