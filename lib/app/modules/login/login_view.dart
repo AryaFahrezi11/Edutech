@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../routes/app_routes.dart';
+import '../../data/edu_theme.dart';
 import 'login_controller.dart';
 
 class LoginView extends GetView<LoginController> {
@@ -9,7 +10,7 @@ class LoginView extends GetView<LoginController> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xffEEF2FF),
+      backgroundColor: EduTheme.bgPrimaryTint,
       body: SafeArea(
         child: SingleChildScrollView(
           padding: const EdgeInsets.symmetric(horizontal: 22, vertical: 14),
@@ -17,7 +18,7 @@ class LoginView extends GetView<LoginController> {
             children: [
               const SizedBox(height: 8),
 
-              // Header Animasi
+              // Header Logo
               TweenAnimationBuilder(
                 tween: Tween<double>(begin: 0, end: 1),
                 duration: const Duration(milliseconds: 600),
@@ -32,19 +33,23 @@ class LoginView extends GetView<LoginController> {
                 },
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.center,
-                  children: const [
-                    Icon(
-                      Icons.face_retouching_natural,
-                      color: Color(0xff1E6DEB),
-                      size: 28,
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(8),
+                      decoration: BoxDecoration(
+                        color: EduTheme.primary,
+                        shape: BoxShape.circle,
+                        boxShadow: EduTheme.buttonShadow(EduTheme.primary),
+                      ),
+                      child: const Icon(Icons.school_rounded, color: Colors.white, size: 24),
                     ),
-                    SizedBox(width: 8),
-                    Text(
+                    const SizedBox(width: 10),
+                    const Text(
                       'Edutech',
                       style: TextStyle(
                         fontSize: 28,
-                        fontWeight: FontWeight.w800,
-                        color: Color(0xff1565D8),
+                        fontWeight: FontWeight.w900,
+                        color: EduTheme.primary,
                       ),
                     ),
                   ],
@@ -53,7 +58,7 @@ class LoginView extends GetView<LoginController> {
 
               const SizedBox(height: 20),
 
-              // Image dengan Animasi Scale
+              // Mascot
               TweenAnimationBuilder(
                 tween: Tween<double>(begin: 0, end: 1),
                 duration: const Duration(milliseconds: 800),
@@ -61,13 +66,22 @@ class LoginView extends GetView<LoginController> {
                 builder: (context, value, child) {
                   return Transform.scale(scale: value, child: child);
                 },
-                child: ClipRRect(
-                  borderRadius: BorderRadius.circular(12),
-                  child: Image.asset(
-                    'assets/images/anak.png',
-                    height: 120,
-                    width: 120,
-                    fit: BoxFit.cover,
+                child: Container(
+                  width: 120,
+                  height: 120,
+                  decoration: BoxDecoration(
+                    color: EduTheme.primaryLight,
+                    shape: BoxShape.circle,
+                    border: Border.all(color: EduTheme.primary, width: 3),
+                    boxShadow: EduTheme.buttonShadow(EduTheme.primary),
+                  ),
+                  child: ClipOval(
+                    child: Image.asset(
+                      'assets/images/anak.png',
+                      height: 120,
+                      width: 120,
+                      fit: BoxFit.cover,
+                    ),
                   ),
                 ),
               ),
@@ -89,18 +103,18 @@ class LoginView extends GetView<LoginController> {
                 child: Column(
                   children: const [
                     Text(
-                      'Selamat Datang Kembali!',
+                      'Selamat Datang!',
                       style: TextStyle(
                         fontSize: 26,
-                        fontWeight: FontWeight.w800,
-                        color: Color(0xff1565D8),
+                        fontWeight: FontWeight.w900,
+                        color: EduTheme.textDark,
                       ),
                       textAlign: TextAlign.center,
                     ),
                     SizedBox(height: 6),
                     Text(
-                      'Masuk untuk melanjutkan belajarmu!',
-                      style: TextStyle(fontSize: 14, color: Colors.black54),
+                      'Masuk untuk melanjutkan petualanganmu!',
+                      style: TextStyle(fontSize: 14, color: EduTheme.textMedium),
                     ),
                   ],
                 ),
@@ -128,7 +142,8 @@ class LoginView extends GetView<LoginController> {
                   ),
                   decoration: BoxDecoration(
                     color: Colors.white,
-                    borderRadius: BorderRadius.circular(28),
+                    borderRadius: BorderRadius.circular(EduTheme.radiusLg),
+                    boxShadow: EduTheme.softShadow(),
                   ),
                   child: Column(
                     children: [
@@ -153,71 +168,22 @@ class LoginView extends GetView<LoginController> {
                       Obx(
                         () => SizedBox(
                           width: double.infinity,
-                          height: 54,
+                          height: 56,
                           child: controller.isLoading.value
-                              ? const Center(child: CircularProgressIndicator())
-                              : ElevatedButton(
-                                  onPressed: controller.loginProcess,
-                                  style: ElevatedButton.styleFrom(
-                                    backgroundColor: const Color(0xff2F80ED),
-                                    shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(28),
-                                    ),
-                                    elevation: 3,
-                                  ),
-                                  child: const Text(
-                                    'Masuk',
-                                    style: TextStyle(
-                                      fontSize: 18,
-                                      fontWeight: FontWeight.w700,
-                                      color: Colors.white,
-                                    ),
-                                  ),
+                              ? const Center(child: CircularProgressIndicator(color: EduTheme.primary))
+                              : _buildGreenButton(
+                                  label: 'MASUK',
+                                  emoji: '',
+                                  onTap: controller.loginProcess,
                                 ),
                         ),
                       ),
 
-                      const SizedBox(height: 20),
-                      const Text(
-                        "atau",
-                        style: TextStyle(
-                          color: Colors.black54,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      const SizedBox(height: 20),
-
-                      SizedBox(
-                        width: double.infinity,
-                        height: 54,
-                        child: OutlinedButton.icon(
-                          onPressed: controller.loginWithGoogle,
-                          icon: Image.network(
-                            'https://tse4.mm.bing.net/th/id/OIP.HgH-NjiOdFOrkmwjsZCCfAHaHl?rs=1&pid=ImgDetMain&o=7&rm=3',
-                            height: 24,
-                          ),
-                          label: const Text(
-                            "Masuk dengan Google",
-                            style: TextStyle(
-                              color: Colors.black87,
-                              fontWeight: FontWeight.w600,
-                              fontSize: 16,
-                            ),
-                          ),
-                          style: OutlinedButton.styleFrom(
-                            backgroundColor: Colors.white,
-                            side: BorderSide(color: Colors.grey.shade300),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(28),
-                            ),
-                          ),
-                        ),
-                      ),
+                      const SizedBox(height: 16),
                     ],
                   ),
                 ),
               ),
-
               const SizedBox(height: 22),
 
               TweenAnimationBuilder(
@@ -231,7 +197,7 @@ class LoginView extends GetView<LoginController> {
                   children: [
                     const Text(
                       'Belum punya akun? ',
-                      style: TextStyle(color: Colors.black54),
+                      style: TextStyle(color: EduTheme.textMedium),
                     ),
                     GestureDetector(
                       onTap: () {
@@ -240,8 +206,8 @@ class LoginView extends GetView<LoginController> {
                       child: const Text(
                         'Daftar Sekarang',
                         style: TextStyle(
-                          color: Color(0xff1565D8),
-                          fontWeight: FontWeight.bold,
+                          color: EduTheme.primary,
+                          fontWeight: FontWeight.w900,
                         ),
                       ),
                     ),
@@ -252,6 +218,46 @@ class LoginView extends GetView<LoginController> {
               const SizedBox(height: 18),
             ],
           ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildGreenButton({
+    required String label,
+    required String emoji,
+    required VoidCallback onTap,
+  }) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        width: double.infinity,
+        height: 56,
+        decoration: BoxDecoration(
+          color: EduTheme.primary,
+          borderRadius: BorderRadius.circular(EduTheme.radiusLg),
+          boxShadow: [
+            const BoxShadow(
+              color: EduTheme.primaryShadow,
+              offset: Offset(0, 5),
+            ),
+          ],
+        ),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Text(emoji, style: const TextStyle(fontSize: 20)),
+            const SizedBox(width: 8),
+            Text(
+              label,
+              style: const TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.w900,
+                color: Colors.white,
+                letterSpacing: 1,
+              ),
+            ),
+          ],
         ),
       ),
     );
@@ -269,7 +275,7 @@ class LoginView extends GetView<LoginController> {
       children: [
         Text(
           title,
-          style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 14),
+          style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 14, color: EduTheme.textDark),
         ),
         const SizedBox(height: 8),
         TextField(
@@ -277,13 +283,22 @@ class LoginView extends GetView<LoginController> {
           obscureText: obscure,
           decoration: InputDecoration(
             hintText: hint,
-            prefixIcon: Icon(icon, color: const Color(0xff5AAE61)),
+            hintStyle: const TextStyle(color: EduTheme.textLight),
+            prefixIcon: Icon(icon, color: EduTheme.primary),
             filled: true,
-            fillColor: const Color(0xffF4F6FA),
+            fillColor: const Color(0xFFF7F7F7),
             contentPadding: const EdgeInsets.symmetric(vertical: 14),
             border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(22),
+              borderRadius: BorderRadius.circular(EduTheme.radiusMd),
               borderSide: BorderSide.none,
+            ),
+            enabledBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(EduTheme.radiusMd),
+              borderSide: const BorderSide(color: EduTheme.border, width: 2),
+            ),
+            focusedBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(EduTheme.radiusMd),
+              borderSide: const BorderSide(color: EduTheme.primary, width: 2),
             ),
           ),
         ),

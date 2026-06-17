@@ -64,7 +64,7 @@ class SpellingExamCategoryView extends StatelessWidget {
     ];
 
     return Scaffold(
-      backgroundColor: const Color(0xFFFDF6EC),
+      backgroundColor: const Color(0xFFF7F7F7),
 
       body: SafeArea(
         child: Column(
@@ -114,7 +114,7 @@ class SpellingExamCategoryView extends StatelessWidget {
 
       decoration: const BoxDecoration(
         gradient: LinearGradient(
-          colors: [Color(0xFFFF9800), Color(0xFFFFC107)],
+          colors: [Color(0xFF1CB0F6), Color(0xFF1899D6)],
 
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
@@ -124,7 +124,7 @@ class SpellingExamCategoryView extends StatelessWidget {
 
         boxShadow: [
           BoxShadow(
-            color: Color(0x44FF9800),
+            color: Color(0x4458CC02),
             blurRadius: 16,
             offset: Offset(0, 8),
           ),
@@ -267,7 +267,7 @@ class _ExamCategoryCardState extends State<_ExamCategoryCard>
 
         snackPosition: SnackPosition.BOTTOM,
 
-        backgroundColor: const Color(0xFFFF9800).withOpacity(0.92),
+        backgroundColor: const Color(0xFF1CB0F6).withOpacity(0.92),
 
         colorText: Colors.white,
 

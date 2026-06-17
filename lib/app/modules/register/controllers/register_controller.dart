@@ -48,27 +48,27 @@ class RegisterController extends GetxController {
       final data = jsonDecode(response.body);
 
       if (response.statusCode == 201) {
-        // 1. Tampilkan snackbar dengan instruksi login yang jelas dan ceria
+        // 1. Tampilkan snackbar dengan instruksi verifikasi
         Get.snackbar(
           "Registrasi Berhasil! 🎉", 
-          "Akun kamu sudah aktif. Yuk, masukkan email dan password untuk mulai belajar!", 
+          "Cek email kamu untuk melihat Kode Rahasia!", 
           backgroundColor: Colors.green, 
           colorText: Colors.white,
-          duration: const Duration(seconds: 3), // Beri waktu anak untuk membaca pesannya
+          duration: const Duration(seconds: 3),
           snackPosition: SnackPosition.TOP,
         );
         
+        // Simpan email sebelum dihapus dari controller
+        final registeredEmail = data['email'] ?? emailController.text;
+
         // 2. Bersihkan form inputan
         namaController.clear();
         emailController.clear();
         passwordController.clear();
         konfirmasiController.clear();
 
-        // 3. Tunggu 3 detik (sesuai durasi snackbar), lalu tendang langsung ke halaman Login
-        Future.delayed(const Duration(seconds: 3), () {
-          // offAllNamed akan membersihkan memory stack halaman register
-          Get.offAllNamed(Routes.LOGIN); 
-        });
+        // 3. Langsung bawa ke halaman OTP dengan menyertakan email tanpa delay
+        Get.toNamed(Routes.OTP, arguments: {'email': registeredEmail}); 
       } else {
         Get.snackbar("Gagal", data['message'], 
             backgroundColor: Colors.redAccent, colorText: Colors.white);

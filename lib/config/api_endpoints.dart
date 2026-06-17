@@ -5,6 +5,7 @@ class ApiEndpoints {
   // --- AUTHENTICATION ---
   static const String register = "$baseUrl/register";
   static const String login = "$baseUrl/login";
+  static const String verifyOtp = "$baseUrl/verify-otp";
   static const String googleLogin = "$baseUrl/google-login";
 
   // --- FITUR UJIAN ---

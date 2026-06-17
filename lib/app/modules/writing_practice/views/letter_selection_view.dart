@@ -9,7 +9,7 @@ class LetterSelectionView extends GetView<LetterSelectionController> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF0F4FF),
+      backgroundColor: const Color(0xFFF7F7F7),
       body: SafeArea(
         child: Column(
           children: [
@@ -69,13 +69,13 @@ class LetterSelectionView extends GetView<LetterSelectionController> {
       padding: const EdgeInsets.fromLTRB(16, 12, 20, 24),
       decoration: const BoxDecoration(
         gradient: LinearGradient(
-          colors: [Color(0xFF6C63FF), Color(0xFF48C6EF)],
+          colors: [Color(0xFF1CB0F6), Color(0xFF1899D6)],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
         borderRadius: BorderRadius.vertical(bottom: Radius.circular(36)),
         boxShadow: [
-          BoxShadow(color: Color(0x446C63FF), blurRadius: 15, offset: Offset(0, 8))
+          BoxShadow(color: Color(0x4458CC02), blurRadius: 15, offset: Offset(0, 8))
         ]
       ),
       child: Column(
