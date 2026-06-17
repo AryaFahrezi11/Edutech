@@ -59,7 +59,7 @@ class WritingExamCategoryView extends StatelessWidget {
     ];
 
     return Scaffold(
-      backgroundColor: const Color(0xFFFFF8EE),
+      backgroundColor: const Color(0xFFF7F7F7),
       body: SafeArea(
         child: Column(
           children: [
@@ -98,14 +98,14 @@ class WritingExamCategoryView extends StatelessWidget {
       padding: const EdgeInsets.fromLTRB(8, 12, 20, 24),
       decoration: const BoxDecoration(
         gradient: LinearGradient(
-          colors: [Color(0xFFFF9F1C), Color(0xFFFFD166)],
+          colors: [Color(0xFF1CB0F6), Color(0xFF1899D6)],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
         borderRadius: BorderRadius.vertical(bottom: Radius.circular(36)),
         boxShadow: [
           BoxShadow(
-            color: Color(0x44FF9F1C),
+            color: Color(0x4458CC02),
             blurRadius: 16,
             offset: Offset(0, 8),
           )
@@ -227,7 +227,7 @@ class _ExamCategoryCardState extends State<_ExamCategoryCard>
         'Segera Hadir! 🚀',
         '${widget.data.title} akan segera tersedia!',
         snackPosition: SnackPosition.BOTTOM,
-        backgroundColor: const Color(0xFFFF9F1C).withOpacity(0.92),
+        backgroundColor: const Color(0xFF1CB0F6).withOpacity(0.92),
         colorText: Colors.white,
         borderRadius: 20,
         margin: const EdgeInsets.all(16),

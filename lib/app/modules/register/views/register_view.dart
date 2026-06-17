@@ -1,18 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import '../../../data/edu_theme.dart';
 import '../controllers/register_controller.dart';
 
-// Gunakan GetView<RegisterController>
 class RegisterView extends GetView<RegisterController> {
   const RegisterView({super.key});
 
   @override
   Widget build(BuildContext context) {
-    // Inisialisasi controller jika belum menggunakan Binding
     Get.put(RegisterController());
 
     return Scaffold(
-      backgroundColor: const Color(0xffEEF2FF),
+      backgroundColor: EduTheme.bgPrimaryTint,
       body: SafeArea(
         child: SingleChildScrollView(
           padding: const EdgeInsets.symmetric(horizontal: 22, vertical: 14),
@@ -20,38 +19,89 @@ class RegisterView extends GetView<RegisterController> {
             children: [
               const SizedBox(height: 8),
 
-              // ... (Bagian Header Icon Edutech dan Gambar biarkan sama persis seperti kodemu) ...
-              // [Saya potong kodenya di sini agar tidak kepanjangan, pakai kode asli milikmu]
+              // Header
+              TweenAnimationBuilder(
+                tween: Tween<double>(begin: 0, end: 1),
+                duration: const Duration(milliseconds: 600),
+                builder: (context, value, child) {
+                  return Opacity(
+                    opacity: value,
+                    child: Transform.translate(
+                      offset: Offset(0, 20 * (1 - value)),
+                      child: child,
+                    ),
+                  );
+                },
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(8),
+                      decoration: BoxDecoration(
+                        color: EduTheme.primary,
+                        shape: BoxShape.circle,
+                        boxShadow: EduTheme.buttonShadow(EduTheme.primary),
+                      ),
+                      child: const Icon(Icons.school_rounded, color: Colors.white, size: 24),
+                    ),
+                    const SizedBox(width: 10),
+                    const Text(
+                      'Edutech',
+                      style: TextStyle(
+                        fontSize: 28,
+                        fontWeight: FontWeight.w900,
+                        color: EduTheme.primary,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+
+              const SizedBox(height: 20),
+
+              // Mascot
+              TweenAnimationBuilder(
+                tween: Tween<double>(begin: 0, end: 1),
+                duration: const Duration(milliseconds: 800),
+                curve: Curves.elasticOut,
+                builder: (context, value, child) {
+                  return Transform.scale(scale: value, child: child);
+                },
+                child: const Text("🎒", style: TextStyle(fontSize: 64)),
+              ),
+
+              const SizedBox(height: 12),
 
               const Text(
-                'Selamat Datang!',
+                'Mulai Petualangan! 🚀',
                 style: TextStyle(
-                  fontSize: 30,
-                  fontWeight: FontWeight.w800,
-                  color: Color(0xff1565D8),
+                  fontSize: 26,
+                  fontWeight: FontWeight.w900,
+                  color: EduTheme.textDark,
                 ),
               ),
               const SizedBox(height: 6),
               const Text(
-                'Yuk mulai belajar sambil bermain!',
-                style: TextStyle(fontSize: 14, color: Colors.black54),
+                'Yuk daftar dan mulai belajar sambil bermain!',
+                style: TextStyle(fontSize: 14, color: EduTheme.textMedium),
               ),
               const SizedBox(height: 24),
 
+              // Form Card
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 22, vertical: 24),
                 decoration: BoxDecoration(
                   color: Colors.white,
-                  borderRadius: BorderRadius.circular(28),
+                  borderRadius: BorderRadius.circular(EduTheme.radiusLg),
+                  boxShadow: EduTheme.softShadow(),
                 ),
                 child: Column(
                   children: [
-                    // --- SAMBUNGKAN CONTROLLER KE INPUT ---
                     _buildInput(
                       title: 'Nama Lengkap',
                       hint: 'Masukkan nama lengkap',
                       icon: Icons.person_outline,
-                      inputController: controller.namaController, // Tambahkan ini
+                      inputController: controller.namaController,
                     ),
                     const SizedBox(height: 16),
 
@@ -59,7 +109,7 @@ class RegisterView extends GetView<RegisterController> {
                       title: 'Email',
                       hint: 'Masukkan alamat email',
                       icon: Icons.email_outlined,
-                      inputController: controller.emailController, // Tambahkan ini
+                      inputController: controller.emailController,
                     ),
                     const SizedBox(height: 16),
 
@@ -68,7 +118,7 @@ class RegisterView extends GetView<RegisterController> {
                       hint: 'Masukkan password',
                       icon: Icons.lock_outline,
                       obscure: true,
-                      inputController: controller.passwordController, // Tambahkan ini
+                      inputController: controller.passwordController,
                     ),
                     const SizedBox(height: 16),
 
@@ -77,33 +127,48 @@ class RegisterView extends GetView<RegisterController> {
                       hint: 'Ulangi password',
                       icon: Icons.check_circle_outline,
                       obscure: true,
-                      inputController: controller.konfirmasiController, // Tambahkan ini
+                      inputController: controller.konfirmasiController,
                     ),
                     const SizedBox(height: 24),
 
-                    // --- TOMBOL DAFTAR ---
+                    // Tombol Daftar
                     SizedBox(
                       width: double.infinity,
-                      height: 54,
-                      child: Obx(() => ElevatedButton(
-                        // Jika isLoading true, matikan tombol. Jika false, panggil fungsi register
-                        onPressed: controller.isLoading.value ? null : () {
-                          controller.registerProcess();
-                        },
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: const Color(0xff2F80ED),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(28),
-                          ),
-                          elevation: 3,
-                        ),
-                        child: controller.isLoading.value 
-                            ? const CircularProgressIndicator(color: Colors.white)
-                            : const Text(
-                                'Daftar Sekarang',
-                                style: TextStyle(fontSize: 18, fontWeight: FontWeight.w700, color: Colors.white),
+                      height: 56,
+                      child: Obx(() => controller.isLoading.value
+                          ? const Center(child: CircularProgressIndicator(color: EduTheme.primary))
+                          : GestureDetector(
+                              onTap: controller.registerProcess,
+                              child: Container(
+                                decoration: BoxDecoration(
+                                  color: EduTheme.primary,
+                                  borderRadius: BorderRadius.circular(EduTheme.radiusLg),
+                                  boxShadow: const [
+                                    BoxShadow(
+                                      color: EduTheme.primaryShadow,
+                                      offset: Offset(0, 5),
+                                    ),
+                                  ],
+                                ),
+                                child: const Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    Text("✨", style: TextStyle(fontSize: 20)),
+                                    SizedBox(width: 8),
+                                    Text(
+                                      'DAFTAR SEKARANG',
+                                      style: TextStyle(
+                                        fontSize: 18,
+                                        fontWeight: FontWeight.w900,
+                                        color: Colors.white,
+                                        letterSpacing: 1,
+                                      ),
+                                    ),
+                                  ],
+                                ),
                               ),
-                      )),
+                            ),
+                      ),
                     ),
                   ],
                 ),
@@ -114,10 +179,13 @@ class RegisterView extends GetView<RegisterController> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  const Text('Sudah punya akun? ', style: TextStyle(color: Colors.black54)),
+                  const Text('Sudah punya akun? ', style: TextStyle(color: EduTheme.textMedium)),
                   GestureDetector(
                     onTap: () => Get.back(),
-                    child: const Text('Masuk', style: TextStyle(color: Color(0xff1565D8), fontWeight: FontWeight.bold)),
+                    child: const Text(
+                      'Masuk',
+                      style: TextStyle(color: EduTheme.primary, fontWeight: FontWeight.w900),
+                    ),
                   ),
                 ],
               ),
@@ -129,31 +197,39 @@ class RegisterView extends GetView<RegisterController> {
     );
   }
 
-  // --- UPDATE WIDGET _buildInput ---
   Widget _buildInput({
     required String title,
     required String hint,
     required IconData icon,
     bool obscure = false,
-    required TextEditingController inputController, // Wajibkan parameter ini
+    required TextEditingController inputController,
   }) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(title, style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 14)),
+        Text(title, style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 14, color: EduTheme.textDark)),
         const SizedBox(height: 8),
         TextField(
-          controller: inputController, // Sambungkan ke TextField
+          controller: inputController,
           obscureText: obscure,
           decoration: InputDecoration(
             hintText: hint,
-            prefixIcon: Icon(icon, color: const Color(0xff5AAE61)),
+            hintStyle: const TextStyle(color: EduTheme.textLight),
+            prefixIcon: Icon(icon, color: EduTheme.primary),
             filled: true,
-            fillColor: const Color(0xffF4F6FA),
+            fillColor: const Color(0xFFF7F7F7),
             contentPadding: const EdgeInsets.symmetric(vertical: 14),
             border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(22),
+              borderRadius: BorderRadius.circular(EduTheme.radiusMd),
               borderSide: BorderSide.none,
+            ),
+            enabledBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(EduTheme.radiusMd),
+              borderSide: const BorderSide(color: EduTheme.border, width: 2),
+            ),
+            focusedBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(EduTheme.radiusMd),
+              borderSide: const BorderSide(color: EduTheme.primary, width: 2),
             ),
           ),
         ),

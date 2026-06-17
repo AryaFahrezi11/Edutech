@@ -1,23 +1,22 @@
+import 'dart:async';
+import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:flutter_tts/flutter_tts.dart';
+import 'package:speech_to_text/speech_to_text.dart' as stt;
 
 class SpellingPracticeController extends GetxController {
-  // =========================================================
-  // INDEX
-  // =========================================================
-
   final currentIndex = 0.obs;
-
-  // =========================================================
-  // TYPE
-  // letter = latihan huruf
-  // word = latihan eja kata
-  // =========================================================
-
   late String type;
 
-  // =========================================================
-  // DATA HURUF
-  // =========================================================
+  // TTS & STT
+  final FlutterTts flutterTts = FlutterTts();
+  final stt.SpeechToText speech = stt.SpeechToText();
+  
+  var isListening = false.obs;
+  var spokenText = "".obs;
+
+  // Completer untuk menunggu TTS selesai bicara
+  Completer<void>? _ttsCompleter;
 
   final letters = [
     {'upper': 'A', 'lower': 'a'},
@@ -48,10 +47,6 @@ class SpellingPracticeController extends GetxController {
     {'upper': 'Z', 'lower': 'z'},
   ];
 
-  // =========================================================
-  // DATA KATA MUDAH
-  // =========================================================
-
   final words = [
     {'word': 'BOLA', 'spell': 'BO • LA', 'sound': 'BO... LA... BOLA'},
     {'word': 'BUKU', 'spell': 'BU • KU', 'sound': 'BU... KU... BUKU'},
@@ -60,153 +55,200 @@ class SpellingPracticeController extends GetxController {
     {'word': 'KUCING', 'spell': 'KU • CING', 'sound': 'KU... CING... KUCING'},
   ];
 
-  // =========================================================
-  // INIT
-  // =========================================================
-
   @override
   void onInit() {
     super.onInit();
-
     final args = Get.arguments ?? {};
-
     type = args['type'] ?? 'letter';
+    
+    _initTTS();
+    _initSTT();
   }
 
-  // =========================================================
-  // MODE
-  // =========================================================
+  void _initTTS() async {
+    await flutterTts.setLanguage("id-ID");
+    await flutterTts.setSpeechRate(0.4);
+    await flutterTts.setPitch(1.2);
+    
+    // Callback saat TTS selesai berbicara
+    flutterTts.setCompletionHandler(() {
+      _ttsCompleter?.complete();
+    });
+  }
+
+  /// Speak dan tunggu sampai selesai diucapkan
+  Future<void> _speakAndWait(String text) async {
+    _ttsCompleter = Completer<void>();
+    await flutterTts.speak(text);
+    await _ttsCompleter!.future;
+  }
+
+  void _initSTT() async {
+    await speech.initialize(
+      onError: (error) => print('Error STT: $error'),
+      onStatus: (status) => print('Status STT: $status'),
+    );
+  }
 
   bool get isLetterMode => type == 'letter';
-
   bool get isWordMode => type == 'word';
 
-  // =========================================================
-  // CURRENT ITEM
-  // =========================================================
-
-  dynamic get currentItem {
-    if (isLetterMode) {
-      return letters[currentIndex.value];
-    }
-
-    return words[currentIndex.value];
-  }
-
-  // =========================================================
-  // TOTAL ITEM
-  // =========================================================
-
-  int get totalItem {
-    if (isLetterMode) {
-      return letters.length;
-    }
-
-    return words.length;
-  }
-
-  // =========================================================
-  // CURRENT WORD
-  // =========================================================
-
-  Map<String, dynamic> get currentWord {
-    return words[currentIndex.value];
-  }
-
-  // =========================================================
-  // NEXT
-  // =========================================================
+  dynamic get currentItem => isLetterMode ? letters[currentIndex.value] : words[currentIndex.value];
+  int get totalItem => isLetterMode ? letters.length : words.length;
+  Map<String, dynamic> get currentWord => words[currentIndex.value];
 
   void nextItem() {
-    if (currentIndex.value < totalItem - 1) {
-      currentIndex.value++;
-    }
+    if (currentIndex.value < totalItem - 1) currentIndex.value++;
   }
-
   void nextWord() {
-    if (currentIndex.value < words.length - 1) {
-      currentIndex.value++;
-    }
+    if (currentIndex.value < words.length - 1) currentIndex.value++;
   }
-
-  // =========================================================
-  // PREVIOUS
-  // =========================================================
-
   void previousItem() {
-    if (currentIndex.value > 0) {
-      currentIndex.value--;
-    }
+    if (currentIndex.value > 0) currentIndex.value--;
   }
-
   void previousWord() {
-    if (currentIndex.value > 0) {
-      currentIndex.value--;
-    }
+    if (currentIndex.value > 0) currentIndex.value--;
   }
 
   // =========================================================
-  // AUDIO HURUF
+  // TEXT-TO-SPEECH (ROBOT SUARA)
   // =========================================================
-
-  void playSound() {
+  Future<void> playSound() async {
     if (isLetterMode) {
-      Get.snackbar(
-        "🔊 Audio Huruf",
-        "Suara huruf ${currentItem['upper']} diputar",
-
-        snackPosition: SnackPosition.BOTTOM,
-      );
+      await flutterTts.speak(currentItem['upper']);
     } else {
-      Get.snackbar(
-        "🔊 Audio Ejaan",
-        "${currentItem['sound']}",
-
-        snackPosition: SnackPosition.BOTTOM,
-      );
+      await flutterTts.speak(currentItem['sound']);
     }
   }
 
-  // =========================================================
-  // AUDIO EJAAN
-  // =========================================================
+  Future<void> speakSpell(String part) async {
+    await flutterTts.speak(part);
+  }
 
-  void speakSpell() {
-    final item = currentWord;
+  Future<void> speakWord() async {
+    await flutterTts.speak(currentWord['word']);
+  }
 
-    Get.snackbar(
-      "🔊 Ejaan Diputar",
-      item['sound'],
+  /// Mengeja kata secara lengkap: huruf per huruf → suku kata → kata utuh
+  /// Contoh: "B. O. L. A. ... BO... LA... BOLA"
+  var isSpelling = false.obs;
 
-      snackPosition: SnackPosition.BOTTOM,
-    );
+  Future<void> speakFullSpelling() async {
+    if (isSpelling.value) return; // cegah double-tap
+    isSpelling.value = true;
+
+    final word = currentWord;
+    final String fullWord = word['word'];
+    final String spellStr = word['spell'];
+    final spellParts = spellStr.split('•').map((e) => e.trim()).toList();
+
+    // 1) Eja huruf satu per satu: B - O - L - A
+    for (int i = 0; i < fullWord.length; i++) {
+      await _speakAndWait(fullWord[i]);
+      await Future.delayed(const Duration(milliseconds: 300));
+    }
+
+    await Future.delayed(const Duration(milliseconds: 500));
+
+    // 2) Eja per suku kata: BO - LA
+    for (final part in spellParts) {
+      await _speakAndWait(part);
+      await Future.delayed(const Duration(milliseconds: 400));
+    }
+
+    await Future.delayed(const Duration(milliseconds: 500));
+
+    // 3) Ucapkan kata utuh: BOLA
+    await _speakAndWait(fullWord);
+
+    isSpelling.value = false;
   }
 
   // =========================================================
-  // AUDIO KATA
+  // SPEECH-TO-TEXT (MIKROFON ANAK)
   // =========================================================
+  void listen() async {
+    if (!isListening.value) {
+      bool available = await speech.initialize();
+      if (available) {
+        isListening.value = true;
+        speech.listen(
+          localeId: "id_ID",
+          onResult: (val) {
+            spokenText.value = val.recognizedWords;
+            if (val.hasConfidenceRating && val.confidence > 0) {
+              // Jika sudah selesai bicara
+              _verifyPronunciation();
+            }
+          },
+        );
+      } else {
+        Get.snackbar("Akses Mikrofon", "Mohon izinkan mikrofon untuk menggunakan fitur ini.");
+      }
+    } else {
+      isListening.value = false;
+      speech.stop();
+    }
+  }
 
-  void speakWord() {
-    final item = currentWord;
+  void _verifyPronunciation() {
+    isListening.value = false;
+    speech.stop();
+    
+    String target = isLetterMode ? currentItem['upper'] : currentWord['word'];
+    target = target.toLowerCase();
+    String spoken = spokenText.value.toLowerCase().trim();
 
-    Get.snackbar(
-      "🔊 Kata Diputar",
-      "Membaca kata ${item['word']}",
+    if (spoken.isEmpty) return;
 
-      snackPosition: SnackPosition.BOTTOM,
+    if (spoken.contains(target) || target.contains(spoken)) {
+      _showSuccessDialog();
+    } else {
+      _showRetryDialog(spoken);
+    }
+  }
+
+  void _showSuccessDialog() {
+    flutterTts.speak("Pintar sekali!");
+    Get.defaultDialog(
+      title: "🎉 LUAR BIASA! 🎉",
+      titleStyle: const TextStyle(fontWeight: FontWeight.w900, color: Color(0xFF1CB0F6), fontSize: 24),
+      content: Column(
+        children: const [
+          Icon(Icons.star_rounded, color: Colors.orange, size: 80),
+          SizedBox(height: 10),
+          Text("Pelafalanmu sempurna!", style: TextStyle(fontSize: 16)),
+        ],
+      ),
+      confirm: ElevatedButton(
+        style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFF1CB0F6), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20))),
+        onPressed: () {
+          Get.back();
+          if (isLetterMode) nextItem(); else nextWord();
+        },
+        child: const Padding(padding: EdgeInsets.symmetric(horizontal: 20, vertical: 10), child: Text("LANJUT", style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold))),
+      ),
     );
   }
 
-  // =========================================================
-  // AUDIO WORD
-  // =========================================================
-
-  void playWord() {
-    Get.snackbar(
-      "🔊 Audio Kata",
-      "Kata ${currentItem['word']} diputar",
-
-      snackPosition: SnackPosition.BOTTOM,
+  void _showRetryDialog(String spoken) {
+    flutterTts.speak("Hampir benar, ayo coba lagi!");
+    Get.defaultDialog(
+      title: "Semangat! 💪",
+      titleStyle: const TextStyle(fontWeight: FontWeight.w900, color: Colors.orange, fontSize: 24),
+      content: Column(
+        children: [
+          const Icon(Icons.sentiment_satisfied_alt_rounded, color: Colors.orange, size: 80),
+          const SizedBox(height: 10),
+          Text("Kamu mengucapkan: '$spoken'", style: const TextStyle(fontSize: 16, fontStyle: FontStyle.italic)),
+          const Text("Coba lafalkan lebih jelas ya!", style: TextStyle(fontSize: 14)),
+        ],
+      ),
+      confirm: ElevatedButton(
+        style: ElevatedButton.styleFrom(backgroundColor: Colors.orange, shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20))),
+        onPressed: () => Get.back(),
+        child: const Padding(padding: EdgeInsets.symmetric(horizontal: 20, vertical: 10), child: Text("COBA LAGI", style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold))),
+      ),
     );
   }
 }

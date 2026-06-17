@@ -10,7 +10,7 @@ class SpellingExamView extends GetView<SpellingExamController> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF0F4FF),
+      backgroundColor: const Color(0xFFF7F7F7),
 
       body: SafeArea(
         child: Obx(() {
@@ -149,7 +149,7 @@ class SpellingExamView extends GetView<SpellingExamController> {
 
                     decoration: BoxDecoration(
                       gradient: const LinearGradient(
-                        colors: [Color(0xFF6C63FF), Color(0xFF48C6EF)],
+                        colors: [Color(0xFF1CB0F6), Color(0xFF1899D6)],
                       ),
 
                       borderRadius: BorderRadius.circular(24),
@@ -215,7 +215,7 @@ class SpellingExamView extends GetView<SpellingExamController> {
 
               decoration: BoxDecoration(
                 gradient: const LinearGradient(
-                  colors: [Color(0xFF6C63FF), Color(0xFF48C6EF)],
+                  colors: [Color(0xFF1CB0F6), Color(0xFF1899D6)],
                 ),
 
                 shape: BoxShape.circle,
@@ -290,7 +290,7 @@ class SpellingExamView extends GetView<SpellingExamController> {
 
                     decoration: BoxDecoration(
                       gradient: const LinearGradient(
-                        colors: [Color(0xFFFF9F1C), Color(0xFFFFD166)],
+                        colors: [Color(0xFF1CB0F6), Color(0xFF1899D6)],
                       ),
 
                       borderRadius: BorderRadius.circular(24),
@@ -346,8 +346,8 @@ class SpellingExamView extends GetView<SpellingExamController> {
                                     const Color(0xFFFF4B2B),
                                   ]
                                 : [
-                                    const Color(0xFF6C63FF),
-                                    const Color(0xFF48C6EF),
+                                      const Color(0xFF1CB0F6),
+                                      const Color(0xFF1899D6),
                                   ],
                           ),
 
@@ -504,7 +504,7 @@ class SpellingExamView extends GetView<SpellingExamController> {
 
                       decoration: BoxDecoration(
                         gradient: const LinearGradient(
-                          colors: [Color(0xFF6C63FF), Color(0xFF48C6EF)],
+                          colors: [Color(0xFF1CB0F6), Color(0xFF1899D6)],
                         ),
 
                         borderRadius: BorderRadius.circular(22),
@@ -541,7 +541,7 @@ class SpellingExamView extends GetView<SpellingExamController> {
 
       decoration: const BoxDecoration(
         gradient: LinearGradient(
-          colors: [Color(0xFF6C63FF), Color(0xFF48C6EF)],
+          colors: [Color(0xFF1CB0F6), Color(0xFF1899D6)],
         ),
 
         borderRadius: BorderRadius.vertical(bottom: Radius.circular(30)),
@@ -692,8 +692,8 @@ class _SpinningLoaderState extends State<_SpinningLoader>
             decoration: const BoxDecoration(
               gradient: SweepGradient(
                 colors: [
-                  Color(0xFF6C63FF),
-                  Color(0xFF48C6EF),
+                  Color(0xFF1CB0F6),
+                  Color(0xFF1899D6),
                   Colors.transparent,
                 ],
               ),
