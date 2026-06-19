@@ -1,150 +1,199 @@
+import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:path_drawing/path_drawing.dart';
+import '../data/letter_paths.dart';
 
 class WritingPracticeController extends GetxController {
-  // Huruf terpilih
   var selectedLetter = 'A'.obs;
+  
+  // Progress dari 0.0 sampai 1.0 pada stroke yang sedang aktif
+  var currentStrokeProgress = 0.0.obs;
+  // Index stroke (garis) ke-berapa yang sedang dikerjakan anak
+  var currentStrokeIndex = 0.obs;
+  // Menyimpan path yang sudah selesai ditebalkan
+  var completedPaths = <Path>[].obs;
+
+  late Path currentLetterPath;
+  late List<PathMetric> currentMetrics;
+
+  // Daftar alfabet untuk tombol navigasi
+  final List<String> alphabet = List.generate(26, (index) => String.fromCharCode(65 + index));
 
   @override
   void onInit() {
     super.onInit();
-    // Tangkap argumen huruf dari halaman pemilihan jika ada
-    if (Get.arguments != null && Get.arguments['letter'] != null) {
-      selectedLetter.value = Get.arguments['letter'];
+    _loadCurrentLetterPath();
+  }
+
+  void _loadCurrentLetterPath() {
+    final pathStr = LetterPaths.uppercasePaths[selectedLetter.value] ?? '';
+    currentLetterPath = pathStr.isNotEmpty ? parseSvgPathData(pathStr) : Path();
+    currentMetrics = currentLetterPath.computeMetrics().toList();
+    
+    currentStrokeIndex.value = 0;
+    currentStrokeProgress.value = 0.0;
+    completedPaths.clear();
+  }
+
+  void onPanUpdate(DragUpdateDetails details) {
+    if (currentStrokeIndex.value >= currentMetrics.length) return; // Sudah selesai semua
+    
+    final metric = currentMetrics[currentStrokeIndex.value];
+    final touchPosition = details.localPosition;
+    
+    // Prediksi titik terdekat di kurva (sederhana)
+    // Karena kita tidak bisa reverse-lookup panjang persis dari posisi X/Y dengan mudah di Flutter,
+    // kita gunakan pendekatan: apakah posisi jari cukup dekat dengan ujung goresan (progress saat ini + threshold)?
+    
+    // Jarak maksimal jari boleh meleset dari target (radius)
+    const double snapRadius = 60.0; 
+    
+    // Cari titik di sepanjang path yang sedikiiiit di depan posisi progress saat ini
+    double targetLength = (currentStrokeProgress.value * metric.length) + 15.0; 
+    if (targetLength > metric.length) targetLength = metric.length;
+    
+    final tangent = metric.getTangentForOffset(targetLength);
+    if (tangent != null) {
+      final distance = (tangent.position - touchPosition).distance;
+      if (distance < snapRadius) {
+        // Jika jari dekat dengan target, majukan progress!
+        currentStrokeProgress.value = targetLength / metric.length;
+        
+        // Jika sudah mencapai ujung (99% atau 100%)
+        if (currentStrokeProgress.value >= 0.98) {
+          _completeCurrentStroke(metric);
+        }
+      }
     }
   }
 
+  void _completeCurrentStroke(PathMetric metric) {
+    // Simpan garis yang sudah penuh
+    completedPaths.add(metric.extractPath(0, metric.length));
+    
+    currentStrokeIndex.value++;
+    currentStrokeProgress.value = 0.0;
+    
+    if (currentStrokeIndex.value >= currentMetrics.length) {
+      checkGoresanAudit();
+    }
+  }
+
+  void onPanEnd() {
+    // Opsional: Jika kita mau mereset progress saat jari diangkat sebelum selesai
+    // Tapi biasanya untuk anak, kita biarkan saja mereka melanjutkannya.
+  }
+
+  void resetCanvas() {
+    _loadCurrentLetterPath();
+  }
+
   void nextLetter() {
-    int currentCode = selectedLetter.value.codeUnitAt(0);
-    if (currentCode < 90) { // 90 adalah 'Z'
-      selectedLetter.value = String.fromCharCode(currentCode + 1);
-      resetCanvas();
+    int currentIndex = alphabet.indexOf(selectedLetter.value);
+    if (currentIndex < alphabet.length - 1) {
+      selectedLetter.value = alphabet[currentIndex + 1];
+      _loadCurrentLetterPath();
     }
   }
 
   void prevLetter() {
-    int currentCode = selectedLetter.value.codeUnitAt(0);
-    if (currentCode > 65) { // 65 adalah 'A'
-      selectedLetter.value = String.fromCharCode(currentCode - 1);
-      resetCanvas();
+    int currentIndex = alphabet.indexOf(selectedLetter.value);
+    if (currentIndex > 0) {
+      selectedLetter.value = alphabet[currentIndex - 1];
+      _loadCurrentLetterPath();
     }
   }
 
-  // Koordinat goresan jari anak
-  var userPoints = <Offset?>[].obs;
-
-  // Data pola (path) untuk berbagai huruf
-  final Map<String, List<List<Offset>>> letterPathsMap = {
-    'A': [
-      [const Offset(150, 100), const Offset(80, 250)], // Stroke 1
-      [const Offset(150, 100), const Offset(220, 250)], // Stroke 2
-      [const Offset(100, 200), const Offset(200, 200)], // Stroke 3
-    ],
-    'B': [
-      [const Offset(100, 100), const Offset(100, 250)], // Garis lurus kiri
-      [const Offset(100, 100), const Offset(180, 120), const Offset(200, 150), const Offset(180, 175), const Offset(100, 175)], // Lengkung atas
-      [const Offset(100, 175), const Offset(190, 200), const Offset(210, 225), const Offset(190, 250), const Offset(100, 250)], // Lengkung bawah
-    ],
-    'C': [
-      [const Offset(220, 120), const Offset(150, 80), const Offset(80, 175), const Offset(150, 270), const Offset(220, 230)], // Lengkung C
-    ],
-    'D': [
-      [const Offset(100, 100), const Offset(100, 250)], // Garis lurus kiri
-      [const Offset(100, 100), const Offset(200, 120), const Offset(220, 175), const Offset(200, 230), const Offset(100, 250)], // Lengkung D
-    ],
-    'E': [
-      [const Offset(100, 100), const Offset(100, 250)], // Garis lurus kiri
-      [const Offset(100, 100), const Offset(200, 100)], // Atas
-      [const Offset(100, 175), const Offset(180, 175)], // Tengah
-      [const Offset(100, 250), const Offset(200, 250)], // Bawah
-    ],
-    'F': [
-      [const Offset(100, 100), const Offset(100, 250)], // Garis lurus kiri
-      [const Offset(100, 100), const Offset(200, 100)], // Atas
-      [const Offset(100, 175), const Offset(180, 175)], // Tengah
-    ],
-    'G': [
-      [const Offset(220, 120), const Offset(150, 80), const Offset(80, 175), const Offset(150, 270), const Offset(220, 250), const Offset(220, 180), const Offset(170, 180)], // Pola G
-    ],
-  };
-
-  // Mendapatkan path sesuai huruf yang aktif
-  List<List<Offset>> get currentPaths {
-    return letterPathsMap[selectedLetter.value] ?? [
-      // Fallback jika huruf belum ada polanya (Garis lurus vertikal sederhana)
-      [const Offset(150, 100), const Offset(150, 250)], 
-    ];
+  void checkGoresanAudit() {
+    // Tampilkan popup gamifikasi modern dengan 3 bintang
+    Get.dialog(
+      Dialog(
+        backgroundColor: Colors.transparent,
+        child: Container(
+          padding: const EdgeInsets.all(24),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(32),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.2),
+                blurRadius: 20,
+                spreadRadius: 5,
+              )
+            ],
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              // 3 Bintang Berjejer
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  _buildStar(delayedBy: 0),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 10).copyWith(bottom: 20),
+                    child: _buildStar(delayedBy: 200, size: 70), // Bintang tengah lebih besar & tinggi
+                  ),
+                  _buildStar(delayedBy: 400),
+                ],
+              ),
+              const SizedBox(height: 16),
+              const Text(
+                "Luar Biasa! 🎉",
+                style: TextStyle(
+                  fontSize: 28,
+                  fontWeight: FontWeight.w900,
+                  color: Color(0xFF1CB0F6),
+                ),
+              ),
+              const SizedBox(height: 8),
+              Text(
+                "Kamu berhasil menulis huruf ${selectedLetter.value} dengan sangat baik!",
+                textAlign: TextAlign.center,
+                style: const TextStyle(fontSize: 16, color: Colors.black54),
+              ),
+              const SizedBox(height: 24),
+              SizedBox(
+                width: double.infinity,
+                height: 50,
+                child: ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xFF1CB0F6),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(16),
+                    ),
+                    elevation: 5,
+                  ),
+                  onPressed: () {
+                    Get.back(); // Tutup popup
+                    nextLetter(); // Langsung ke huruf berikutnya
+                  },
+                  child: const Text(
+                    "Lanjut Belajar",
+                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.w900, color: Colors.white),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+      barrierDismissible: false,
+    );
   }
 
-  // Index stroke hantu yang sedang harus dikerjakan
-  var currentStroke = 0.obs;
-
-  // Fungsi saat anak mengusap jari
-  void onPanUpdate(DragUpdateDetails details) {
-    // Tambahkan poin jari anak
-    userPoints.add(details.localPosition);
-    
-    // Logika simulasi "Audit Goresan" (PSC 2 Core Logic)
-    _auditUserProgress(details.localPosition);
-  }
-
-  // Fungsi saat anak mengangkat jari
-  void onPanEnd() {
-    // Tandai akhir goresan
-    userPoints.add(null);
-  }
-
-  // Logika audit progress goresan (Simulasi Audit Trail)
-  void _auditUserProgress(Offset currentTouchPoint) {
-    if (currentStroke.value >= currentPaths.length) return;
-
-    // Ambil koordinat panduan untuk stroke saat ini
-    final currentPathGuide = currentPaths[currentStroke.value];
-    if (currentPathGuide.length < 2) return;
-
-    final targetEndPoint = currentPathGuide.last;
-    
-    // Hitung jarak jari anak ke target titik akhir stroke
-    double distance = (currentTouchPoint - targetEndPoint).distance;
-
-    // Jika jari anak cukup dekat dengan target (ambang batas), tandai stroke selesai
-    if (distance < 20.0) {
-      Get.snackbar(
-        "Hebat!",
-        "Goresan ${currentStroke.value + 1} selesai!",
-        backgroundColor: Colors.greenAccent[100],
-        snackPosition: SnackPosition.BOTTOM,
-      );
-      currentStroke.value++;
-      userPoints.add(null); // Tandai akhir stroke untuk painter
-    }
-  }
-
-  // Fungsi untuk reset kanvas
-  void resetCanvas() {
-    userPoints.clear();
-    currentStroke.value = 0;
-  }
-
-  // Fungsi kirim data ke Backend (Mobile/Web Service Principle)
-  void checkGoresanAudit() async {
-    if (currentStroke.value < currentPaths.length) {
-      Get.snackbar("Ayo!", "Selesaikan semua goresan dulu!");
-      return;
-    }
-
-    // Ubah koordinat Offset menjadi List map agar bisa di-JSON-kan
-    final coordsPayload = userPoints
-        .where((p) => p != null)
-        .map((p) => {'x': p!.dx, 'y': p!.dy}) // Gunakan ! jika diperlukan oleh compiler, namun jika IDE protes, hapus saja.
-        .toList();
-
-    // Data siap dikirim ke backend Flask via HTTP POST
-    debugPrint("Mengirim data koordinat: $coordsPayload");
-
-    Get.dialog(const Center(child: CircularProgressIndicator()));
-    await Future.delayed(const Duration(seconds: 2)); // Simulasi audit
-    Get.back();
-    Get.snackbar("Audit Selesai!", "AI bilang goresanmu BAGUS!");
+  Widget _buildStar({required int delayedBy, double size = 50}) {
+    return TweenAnimationBuilder<double>(
+      tween: Tween(begin: 0, end: 1),
+      duration: const Duration(milliseconds: 600),
+      curve: Curves.elasticOut,
+      builder: (context, value, child) {
+        return Transform.scale(
+          scale: value,
+          child: Icon(Icons.star_rounded, color: const Color(0xFFFFD700), size: size),
+        );
+      },
+    );
   }
 }

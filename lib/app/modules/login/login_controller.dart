@@ -21,12 +21,11 @@ class LoginController extends GetxController {
   Future<void> loginProcess() async {
     // 1. Validasi Input Kosong di sisi Flutter
     if (emailController.text.isEmpty || passwordController.text.isEmpty) {
-      Get.snackbar(
+      _showModernSnackbar(
         "Peringatan",
         "Email dan Password tidak boleh kosong!",
-        backgroundColor: Colors.orangeAccent,
-        colorText: Colors.white,
-        snackPosition: SnackPosition.TOP,
+        Colors.orange,
+        Icons.warning_amber_rounded,
       );
       return;
     }
@@ -50,60 +49,80 @@ class LoginController extends GetxController {
       // 3. Cek Status Respons
       if (response.statusCode == 200) {
         // --- LOGIN SUKSES ---
-        // Simpan token JWT dan data user ke memori statis
         token = data['token'];
         userData = data['user'];
 
-        // Tampilkan pesan sukses dari backend
-        Get.snackbar(
-          "Berhasil!",
+        _showModernSnackbar(
+          "Berhasil! 🎉",
           data['message'],
-          backgroundColor: Colors.green,
-          colorText: Colors.white,
-          snackPosition: SnackPosition.TOP,
+          Colors.green,
+          Icons.check_circle_rounded,
         );
 
-        // Bersihkan kolom inputan agar aman jika dilogout nanti
         emailController.clear();
         passwordController.clear();
 
-        // Pindah ke halaman Home dan hapus riwayat halaman (cegah tombol back)
         Future.delayed(const Duration(seconds: 1), () {
           Get.offAllNamed(Routes.HOME);
         });
+      } else if (response.statusCode == 403 && data['status'] == 'unverified') {
+        // --- LOGIN GAGAL: Akun belum diverifikasi ---
+        _showModernSnackbar(
+          "Belum Verifikasi",
+          data['message'] ?? "Akun kamu belum diverifikasi!",
+          Colors.orange,
+          Icons.mark_email_unread_rounded,
+        );
+        Get.toNamed(Routes.OTP, arguments: {'email': data['email']});
       } else {
-        // --- LOGIN GAGAL (Email/Password salah) ---
-        Get.snackbar(
+        // --- LOGIN GAGAL ---
+        _showModernSnackbar(
           "Gagal Masuk",
           data['message'] ?? "Terjadi kesalahan",
-          backgroundColor: Colors.redAccent,
-          colorText: Colors.white,
-          snackPosition: SnackPosition.TOP,
+          Colors.redAccent,
+          Icons.error_outline_rounded,
         );
       }
     } catch (e) {
       print("Error Login: $e");
-      Get.snackbar(
+      _showModernSnackbar(
         "Koneksi Error",
         "Tidak dapat terhubung ke server. Pastikan internet menyala dan server aktif.",
-        backgroundColor: Colors.red,
-        colorText: Colors.white,
-        snackPosition: SnackPosition.TOP,
+        Colors.red,
+        Icons.wifi_off_rounded,
       );
     } finally {
-      // Matikan animasi loading
       isLoading.value = false;
     }
   }
 
-  // Fungsi placeholder untuk tombol Google
-  void loginWithGoogle() {
+  // --- HELPER UNTUK MODERN SNACKBAR ---
+  void _showModernSnackbar(String title, String message, Color color, IconData icon) {
     Get.snackbar(
-      "Info",
-      "Fitur Login dengan Google sedang dalam tahap pengembangan.",
-      backgroundColor: Colors.blueAccent,
-      colorText: Colors.white,
+      title,
+      message,
+      backgroundColor: Colors.white,
+      colorText: color,
+      icon: Icon(icon, color: color, size: 28),
+      shouldIconPulse: true,
+      margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+      borderRadius: 20,
+      boxShadows: [
+        BoxShadow(
+          color: color.withOpacity(0.15),
+          blurRadius: 20,
+          spreadRadius: 2,
+          offset: const Offset(0, 5),
+        )
+      ],
       snackPosition: SnackPosition.TOP,
+      borderWidth: 1.5,
+      borderColor: color.withOpacity(0.2),
+      duration: const Duration(seconds: 3),
+      animationDuration: const Duration(milliseconds: 500),
+      isDismissible: true,
+      forwardAnimationCurve: Curves.easeOutBack,
     );
   }
 

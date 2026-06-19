@@ -1,4 +1,5 @@
 abstract class Routes {
+  static const SPLASH = '/splash';
   static const LOGIN = '/login';
   static const HOME = '/home';
   static const REGISTER = '/register';
@@ -8,8 +9,12 @@ abstract class Routes {
   static const LETTER_SELECTION = '/letter-selection';
   static const WRITING_EXAM = '/writing-exam';
   static const WRITING_EXAM_CATEGORY = '/writing-exam-category';
+  static const WORD_SELECTION = '/word-selection';
+  static const WORD_PRACTICE = '/word-practice';
   static const SPELLING_PRACTICE = '/spelling-practice';
   static const SPELLING_EXAM = '/spelling-exam';
   static const SPELLING_CATEGORY = '/spelling-category';
   static const SPELLING_EXAM_CATEGORY = '/spelling-exam-category';
+  static const RAPORT = '/raport';
+  static const OTP = '/otp';
 }

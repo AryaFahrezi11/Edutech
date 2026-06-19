@@ -1,0 +1,211 @@
+import 'dart:ui';
+import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:get/get.dart';
+import 'package:path_drawing/path_drawing.dart';
+import '../data/letter_paths.dart';
+
+class LetterData {
+  final String letter;
+  final Path fullPath;
+  final List<PathMetric> metrics;
+  
+  int currentStrokeIndex = 0;
+  double currentStrokeProgress = 0.0;
+  List<Path> completedPaths = [];
+
+  LetterData({
+    required this.letter,
+    required this.fullPath,
+    required this.metrics,
+  });
+}
+
+class WordPracticeController extends GetxController {
+  late String word;
+  
+  var currentLetterIndex = 0.obs;
+  var lettersData = <LetterData>[].obs;
+
+  @override
+  void onInit() {
+    super.onInit();
+    // Kunci layar ke mode Landscape
+    SystemChrome.setPreferredOrientations([
+      DeviceOrientation.landscapeRight,
+      DeviceOrientation.landscapeLeft,
+    ]);
+    
+    word = Get.arguments?['word'] ?? 'BOLA';
+    _initLetters();
+  }
+
+  void _initLetters() {
+    List<LetterData> tempData = [];
+    for (int i = 0; i < word.length; i++) {
+      String char = word[i].toUpperCase();
+      final pathStr = LetterPaths.uppercasePaths[char] ?? '';
+      Path path = pathStr.isNotEmpty ? parseSvgPathData(pathStr) : Path();
+      List<PathMetric> metrics = path.computeMetrics().toList();
+      
+      tempData.add(LetterData(letter: char, fullPath: path, metrics: metrics));
+    }
+    lettersData.value = tempData;
+    currentLetterIndex.value = 0;
+  }
+
+  void onPanUpdate(DragUpdateDetails details, int letterIndex) {
+    if (letterIndex != currentLetterIndex.value) return; // Hanya bisa menggambar huruf yang aktif
+    
+    final data = lettersData[letterIndex];
+    if (data.currentStrokeIndex >= data.metrics.length) return;
+    
+    final metric = data.metrics[data.currentStrokeIndex];
+    final touchPosition = details.localPosition;
+    
+    const double snapRadius = 60.0; 
+    
+    double targetLength = (data.currentStrokeProgress * metric.length) + 15.0; 
+    if (targetLength > metric.length) targetLength = metric.length;
+    
+    final tangent = metric.getTangentForOffset(targetLength);
+    if (tangent != null) {
+      final distance = (tangent.position - touchPosition).distance;
+      if (distance < snapRadius) {
+        data.currentStrokeProgress = targetLength / metric.length;
+        
+        if (data.currentStrokeProgress >= 0.98) {
+          _completeCurrentStroke(data, metric, letterIndex);
+        }
+        
+        // Memaksa update UI karena kita mengubah properti dalam object
+        lettersData.refresh();
+      }
+    }
+  }
+
+  void _completeCurrentStroke(LetterData data, PathMetric metric, int letterIndex) {
+    data.completedPaths.add(metric.extractPath(0, metric.length));
+    data.currentStrokeIndex++;
+    data.currentStrokeProgress = 0.0;
+    
+    // Jika seluruh huruf selesai
+    if (data.currentStrokeIndex >= data.metrics.length) {
+      if (currentLetterIndex.value < lettersData.length - 1) {
+        // Lanjut ke huruf berikutnya
+        currentLetterIndex.value++;
+      } else {
+        // Seluruh kata selesai
+        checkGoresanAudit();
+      }
+    }
+  }
+
+  void onPanEnd(int letterIndex) {
+    // Kosong, bisa diisi logika saat jari diangkat
+  }
+
+  void resetCanvas() {
+    _initLetters();
+  }
+
+  void checkGoresanAudit() {
+    Get.dialog(
+      Dialog(
+        backgroundColor: Colors.transparent,
+        child: Container(
+          padding: const EdgeInsets.all(24),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(32),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.2),
+                blurRadius: 20,
+                spreadRadius: 5,
+              )
+            ],
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  _buildStar(delayedBy: 0),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 10).copyWith(bottom: 20),
+                    child: _buildStar(delayedBy: 200, size: 70),
+                  ),
+                  _buildStar(delayedBy: 400),
+                ],
+              ),
+              const SizedBox(height: 16),
+              const Text(
+                "Luar Biasa! 🎉",
+                style: TextStyle(
+                  fontSize: 28,
+                  fontWeight: FontWeight.w900,
+                  color: Color(0xFF1CB0F6),
+                ),
+              ),
+              const SizedBox(height: 8),
+              Text(
+                "Kamu berhasil menulis kata '$word'!",
+                textAlign: TextAlign.center,
+                style: const TextStyle(fontSize: 16, color: Colors.black54),
+              ),
+              const SizedBox(height: 24),
+              SizedBox(
+                width: double.infinity,
+                height: 50,
+                child: ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xFF1CB0F6),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(16),
+                    ),
+                    elevation: 5,
+                  ),
+                  onPressed: () {
+                    Get.back(); // Tutup popup
+                    Get.back(); // Kembali ke pemilihan kata
+                  },
+                  child: const Text(
+                    "Selesai",
+                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.w900, color: Colors.white),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+      barrierDismissible: false,
+    );
+  }
+
+  Widget _buildStar({required int delayedBy, double size = 50}) {
+    return TweenAnimationBuilder<double>(
+      tween: Tween(begin: 0, end: 1),
+      duration: const Duration(milliseconds: 600),
+      curve: Curves.elasticOut,
+      builder: (context, value, child) {
+        return Transform.scale(
+          scale: value,
+          child: Icon(Icons.star_rounded, color: const Color(0xFFFFD700), size: size),
+        );
+      },
+    );
+  }
+
+  @override
+  void onClose() {
+    // Kembalikan ke mode Portrait saat keluar
+    SystemChrome.setPreferredOrientations([
+      DeviceOrientation.portraitUp,
+      DeviceOrientation.portraitDown,
+    ]);
+    super.onClose();
+  }
+}

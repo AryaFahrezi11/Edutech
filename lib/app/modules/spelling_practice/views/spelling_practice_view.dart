@@ -16,7 +16,7 @@ class SpellingPracticeView extends GetView<SpellingPracticeController> {
 
     if (type == 'word') {
       return Scaffold(
-        backgroundColor: const Color(0xFFFDF6EC),
+        backgroundColor: const Color(0xFFF7F7F7),
 
         body: SafeArea(
           child: Obx(() {
@@ -90,18 +90,9 @@ class SpellingPracticeView extends GetView<SpellingPracticeController> {
                                 final part = spellParts[index].trim();
 
                                 return GestureDetector(
-                                  onTap: () {
-                                    Get.snackbar(
-                                      "🔊 Ejaan",
-                                      "Suara $part diputar",
-
-                                      snackPosition: SnackPosition.BOTTOM,
-
-                                      backgroundColor: Colors.orange,
-
-                                      colorText: Colors.white,
-                                    );
-                                  },
+                                    onTap: () {
+                                      controller.speakSpell(part);
+                                    },
 
                                   child: AnimatedContainer(
                                     duration: const Duration(milliseconds: 250),
@@ -161,39 +152,97 @@ class SpellingPracticeView extends GetView<SpellingPracticeController> {
                               }),
                             ),
 
-                            const SizedBox(height: 45),
+                            const SizedBox(height: 30),
 
                             // =================================================
-                            // BACA KATA
+                            // TOMBOL DENGAR EJAAN LENGKAP
                             // =================================================
-                            SizedBox(
+                            Obx(() => SizedBox(
                               width: double.infinity,
-                              height: 58,
-
+                              height: 60,
                               child: ElevatedButton.icon(
-                                onPressed: controller.speakWord,
-
-                                icon: const Icon(Icons.record_voice_over),
-
-                                label: const Text(
-                                  "BACA KATA",
-                                  style: TextStyle(
-                                    fontWeight: FontWeight.bold,
-
-                                    fontSize: 16,
+                                onPressed: controller.isSpelling.value
+                                    ? null
+                                    : controller.speakFullSpelling,
+                                icon: controller.isSpelling.value
+                                    ? const SizedBox(
+                                        width: 24,
+                                        height: 24,
+                                        child: CircularProgressIndicator(
+                                          strokeWidth: 3,
+                                          color: Colors.white,
+                                        ),
+                                      )
+                                    : const Icon(
+                                        Icons.record_voice_over_rounded,
+                                        size: 28,
+                                      ),
+                                label: Text(
+                                  controller.isSpelling.value
+                                      ? "SEDANG MENGEJA..."
+                                      : "🔊 DENGAR EJAAN",
+                                  style: const TextStyle(
+                                    fontWeight: FontWeight.w900,
+                                    fontSize: 17,
+                                    letterSpacing: 1,
                                   ),
                                 ),
-
                                 style: ElevatedButton.styleFrom(
-                                  backgroundColor: Colors.deepOrange,
-
+                                  backgroundColor: controller.isSpelling.value
+                                      ? Colors.grey
+                                      : const Color(0xFF4CAF50),
                                   foregroundColor: Colors.white,
-
                                   shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(18),
+                                    borderRadius: BorderRadius.circular(20),
                                   ),
+                                  elevation: controller.isSpelling.value ? 0 : 6,
+                                  shadowColor: Colors.green.withOpacity(0.4),
                                 ),
                               ),
+                            )),
+
+                            const SizedBox(height: 20),
+
+                            // =================================================
+                            // BACA KATA & LAFALKAN
+                            // =================================================
+                            Row(
+                              children: [
+                                Expanded(
+                                  child: SizedBox(
+                                    height: 58,
+                                    child: ElevatedButton.icon(
+                                      onPressed: controller.speakWord,
+                                      icon: const Icon(Icons.volume_up_rounded, size: 28),
+                                      label: const Text("DENGAR", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+                                      style: ElevatedButton.styleFrom(
+                                        backgroundColor: Colors.deepOrange,
+                                        foregroundColor: Colors.white,
+                                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                                const SizedBox(width: 12),
+                                Expanded(
+                                  child: Obx(() => SizedBox(
+                                    height: 58,
+                                    child: ElevatedButton.icon(
+                                      onPressed: controller.listen,
+                                      icon: controller.isListening.value 
+                                        ? const Icon(Icons.mic_rounded, size: 28)
+                                        : const Icon(Icons.mic_none_rounded, size: 28),
+                                      label: const Text("LAFALKAN", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+                                      style: ElevatedButton.styleFrom(
+                                        backgroundColor: controller.isListening.value ? Colors.red : const Color(0xFF1CB0F6),
+                                        foregroundColor: Colors.white,
+                                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
+                                        elevation: controller.isListening.value ? 10 : 2,
+                                      ),
+                                    ),
+                                  )),
+                                ),
+                              ],
                             ),
 
                             const SizedBox(height: 38),
@@ -254,7 +303,7 @@ class SpellingPracticeView extends GetView<SpellingPracticeController> {
     final letters = controller.letters;
 
     return Scaffold(
-      backgroundColor: const Color(0xFFFDF6EC),
+      backgroundColor: const Color(0xFFF7F7F7),
 
       body: SafeArea(
         child: Obx(() {
@@ -302,7 +351,7 @@ class SpellingPracticeView extends GetView<SpellingPracticeController> {
 
                             decoration: BoxDecoration(
                               gradient: const LinearGradient(
-                                colors: [Color(0xFFFF9800), Color(0xFFFFC107)],
+                                colors: [Color(0xFF1CB0F6), Color(0xFF1899D6)],
                               ),
 
                               borderRadius: BorderRadius.circular(24),
@@ -384,23 +433,43 @@ class SpellingPracticeView extends GetView<SpellingPracticeController> {
 
                           const Spacer(),
 
-                          SizedBox(
-                            width: double.infinity,
-                            height: 56,
-
-                            child: ElevatedButton.icon(
-                              onPressed: controller.playSound,
-
-                              icon: const Icon(Icons.volume_up),
-
-                              label: const Text("DENGAR HURUF"),
-
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: Colors.orange,
-
-                                foregroundColor: Colors.white,
+                          Row(
+                            children: [
+                              Expanded(
+                                child: SizedBox(
+                                  height: 56,
+                                  child: ElevatedButton.icon(
+                                    onPressed: controller.playSound,
+                                    icon: const Icon(Icons.volume_up_rounded, size: 26),
+                                    label: const Text("DENGAR", style: TextStyle(fontWeight: FontWeight.bold)),
+                                    style: ElevatedButton.styleFrom(
+                                      backgroundColor: Colors.orange,
+                                      foregroundColor: Colors.white,
+                                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
+                                    ),
+                                  ),
+                                ),
                               ),
-                            ),
+                              const SizedBox(width: 12),
+                              Expanded(
+                                child: Obx(() => SizedBox(
+                                  height: 56,
+                                  child: ElevatedButton.icon(
+                                    onPressed: controller.listen,
+                                    icon: controller.isListening.value 
+                                        ? const Icon(Icons.mic_rounded, size: 26)
+                                        : const Icon(Icons.mic_none_rounded, size: 26),
+                                    label: const Text("LAFALKAN", style: TextStyle(fontWeight: FontWeight.bold)),
+                                    style: ElevatedButton.styleFrom(
+                                      backgroundColor: controller.isListening.value ? Colors.red : const Color(0xFF1CB0F6),
+                                      foregroundColor: Colors.white,
+                                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
+                                      elevation: controller.isListening.value ? 10 : 2,
+                                    ),
+                                  ),
+                                )),
+                              ),
+                            ],
                           ),
 
                           const SizedBox(height: 20),
@@ -454,7 +523,7 @@ class SpellingPracticeView extends GetView<SpellingPracticeController> {
 
       decoration: const BoxDecoration(
         gradient: LinearGradient(
-          colors: [Color(0xFFFF9800), Color(0xFFFFC107)],
+          colors: [Color(0xFF1CB0F6), Color(0xFF1899D6)],
         ),
 
         borderRadius: BorderRadius.vertical(bottom: Radius.circular(30)),
