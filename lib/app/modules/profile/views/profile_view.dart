@@ -225,7 +225,7 @@ class ProfileView extends GetView {
           ),
           const SizedBox(height: 22),
           const Text(
-            'Adit Pratama',
+            'Gilang',
             style: TextStyle(
               fontSize: 24,
               fontWeight: FontWeight.w900,
