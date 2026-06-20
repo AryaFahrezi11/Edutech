@@ -3,6 +3,11 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:path_drawing/path_drawing.dart';
 import '../data/letter_paths.dart';
+import '../../../services/progress_service.dart';
+import '../../../services/point_service.dart';
+import '../../../services/tts_service.dart';
+import '../../../services/sfx_service.dart';
+import '../../../widgets/point_animation.dart';
 
 class WritingPracticeController extends GetxController {
   var selectedLetter = 'A'.obs;
@@ -24,6 +29,13 @@ class WritingPracticeController extends GetxController {
   void onInit() {
     super.onInit();
     _loadCurrentLetterPath();
+    _announceStart();
+  }
+
+  void _announceStart() async {
+    final tts = Get.find<TtsService>();
+    await tts.speakAndWait("Sekarang kita akan belajar menulis huruf");
+    await tts.speak("Huruf ${selectedLetter.value}");
   }
 
   void _loadCurrentLetterPath() {
@@ -42,14 +54,8 @@ class WritingPracticeController extends GetxController {
     final metric = currentMetrics[currentStrokeIndex.value];
     final touchPosition = details.localPosition;
     
-    // Prediksi titik terdekat di kurva (sederhana)
-    // Karena kita tidak bisa reverse-lookup panjang persis dari posisi X/Y dengan mudah di Flutter,
-    // kita gunakan pendekatan: apakah posisi jari cukup dekat dengan ujung goresan (progress saat ini + threshold)?
-    
-    // Jarak maksimal jari boleh meleset dari target (radius)
     const double snapRadius = 60.0; 
     
-    // Cari titik di sepanjang path yang sedikiiiit di depan posisi progress saat ini
     double targetLength = (currentStrokeProgress.value * metric.length) + 15.0; 
     if (targetLength > metric.length) targetLength = metric.length;
     
@@ -57,10 +63,8 @@ class WritingPracticeController extends GetxController {
     if (tangent != null) {
       final distance = (tangent.position - touchPosition).distance;
       if (distance < snapRadius) {
-        // Jika jari dekat dengan target, majukan progress!
         currentStrokeProgress.value = targetLength / metric.length;
         
-        // Jika sudah mencapai ujung (99% atau 100%)
         if (currentStrokeProgress.value >= 0.98) {
           _completeCurrentStroke(metric);
         }
@@ -69,9 +73,7 @@ class WritingPracticeController extends GetxController {
   }
 
   void _completeCurrentStroke(PathMetric metric) {
-    // Simpan garis yang sudah penuh
     completedPaths.add(metric.extractPath(0, metric.length));
-    
     currentStrokeIndex.value++;
     currentStrokeProgress.value = 0.0;
     
@@ -81,8 +83,6 @@ class WritingPracticeController extends GetxController {
   }
 
   void onPanEnd() {
-    // Opsional: Jika kita mau mereset progress saat jari diangkat sebelum selesai
-    // Tapi biasanya untuk anak, kita biarkan saja mereka melanjutkannya.
   }
 
   void resetCanvas() {
@@ -94,6 +94,7 @@ class WritingPracticeController extends GetxController {
     if (currentIndex < alphabet.length - 1) {
       selectedLetter.value = alphabet[currentIndex + 1];
       _loadCurrentLetterPath();
+      Get.find<TtsService>().speak("Huruf ${selectedLetter.value}");
     }
   }
 
@@ -102,10 +103,22 @@ class WritingPracticeController extends GetxController {
     if (currentIndex > 0) {
       selectedLetter.value = alphabet[currentIndex - 1];
       _loadCurrentLetterPath();
+      Get.find<TtsService>().speak("Huruf ${selectedLetter.value}");
     }
   }
 
   void checkGoresanAudit() {
+    // Advance progress
+    int currentIndex = alphabet.indexOf(selectedLetter.value);
+    Get.find<ProgressService>().completeWritingLetter(currentIndex);
+
+    // Hitung poin
+    int earned = Get.find<PointService>().completeActivity('write_letter_${selectedLetter.value}');
+
+    // Ucapkan selamat dan mainkan SFX!
+    Get.find<SfxService>().playSuccess();
+    Get.find<TtsService>().speak("Hebat! Kamu berhasil menulis huruf ${selectedLetter.value} dengan sangat baik!");
+
     // Tampilkan popup gamifikasi modern dengan 3 bintang
     Get.dialog(
       Dialog(
@@ -166,8 +179,11 @@ class WritingPracticeController extends GetxController {
                     elevation: 5,
                   ),
                   onPressed: () {
-                    Get.back(); // Tutup popup
-                    nextLetter(); // Langsung ke huruf berikutnya
+                    Get.back(); // Tutup popup bintang
+                    // Tampilkan animasi koin, setelah selesai baru nextLetter
+                    PointAnimation.showPointAnimation(earned, onComplete: () {
+                      nextLetter();
+                    });
                   },
                   child: const Text(
                     "Lanjut Belajar",

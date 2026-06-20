@@ -3,12 +3,23 @@ import 'package:get/get.dart';
 import 'app/routes/app_pages.dart';
 import 'app/routes/app_routes.dart';
 import 'app/services/bgm_service.dart';
+import 'app/services/progress_service.dart';
+import 'app/services/point_service.dart';
+import 'app/services/tts_service.dart';
+import 'app/services/sfx_service.dart';
 
-void main() {
+
+void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  // Inisialisasi Service Background Music secara global
-  Get.put(BackgroundMusicService());
   
+  // Initialize services
+  Get.put(ProgressService());
+  Get.put(SfxService());
+  await Get.putAsync(() => PointService().init());
+  await Get.putAsync(() => TtsService().init());
+  Get.put(BackgroundMusicService());
+
+
   runApp(const MyApp());
 }
 
@@ -22,6 +33,17 @@ class MyApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       initialRoute: Routes.SPLASH,
       getPages: AppPages.pages,
+      routingCallback: (routing) {
+        if (routing != null) {
+          final bgm = Get.find<BackgroundMusicService>();
+          // Play music only on LOGIN and HOME
+          if (routing.current == Routes.HOME || routing.current == Routes.LOGIN) {
+            bgm.playBgm();
+          } else {
+            bgm.pauseBgm();
+          }
+        }
+      },
       theme: ThemeData(
         primaryColor: const Color(0xFF1CB0F6),
         colorScheme: ColorScheme.fromSeed(

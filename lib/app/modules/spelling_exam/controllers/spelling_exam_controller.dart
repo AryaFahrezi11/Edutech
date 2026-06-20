@@ -1,6 +1,8 @@
 import 'dart:async';
 import 'package:get/get.dart';
 import 'package:speech_to_text/speech_to_text.dart';
+import '../../../services/tts_service.dart';
+import '../../../services/sfx_service.dart';
 
 enum ExamState { idle, countdown, listening, checking, result }
 
@@ -63,6 +65,17 @@ class SpellingExamController extends GetxController {
         {'answer': 'D'},
         {'answer': 'E'},
       ];
+    }
+    
+    _announceStart();
+  }
+
+  void _announceStart() async {
+    final tts = Get.find<TtsService>();
+    if (category == 'word') {
+      await tts.speak("Sekarang kita akan memulai ujian mengeja kata");
+    } else {
+      await tts.speak("Sekarang kita akan memulai ujian mengeja huruf");
     }
   }
 
@@ -141,13 +154,23 @@ class SpellingExamController extends GetxController {
 
     if (userAnswer.contains(correctAnswer)) {
       isCorrect.value = true;
-
       score.value += 20;
+      Get.find<SfxService>().playSuccess();
+      Get.find<TtsService>().speak("Pintar! Jawabanmu benar!");
     } else {
       isCorrect.value = false;
+      Get.find<SfxService>().playWrong();
+      Get.find<TtsService>().speak("Belum tepat. Tidak apa-apa, ayo coba lagi nanti!");
     }
 
     examState.value = ExamState.result;
+    
+    // Jika soal terakhir, ucapkan selesai
+    if (isLastQuestion) {
+      Future.delayed(const Duration(seconds: 3), () {
+        Get.find<TtsService>().speak("Hore! Ujian selesai! Skor kamu ${score.value}");
+      });
+    }
   }
 
   // NEXT
