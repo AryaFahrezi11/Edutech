@@ -106,10 +106,10 @@ class WordPracticeView extends GetView<WordPracticeController> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Obx(() => Text(
+                Text(
                   "🖍️ Menulis Kata: ${controller.word}", 
                   style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w900, color: Colors.white),
-                )),
+                ),
                 const SizedBox(height: 2),
                 const Text(
                   "Tebalkan huruf secara berurutan!", 

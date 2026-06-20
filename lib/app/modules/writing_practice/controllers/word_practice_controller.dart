@@ -4,6 +4,11 @@ import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:path_drawing/path_drawing.dart';
 import '../data/letter_paths.dart';
+import '../../../services/progress_service.dart';
+import '../../../services/point_service.dart';
+import '../../../services/tts_service.dart';
+import '../../../services/sfx_service.dart';
+import '../../../widgets/point_animation.dart';
 
 class LetterData {
   final String letter;
@@ -27,17 +32,26 @@ class WordPracticeController extends GetxController {
   var currentLetterIndex = 0.obs;
   var lettersData = <LetterData>[].obs;
 
+  late int wordIndex;
+
   @override
   void onInit() {
     super.onInit();
-    // Kunci layar ke mode Landscape
     SystemChrome.setPreferredOrientations([
       DeviceOrientation.landscapeRight,
       DeviceOrientation.landscapeLeft,
     ]);
     
     word = Get.arguments?['word'] ?? 'BOLA';
+    wordIndex = Get.arguments?['index'] ?? 0;
     _initLetters();
+    _announceStart();
+  }
+
+  void _announceStart() async {
+    final tts = Get.find<TtsService>();
+    await tts.speakAndWait("Sekarang kita akan belajar menulis kata");
+    await tts.speak("Kata $word");
   }
 
   void _initLetters() {
@@ -110,6 +124,15 @@ class WordPracticeController extends GetxController {
   }
 
   void checkGoresanAudit() {
+    // Advance progress
+    Get.find<ProgressService>().completeWritingWord(wordIndex);
+
+    // Hitung Poin
+    int earned = Get.find<PointService>().completeActivity('write_word_$word', isWord: true);
+
+    Get.find<SfxService>().playSuccess();
+    Get.find<TtsService>().speak("Luar biasa! Kamu berhasil menulis kata $word!");
+
     Get.dialog(
       Dialog(
         backgroundColor: Colors.transparent,
@@ -168,8 +191,10 @@ class WordPracticeController extends GetxController {
                     elevation: 5,
                   ),
                   onPressed: () {
-                    Get.back(); // Tutup popup
-                    Get.back(); // Kembali ke pemilihan kata
+                    Get.back(); // Tutup popup bintang
+                    PointAnimation.showPointAnimation(earned, onComplete: () {
+                      Get.back(); // Kembali ke pemilihan kata
+                    });
                   },
                   child: const Text(
                     "Selesai",

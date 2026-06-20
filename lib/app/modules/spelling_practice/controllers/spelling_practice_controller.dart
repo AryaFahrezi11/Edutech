@@ -3,6 +3,12 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:flutter_tts/flutter_tts.dart';
 import 'package:speech_to_text/speech_to_text.dart' as stt;
+import '../../../services/progress_service.dart';
+import '../../../services/point_service.dart';
+import '../../../services/tts_service.dart';
+import '../../../services/sfx_service.dart';
+import '../../../widgets/point_animation.dart';
+
 
 class SpellingPracticeController extends GetxController {
   final currentIndex = 0.obs;
@@ -63,6 +69,18 @@ class SpellingPracticeController extends GetxController {
     
     _initTTS();
     _initSTT();
+    _announceStart();
+  }
+
+  void _announceStart() async {
+    final tts = Get.find<TtsService>();
+    if (isLetterMode) {
+      await tts.speakAndWait("Sekarang kita akan belajar mengeja huruf");
+      await tts.speak("Huruf ${currentItem['upper']}");
+    } else {
+      await tts.speakAndWait("Sekarang kita akan belajar mengeja kata");
+      await tts.speak("Kata ${currentWord['word']}");
+    }
   }
 
   void _initTTS() async {
@@ -98,16 +116,28 @@ class SpellingPracticeController extends GetxController {
   Map<String, dynamic> get currentWord => words[currentIndex.value];
 
   void nextItem() {
-    if (currentIndex.value < totalItem - 1) currentIndex.value++;
+    if (currentIndex.value < totalItem - 1) {
+      currentIndex.value++;
+      Get.find<TtsService>().speak("Huruf ${currentItem['upper']}");
+    }
   }
   void nextWord() {
-    if (currentIndex.value < words.length - 1) currentIndex.value++;
+    if (currentIndex.value < words.length - 1) {
+      currentIndex.value++;
+      Get.find<TtsService>().speak("Kata ${currentWord['word']}");
+    }
   }
   void previousItem() {
-    if (currentIndex.value > 0) currentIndex.value--;
+    if (currentIndex.value > 0) {
+      currentIndex.value--;
+      Get.find<TtsService>().speak("Huruf ${currentItem['upper']}");
+    }
   }
   void previousWord() {
-    if (currentIndex.value > 0) currentIndex.value--;
+    if (currentIndex.value > 0) {
+      currentIndex.value--;
+      Get.find<TtsService>().speak("Kata ${currentWord['word']}");
+    }
   }
 
   // =========================================================
@@ -209,7 +239,29 @@ class SpellingPracticeController extends GetxController {
   }
 
   void _showSuccessDialog() {
-    flutterTts.speak("Pintar sekali!");
+    // Advance progress
+    if (isLetterMode) {
+      Get.find<ProgressService>().completeSpellingLetter(currentIndex.value);
+    } else {
+      Get.find<ProgressService>().completeSpellingWord(currentIndex.value);
+    }
+
+    final pointService = Get.find<PointService>();
+    bool isCombo = pointService.incrementCombo();
+    
+    String itemId = isLetterMode ? 'spell_letter_${currentItem['upper']}' : 'spell_word_${currentWord['word']}';
+    int earned = pointService.completeActivity(itemId, isWord: isWordMode);
+    
+    if (isCombo) earned += 30; // Termasuk bonus combo untuk ditampilkan di animasi
+
+    if (isCombo) {
+      Get.find<SfxService>().playSuccess();
+      Get.find<TtsService>().speak("Wah, luar biasa! Kamu benar 5 kali berturut-turut! Hebat banget!");
+    } else {
+      Get.find<SfxService>().playSuccess();
+      Get.find<TtsService>().speak("Yey! Pintar sekali, pelafalanmu sudah pas!");
+    }
+    
     Get.defaultDialog(
       title: "🎉 LUAR BIASA! 🎉",
       titleStyle: const TextStyle(fontWeight: FontWeight.w900, color: Color(0xFF1CB0F6), fontSize: 24),
@@ -224,7 +276,19 @@ class SpellingPracticeController extends GetxController {
         style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFF1CB0F6), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20))),
         onPressed: () {
           Get.back();
-          if (isLetterMode) nextItem(); else nextWord();
+          PointAnimation.showPointAnimation(earned, onComplete: () {
+            if (isCombo) {
+              Get.snackbar(
+                "COMBO MANTAP! 🔥",
+                "5 benar berturut-turut! +30 Poin Bonus!",
+                backgroundColor: Colors.orange,
+                colorText: Colors.white,
+                snackPosition: SnackPosition.TOP,
+                margin: const EdgeInsets.all(16),
+              );
+            }
+            if (isLetterMode) nextItem(); else nextWord();
+          });
         },
         child: const Padding(padding: EdgeInsets.symmetric(horizontal: 20, vertical: 10), child: Text("LANJUT", style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold))),
       ),
@@ -232,7 +296,9 @@ class SpellingPracticeController extends GetxController {
   }
 
   void _showRetryDialog(String spoken) {
-    flutterTts.speak("Hampir benar, ayo coba lagi!");
+    Get.find<PointService>().resetCombo(); // Reset combo jika salah
+    Get.find<SfxService>().playWrong();
+    Get.find<TtsService>().speak("Aduh, hampir benar. Coba lafalkan lagi lebih keras ya!");
     Get.defaultDialog(
       title: "Semangat! 💪",
       titleStyle: const TextStyle(fontWeight: FontWeight.w900, color: Colors.orange, fontSize: 24),

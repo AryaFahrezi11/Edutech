@@ -9,6 +9,8 @@ import 'widgets/mission_node_widget.dart';
 import 'widgets/mission_path_painter.dart';
 import 'widgets/stats_bar_widget.dart';
 
+import '../../services/point_service.dart';
+
 class HomeView extends GetView<HomeController> {
   const HomeView({Key? key}) : super(key: key);
 
@@ -44,9 +46,7 @@ class HomeView extends GetView<HomeController> {
           const SizedBox(height: 8),
 
           // Mission Map (scrollable)
-          Expanded(
-            child: _buildMissionMap(),
-          ),
+          Expanded(child: _buildMissionMap()),
         ],
       ),
     );
@@ -73,7 +73,9 @@ class HomeView extends GetView<HomeController> {
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
           ),
-          borderRadius: const BorderRadius.vertical(bottom: Radius.circular(28)),
+          borderRadius: const BorderRadius.vertical(
+            bottom: Radius.circular(28),
+          ),
           boxShadow: [
             BoxShadow(
               color: const Color(0xFF1CB0F6).withOpacity(0.3),
@@ -118,41 +120,52 @@ class HomeView extends GetView<HomeController> {
                     ),
                   ),
                   const SizedBox(height: 2),
-                  Obx(() => Text(
-                    "Misi ${controller.completedMissions.length}/${controller.missionNodes.length} selesai",
-                    style: TextStyle(
-                      fontSize: 12,
-                      fontWeight: FontWeight.w700,
-                      color: Colors.white.withOpacity(0.85),
-                    ),
-                  )),
-                ],
-              ),
-            ),
-            // XP Badge
-            Obx(() => Container(
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-              decoration: BoxDecoration(
-                color: Colors.white.withOpacity(0.2),
-                borderRadius: BorderRadius.circular(16),
-                border: Border.all(color: Colors.white.withOpacity(0.3), width: 1),
-              ),
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  const Text("⭐", style: TextStyle(fontSize: 16)),
-                  const SizedBox(width: 4),
-                  Text(
-                    "${controller.totalXP.value}",
-                    style: const TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w900,
-                      color: Colors.white,
+                  Obx(
+                    () => Text(
+                      "Misi ${controller.completedMissions.length}/${controller.missionNodes.length} selesai",
+                      style: TextStyle(
+                        fontSize: 12,
+                        fontWeight: FontWeight.w700,
+                        color: Colors.white.withOpacity(0.85),
+                      ),
                     ),
                   ),
                 ],
               ),
-            )),
+            ),
+            // Coin Badge
+            Obx(() {
+              final points = Get.find<PointService>().totalPoints.value;
+              return Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 8,
+                ),
+                decoration: BoxDecoration(
+                  color: Colors.white.withOpacity(0.2),
+                  borderRadius: BorderRadius.circular(16),
+                  border: Border.all(
+                    color: Colors.white.withOpacity(0.3),
+                    width: 1,
+                  ),
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const Text("🪙", style: TextStyle(fontSize: 16)),
+                    const SizedBox(width: 4),
+                    Text(
+                      "$points",
+                      style: const TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w900,
+                        color: Colors.white,
+                      ),
+                    ),
+                  ],
+                ),
+              );
+            }),
           ],
         ),
       ),
@@ -185,7 +198,8 @@ class HomeView extends GetView<HomeController> {
 
     return Obx(() {
       // Force rebuild saat completedMissions berubah
-      final _ = controller.completedMissions.length +
+      final _ =
+          controller.completedMissions.length +
           controller.currentMissionIndex.value;
 
       return Stack(
@@ -230,14 +244,10 @@ class HomeView extends GetView<HomeController> {
                     // Posisi X zigzag
                     final screenWidth = Get.width;
                     final centerX = screenWidth / 2;
-                    final patterns = [
-                      -zigzagOffset,
-                      0.0,
-                      zigzagOffset,
-                      0.0,
-                    ];
+                    final patterns = [-zigzagOffset, 0.0, zigzagOffset, 0.0];
                     final xOffset = patterns[i % patterns.length];
-                    final xPos = centerX + xOffset - 50; // 50 = setengah lebar node
+                    final xPos =
+                        centerX + xOffset - 50; // 50 = setengah lebar node
 
                     return Positioned(
                       left: xPos,
@@ -259,10 +269,15 @@ class HomeView extends GetView<HomeController> {
                           width: 100,
                           child: MissionNodeWidget(
                             node: node,
-                            isCompleted: controller.isNodeCompleted(reversedIndex),
+                            isCompleted: controller.isNodeCompleted(
+                              reversedIndex,
+                            ),
                             isCurrent: controller.isCurrentNode(reversedIndex),
-                            isUnlocked: controller.isNodeUnlocked(reversedIndex),
-                            onTap: () => controller.navigateToNode(reversedIndex),
+                            isUnlocked: controller.isNodeUnlocked(
+                              reversedIndex,
+                            ),
+                            onTap: () =>
+                                controller.navigateToNode(reversedIndex),
                           ),
                         ),
                       ),
@@ -308,7 +323,8 @@ class HomeView extends GetView<HomeController> {
     for (int i = 0; i < nodeCount * 2; i++) {
       final yPos = random.nextDouble() * (nodeCount * nodeSpacing);
       final xPos = random.nextBool()
-          ? random.nextDouble() * 50 + 10  // kiri
+          ? random.nextDouble() * 50 +
+                10 // kiri
           : Get.width - random.nextDouble() * 50 - 40; // kanan
       final emoji = emojis[random.nextInt(emojis.length)];
       final size = 14.0 + random.nextDouble() * 10;
@@ -353,8 +369,14 @@ class HomeView extends GetView<HomeController> {
             elevation: 0,
             selectedItemColor: const Color(0xFF1CB0F6),
             unselectedItemColor: const Color(0xFFCBD5E1),
-            selectedLabelStyle: const TextStyle(fontWeight: FontWeight.w900, fontSize: 12),
-            unselectedLabelStyle: const TextStyle(fontWeight: FontWeight.w700, fontSize: 11),
+            selectedLabelStyle: const TextStyle(
+              fontWeight: FontWeight.w900,
+              fontSize: 12,
+            ),
+            unselectedLabelStyle: const TextStyle(
+              fontWeight: FontWeight.w700,
+              fontSize: 11,
+            ),
             items: const [
               BottomNavigationBarItem(
                 icon: Icon(Icons.map_rounded, size: 28),

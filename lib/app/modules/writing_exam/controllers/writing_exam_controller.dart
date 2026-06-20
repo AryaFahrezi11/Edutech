@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
+import '../../../services/tts_service.dart';
+import '../../../services/sfx_service.dart';
 
 enum ExamState { idle, countdown, drawing, checking, result }
 
@@ -57,14 +59,12 @@ class WritingExamController extends GetxController
       curve: Curves.elasticOut,
     );
 
-    // Baca kategori dari argumen navigasi
     if (Get.arguments != null) {
       final cat = Get.arguments['category'] as String? ?? 'capital';
       final title = Get.arguments['title'] as String? ?? 'Huruf Kapital';
       categoryTitle.value = title;
       questions = List.from(_questionBank[cat] ?? _questionBank['capital']!);
 
-      // Paksa landscape untuk kategori kata sederhana
       if (cat == 'word') {
         isLandscape.value = true;
         SystemChrome.setPreferredOrientations([
@@ -74,6 +74,17 @@ class WritingExamController extends GetxController
       }
     } else {
       questions = List.from(_questionBank['capital']!);
+    }
+    
+    _announceStart();
+  }
+
+  void _announceStart() async {
+    final tts = Get.find<TtsService>();
+    if (isLandscape.value) {
+      await tts.speak("Sekarang kita akan memulai ujian menulis kata");
+    } else {
+      await tts.speak("Sekarang kita akan memulai ujian menulis huruf");
     }
   }
 
@@ -156,6 +167,11 @@ class WritingExamController extends GetxController
     if (isAnswerCorrect) {
       score.value += 20;
       starsAnimController.forward(from: 0);
+      Get.find<SfxService>().playSuccess();
+      Get.find<TtsService>().speak("Wah, benar! Hebat sekali!");
+    } else {
+      Get.find<SfxService>().playWrong();
+      Get.find<TtsService>().speak("Aduh, masih kurang tepat. Tetap semangat ya!");
     }
 
     examState.value = ExamState.result;
@@ -173,6 +189,7 @@ class WritingExamController extends GetxController
   }
 
   void _showFinalResult() {
+    Get.find<TtsService>().speak("Hore! Ujian selesai! Kamu mendapat nilai ${score.value}");
     Get.dialog(
       _FinalResultDialog(score: score.value, total: questions.length * 20),
       barrierDismissible: false,

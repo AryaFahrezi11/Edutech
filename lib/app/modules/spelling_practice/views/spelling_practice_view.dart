@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 import '../controllers/spelling_practice_controller.dart';
+import '../../../services/progress_service.dart';
 
 class SpellingPracticeView extends GetView<SpellingPracticeController> {
   const SpellingPracticeView({super.key});
@@ -268,19 +269,30 @@ class SpellingPracticeView extends GetView<SpellingPracticeController> {
 
                                 const SizedBox(width: 12),
 
-                                Expanded(
-                                  child: ElevatedButton(
-                                    onPressed: controller.nextWord,
-
-                                    style: ElevatedButton.styleFrom(
-                                      backgroundColor: Colors.orange,
-
-                                      foregroundColor: Colors.white,
-                                    ),
-
-                                    child: const Text("Berikutnya ➡"),
+                                  Expanded(
+                                    child: Obx(() {
+                                      final progress = Get.find<ProgressService>().unlockedSpellingWord.value;
+                                      final isLocked = controller.currentIndex.value >= progress;
+                                      return ElevatedButton(
+                                        onPressed: isLocked ? () {
+                                          Get.snackbar(
+                                            "Terkunci 🔒", 
+                                            "Kamu harus lafalkan kata ini dengan benar dulu!",
+                                            snackPosition: SnackPosition.BOTTOM,
+                                            backgroundColor: Colors.orange,
+                                            colorText: Colors.white,
+                                            margin: const EdgeInsets.all(16),
+                                            borderRadius: 20,
+                                          );
+                                        } : controller.nextWord,
+                                        style: ElevatedButton.styleFrom(
+                                          backgroundColor: isLocked ? Colors.grey : Colors.orange,
+                                          foregroundColor: Colors.white,
+                                        ),
+                                        child: Text(isLocked ? "🔒 Terkunci" : "Berikutnya ➡"),
+                                      );
+                                    }),
                                   ),
-                                ),
                               ],
                             ),
                           ],
@@ -490,11 +502,28 @@ class SpellingPracticeView extends GetView<SpellingPracticeController> {
                               const SizedBox(width: 12),
 
                               Expanded(
-                                child: ElevatedButton(
-                                  onPressed: controller.nextItem,
-
-                                  child: const Text("Berikutnya ➡"),
-                                ),
+                                child: Obx(() {
+                                  final progress = Get.find<ProgressService>().unlockedSpellingLetter.value;
+                                  final isLocked = controller.currentIndex.value >= progress;
+                                  return ElevatedButton(
+                                    onPressed: isLocked ? () {
+                                      Get.snackbar(
+                                        "Terkunci 🔒", 
+                                        "Kamu harus lafalkan huruf ini dengan benar dulu!",
+                                        snackPosition: SnackPosition.BOTTOM,
+                                        backgroundColor: Colors.orange,
+                                        colorText: Colors.white,
+                                        margin: const EdgeInsets.all(16),
+                                        borderRadius: 20,
+                                      );
+                                    } : controller.nextItem,
+                                    style: ElevatedButton.styleFrom(
+                                      backgroundColor: isLocked ? Colors.grey : const Color(0xFF1CB0F6),
+                                      foregroundColor: Colors.white,
+                                    ),
+                                    child: Text(isLocked ? "🔒 Terkunci" : "Berikutnya ➡"),
+                                  );
+                                }),
                               ),
                             ],
                           ),
