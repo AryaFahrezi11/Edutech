@@ -1,6 +1,9 @@
 import 'dart:convert';
 import 'package:get/get.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:http/http.dart' as http;
+import '../../config/api_endpoints.dart';
+import 'log_service.dart';
 
 class PointService extends GetxService {
   var totalPoints = 0.obs;
@@ -57,13 +60,16 @@ class PointService extends GetxService {
       _prefs.setString('last_login_date', todayStr);
       _prefs.setInt('streak_days', streakDays.value);
 
-      // Berikan poin login (opsional bisa dipisah, tapi kita kasih aja 10 poin rutin)
+      // Berikan poin login
       addPoints(10);
+      Get.find<LogService>().addLog("Login Harian", "Rajin belajar setiap hari!", 10);
       
       if (streakDays.value >= 7) {
         addPoints(200); // Bonus 1 minggu
+        Get.find<LogService>().addLog("Bonus 7 Hari", "Luar biasa! 7 hari berturut-turut!", 200);
       } else if (streakDays.value >= 3) {
         addPoints(50); // Bonus 3 hari
+        Get.find<LogService>().addLog("Bonus 3 Hari", "Keren! 3 hari berturut-turut!", 50);
       }
     }
   }
@@ -72,13 +78,15 @@ class PointService extends GetxService {
     if (amount <= 0) return;
     totalPoints.value += amount;
     _prefs.setInt('total_points', totalPoints.value);
+    _syncToBackend();
   }
 
   bool incrementCombo() {
     currentCombo.value++;
     if (currentCombo.value == 5) {
       addPoints(30); // Bonus combo 5x benar berturut-turut
-      // Combo tidak direset, kalau ke-10 dapet lagi bisa saja, atau reset.
+      Get.find<LogService>().addLog("Bonus Combo", "Menjawab benar 5x berturut-turut tanpa salah!", 30);
+      
       // Kita reset saja setelah dapat bonus biar seru ngejar lagi
       currentCombo.value = 0; 
       return true;
@@ -117,6 +125,62 @@ class PointService extends GetxService {
     }
 
     addPoints(earned);
+    
+    // Kirim Log
+    String actionName = isExam ? "Ujian" : "Latihan";
+    String desc = "Berhasil menyelesaikan $actionName ${itemId.replaceAll('_', ' ')}";
+    if (isExam) {
+      desc += " dengan $stars Bintang!";
+    }
+    Get.find<LogService>().addLog(actionName, desc, earned);
+
     return earned;
+  }
+  
+  void fromJson(Map<String, dynamic> json) {
+    if (json['total_points'] != null) {
+      totalPoints.value = json['total_points'];
+      _prefs.setInt('total_points', totalPoints.value);
+    }
+    if (json['streak_days'] != null) {
+      streakDays.value = json['streak_days'];
+      _prefs.setInt('streak_days', streakDays.value);
+    }
+    if (json['last_login_date'] != null) {
+      _prefs.setString('last_login_date', json['last_login_date']);
+    }
+    if (json['completed_items'] != null && json['completed_items'] is List) {
+      List<String> items = (json['completed_items'] as List).map((e) => e.toString()).toList();
+      _completedItems = items.toSet();
+      _prefs.setStringList('completed_items', items);
+    }
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      "total_points": totalPoints.value,
+      "streak_days": streakDays.value,
+      "last_login_date": _prefs.getString('last_login_date'),
+      "completed_items": _completedItems.toList(),
+    };
+  }
+  
+  void _syncToBackend() async {
+    try {
+      String email = _prefs.getString('user_email') ?? "";
+      if (email.isEmpty) return; // Belum login
+
+      Map<String, dynamic> payload = toJson();
+      payload['email'] = email;
+      
+      final url = Uri.parse(ApiEndpoints.syncProgress);
+      await http.post(
+        url,
+        headers: {"Content-Type": "application/json"},
+        body: jsonEncode(payload),
+      );
+    } catch (e) {
+      print("Sync Point Error: $e");
+    }
   }
 }

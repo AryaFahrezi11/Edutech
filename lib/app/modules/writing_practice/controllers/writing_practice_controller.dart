@@ -28,6 +28,11 @@ class WritingPracticeController extends GetxController {
   @override
   void onInit() {
     super.onInit();
+    
+    if (Get.arguments != null && Get.arguments['letter'] != null) {
+      selectedLetter.value = Get.arguments['letter'];
+    }
+
     _loadCurrentLetterPath();
     _announceStart();
   }

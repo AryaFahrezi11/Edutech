@@ -66,6 +66,9 @@ class SpellingPracticeController extends GetxController {
     super.onInit();
     final args = Get.arguments ?? {};
     type = args['type'] ?? 'letter';
+    if (args['index'] != null) {
+      currentIndex.value = args['index'];
+    }
     
     _initTTS();
     _initSTT();

@@ -12,6 +12,14 @@ abstract class Routes {
   static const WORD_SELECTION = '/word-selection';
   static const WORD_PRACTICE = '/word-practice';
   static const SPELLING_PRACTICE = '/spelling-practice';
+  static const SPELLING_LETTER_SELECTION = '/spelling-letter-selection';
+  static const SPELLING_WORD_SELECTION = '/spelling-word-selection';
+  
+  // Object Hunt
+  static const OBJECT_HUNT_PRACTICE = '/object-hunt-practice';
+  static const OBJECT_HUNT_CAMERA = '/object-hunt-camera';
+  static const OBJECT_HUNT_EXAM = '/object-hunt-exam';
+  static const OBJECT_HUNT_EXAM_CAMERA = '/object-hunt-exam-camera';
   static const SPELLING_EXAM = '/spelling-exam';
   static const SPELLING_CATEGORY = '/spelling-category';
   static const SPELLING_EXAM_CATEGORY = '/spelling-exam-category';

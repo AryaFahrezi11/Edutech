@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../../data/edu_theme.dart';
+import '../controllers/profile_controller.dart';
+import '../../../services/log_service.dart';
 
-class ProfileView extends GetView {
+class ProfileView extends GetView<ProfileController> {
   const ProfileView({super.key});
 
   @override
@@ -94,13 +96,10 @@ class ProfileView extends GetView {
                 },
               ),
 
-              _buildMenuButton(
-                emoji: '🕵️',
-                title: 'Jejak Petualangan',
-                subtitle: 'Aktivitas terakhir yang kamu mainkan',
-                color: EduTheme.purple,
-                onTap: () {},
-              ),
+              const SizedBox(height: 10),
+              
+              // ================= TIMELINE JEJAK PETUALANGAN =================
+              _buildActivityLogsTimeline(),
 
               _buildMenuButton(
                 emoji: '⚙️',
@@ -362,6 +361,133 @@ class ProfileView extends GetView {
           ),
         ),
       ),
+    );
+  }
+
+  Widget _buildActivityLogsTimeline() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const SizedBox(height: 10),
+        const Row(
+          children: [
+            Text('🕵️', style: TextStyle(fontSize: 22)),
+            SizedBox(width: 8),
+            Text(
+              'Jejak Petualangan',
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.w900,
+                color: EduTheme.textDark,
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 16),
+        Obx(() {
+          final logService = Get.find<LogService>();
+          if (logService.isLoading.value) {
+            return const Center(child: CircularProgressIndicator());
+          }
+          if (logService.logs.isEmpty) {
+            return Container(
+              padding: const EdgeInsets.all(20),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(EduTheme.radiusMd),
+                border: Border.all(color: EduTheme.border, width: 2),
+              ),
+              child: const Center(
+                child: Text(
+                  "Belum ada petualangan.\nAyo mulai main!",
+                  textAlign: TextAlign.center,
+                  style: TextStyle(color: EduTheme.textMedium, fontWeight: FontWeight.bold),
+                ),
+              ),
+            );
+          }
+
+          return ListView.builder(
+            shrinkWrap: true,
+            physics: const NeverScrollableScrollPhysics(),
+            itemCount: logService.logs.length,
+            itemBuilder: (context, index) {
+              final log = logService.logs[index];
+              final isLast = index == logService.logs.length - 1;
+              return Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // Timeline Line & Dot
+                  Column(
+                    children: [
+                      Container(
+                        width: 16,
+                        height: 16,
+                        decoration: BoxDecoration(
+                          color: EduTheme.purple,
+                          shape: BoxShape.circle,
+                          border: Border.all(color: Colors.white, width: 3),
+                          boxShadow: const [BoxShadow(color: Colors.black12, blurRadius: 4)],
+                        ),
+                      ),
+                      if (!isLast)
+                        Container(
+                          width: 4,
+                          height: 60,
+                          color: EduTheme.purple.withOpacity(0.3),
+                        ),
+                    ],
+                  ),
+                  const SizedBox(width: 16),
+                  // Content Card
+                  Expanded(
+                    child: Container(
+                      margin: const EdgeInsets.only(bottom: 16),
+                      padding: const EdgeInsets.all(12),
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(EduTheme.radiusMd),
+                        border: Border.all(color: EduTheme.border, width: 1.5),
+                        boxShadow: const [BoxShadow(color: Color(0x0A000000), offset: Offset(0, 2), blurRadius: 4)],
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Expanded(
+                                child: Text(
+                                  log.action,
+                                  style: const TextStyle(fontWeight: FontWeight.w900, color: EduTheme.textDark, fontSize: 14),
+                                ),
+                              ),
+                              Text(
+                                "+${log.pointsEarned} XP",
+                                style: const TextStyle(fontWeight: FontWeight.w900, color: EduTheme.gold, fontSize: 12),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 4),
+                          Text(
+                            log.description,
+                            style: const TextStyle(fontSize: 12, color: EduTheme.textMedium, fontWeight: FontWeight.w600),
+                          ),
+                          const SizedBox(height: 6),
+                          Text(
+                            log.timestamp,
+                            style: const TextStyle(fontSize: 10, color: Colors.grey, fontWeight: FontWeight.w500),
+                          ),
+                        ],
+                      ),
+                    ),
+                  )
+                ],
+              );
+            },
+          );
+        }),
+      ],
     );
   }
 }

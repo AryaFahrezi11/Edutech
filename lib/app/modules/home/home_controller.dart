@@ -1,16 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../data/mission_node.dart';
+import '/app/services/progress_service.dart';
+import '/app/services/point_service.dart';
 
 class HomeController extends GetxController {
   var tabIndex = 0.obs; // Untuk navigasi bawah
 
   // === GAMIFICATION STATE ===
-  var currentMissionIndex = 0.obs;           // Index node yang sedang aktif
-  var completedMissions = <int>[].obs;       // List index node yang sudah selesai
-  var totalXP = 120.obs;                     // Total XP/bintang
-  var streakDays = 3.obs;                    // Hari beruntun
-  var currentLevel = 1.obs;                  // Level saat ini
+  final progress = Get.find<ProgressService>();
+  final pointService = Get.find<PointService>();
+
+  // Level didapatkan dari total poin (tiap 100 poin = 1 level)
+  int get currentLevel => (pointService.totalPoints.value / 100).floor() + 1;
 
   // === MISSION NODES (8 nodes) ===
   final List<MissionNode> missionNodes = [
@@ -62,7 +64,7 @@ class HomeController extends GetxController {
       subtitle: "Suara huruf A-Z",
       emoji: "🔤",
       type: MissionType.spellingPractice,
-      routeName: '/spelling-practice',
+      routeName: '/spelling-letter-selection',
       arguments: {'type': 'letter'},
       isBoss: false,
       gradient: [Color(0xFF4FACFE), Color(0xFF00F2FE)],
@@ -84,7 +86,7 @@ class HomeController extends GetxController {
       subtitle: "Mengingat ejaan",
       emoji: "🧩",
       type: MissionType.spellingPractice,
-      routeName: '/spelling-practice',
+      routeName: '/spelling-word-selection',
       arguments: {'type': 'word'},
       isBoss: false,
       gradient: [Color(0xFF9D4EDD), Color(0xFFC77DFF)],
@@ -100,44 +102,62 @@ class HomeController extends GetxController {
       isBoss: true,
       gradient: [Color(0xFFFF416C), Color(0xFFFF4B2B)],
     ),
+    const MissionNode(
+      index: 8,
+      title: "Berburu Benda 🔍",
+      subtitle: "Temukan benda di sekitarmu!",
+      emoji: "🔍",
+      type: MissionType.objectHuntPractice,
+      routeName: '/object-hunt-practice',
+      isBoss: false,
+      gradient: [Color(0xFF11998E), Color(0xFF38EF7D)],
+    ),
+    const MissionNode(
+      index: 9,
+      title: "Ujian Berburu Benda",
+      subtitle: "Kejar 5 benda dalam 60 detik!",
+      emoji: "⏱️",
+      type: MissionType.objectHuntExam,
+      routeName: '/object-hunt-exam',
+      isBoss: true,
+      gradient: [Color(0xFFFC5C7D), Color(0xFF6A3093)],
+    ),
   ];
 
   void changeTabIndex(int index) {
     tabIndex.value = index;
   }
 
-  /// Cek apakah node pada index tertentu sudah terbuka
+  /// [DEV MODE] Semua node terbuka untuk keperluan testing
+  /// Kembalikan ke: return index <= progress.currentMissionIndex.value; saat deploy
   bool isNodeUnlocked(int index) {
-    return index <= currentMissionIndex.value;
+    return true;
   }
 
   /// Cek apakah node pada index tertentu sudah selesai
   bool isNodeCompleted(int index) {
-    return completedMissions.contains(index);
+    return progress.completedMissions.contains(index);
   }
 
   /// Cek apakah node pada index tertentu adalah node yang sedang aktif
   bool isCurrentNode(int index) {
-    return index == currentMissionIndex.value;
+    return index == progress.currentMissionIndex.value;
   }
 
   /// Tandai node sebagai selesai dan buka node berikutnya
   void completeNode(int index) {
-    if (!completedMissions.contains(index)) {
-      completedMissions.add(index);
-
-      // Tambah XP
-      final node = missionNodes[index];
-      totalXP.value += node.isBoss ? 50 : 20;
-
-      // Update level
-      currentLevel.value = (totalXP.value / 100).floor() + 1;
+    if (!progress.completedMissions.contains(index)) {
+      List<int> newCompleted = List.from(progress.completedMissions);
+      newCompleted.add(index);
 
       // Buka node berikutnya
-      if (index == currentMissionIndex.value &&
-          currentMissionIndex.value < missionNodes.length - 1) {
-        currentMissionIndex.value++;
+      int nextMissionIndex = progress.currentMissionIndex.value;
+      if (index == progress.currentMissionIndex.value &&
+          progress.currentMissionIndex.value < missionNodes.length - 1) {
+        nextMissionIndex++;
       }
+
+      progress.updateMissionProgress(nextMissionIndex, newCompleted);
     }
   }
 

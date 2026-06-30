@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
+import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:convert';
 import '../../routes/app_routes.dart';
 import '/config/api_endpoints.dart';
+import '../../services/point_service.dart';
+import '../../services/progress_service.dart';
 
 class LoginController extends GetxController {
   // Controller untuk menangkap inputan dari LoginView
@@ -51,6 +54,13 @@ class LoginController extends GetxController {
         // --- LOGIN SUKSES ---
         token = data['token'];
         userData = data['user'];
+
+        // Simpan email ke shared preferences untuk dipakai Service melakukan sync
+        final prefs = await SharedPreferences.getInstance();
+        await prefs.setString('user_email', userData['email']);
+
+        // Fetch progres dari backend
+        await _fetchProgressFromBackend(userData['email']);
 
         _showModernSnackbar(
           "Berhasil! 🎉",
@@ -124,6 +134,24 @@ class LoginController extends GetxController {
       isDismissible: true,
       forwardAnimationCurve: Curves.easeOutBack,
     );
+  }
+
+  Future<void> _fetchProgressFromBackend(String email) async {
+    try {
+      final url = Uri.parse("${ApiEndpoints.getProgress}?email=$email");
+      final response = await http.get(url);
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        if (data['status'] == 'success' && data['progress'] != null) {
+          final progressData = data['progress'];
+          // Update Service
+          Get.find<PointService>().fromJson(progressData);
+          Get.find<ProgressService>().fromJson(progressData);
+        }
+      }
+    } catch (e) {
+      print("Gagal mengambil progress dari backend: $e");
+    }
   }
 
   @override

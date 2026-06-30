@@ -11,6 +11,15 @@ class ApiEndpoints {
   // --- FITUR UJIAN ---
   static const String ujianMengeja = "$baseUrl/ujian-membaca";
   static const String ujianMenulis = "$baseUrl/ujian-menulis-gemini";
+
+  // --- GAMIFIKASI & PROGRESS ---
+  static const String syncProgress = "$baseUrl/sync-progress";
+  static const String getProgress = "$baseUrl/get-progress";
+  static const String leaderboard = "$baseUrl/leaderboard";
   
+  // LOGS
+  static const String addActivityLog = "$baseUrl/activity/log";
+  static const String getActivityLogs = "$baseUrl/activity/logs";
+
   // Nanti kamu bisa tambahkan endpoint lain di sini dengan mudah...
 }

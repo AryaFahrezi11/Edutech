@@ -9,7 +9,7 @@ import 'widgets/mission_node_widget.dart';
 import 'widgets/mission_path_painter.dart';
 import 'widgets/stats_bar_widget.dart';
 
-import '../../services/point_service.dart';
+import '/app/services/point_service.dart';
 
 class HomeView extends GetView<HomeController> {
   const HomeView({Key? key}) : super(key: key);
@@ -122,7 +122,7 @@ class HomeView extends GetView<HomeController> {
                   const SizedBox(height: 2),
                   Obx(
                     () => Text(
-                      "Misi ${controller.completedMissions.length}/${controller.missionNodes.length} selesai",
+                      "Misi ${controller.progress.completedMissions.length}/${controller.missionNodes.length} selesai",
                       style: TextStyle(
                         fontSize: 12,
                         fontWeight: FontWeight.w700,
@@ -183,7 +183,7 @@ class HomeView extends GetView<HomeController> {
 
     // Delay scroll ke current node
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      final currentIndex = controller.currentMissionIndex.value;
+      final currentIndex = controller.progress.currentMissionIndex.value;
       // Reversed index karena list ditampilkan terbalik (bawah ke atas)
       final reversedIndex = nodeCount - 1 - currentIndex;
       final targetScroll = reversedIndex * nodeSpacing - 200;
@@ -199,8 +199,8 @@ class HomeView extends GetView<HomeController> {
     return Obx(() {
       // Force rebuild saat completedMissions berubah
       final _ =
-          controller.completedMissions.length +
-          controller.currentMissionIndex.value;
+          controller.progress.completedMissions.length +
+          controller.progress.currentMissionIndex.value;
 
       return Stack(
         children: [
@@ -222,7 +222,7 @@ class HomeView extends GetView<HomeController> {
                     child: CustomPaint(
                       painter: MissionPathPainter(
                         nodeCount: nodeCount,
-                        currentNodeIndex: controller.currentMissionIndex.value,
+                        currentNodeIndex: controller.progress.currentMissionIndex.value,
                         nodeSpacing: nodeSpacing,
                         zigzagOffset: zigzagOffset,
                       ),
