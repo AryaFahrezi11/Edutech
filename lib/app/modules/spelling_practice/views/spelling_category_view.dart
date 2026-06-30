@@ -108,7 +108,11 @@ class _CategoryCardState extends State<_CategoryCard> with SingleTickerProviderS
         snackPosition: SnackPosition.BOTTOM, backgroundColor: EduTheme.blue, colorText: Colors.white, borderRadius: 20, margin: const EdgeInsets.all(16));
       return;
     }
-    Get.toNamed(Routes.SPELLING_PRACTICE, arguments: {'type': d.title == "Kata Mudah" ? 'word' : 'letter'});
+    if (d.title == "Kata Mudah") {
+      Get.toNamed(Routes.SPELLING_WORD_SELECTION);
+    } else {
+      Get.toNamed(Routes.SPELLING_LETTER_SELECTION);
+    }
   }
 
   @override

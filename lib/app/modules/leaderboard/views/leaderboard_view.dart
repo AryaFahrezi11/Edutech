@@ -8,142 +8,171 @@ class LeaderboardView extends GetView<LeaderboardController> {
 
   @override
   Widget build(BuildContext context) {
-    final players = [
-      {"rank": 4, "name": "Dodi Prasetyo", "score": "1.950", "emoji": "🦊"},
-      {"rank": 5, "name": "Eko Putri", "score": "1.820", "emoji": "🐼"},
-      {"rank": 6, "name": "Fajar", "score": "1.700", "emoji": "🐸"},
-      {"rank": 7, "name": "Kamu (Gilang)", "score": "1.540", "active": true, "emoji": "🧒"},
-      {"rank": 8, "name": "Hana", "score": "1.410", "emoji": "🐱"},
-    ];
-
     return Scaffold(
       backgroundColor: EduTheme.bgLight,
       body: SafeArea(
-        child: Column(
-          children: [
-            // ── HEADER ──
-            Container(
-              padding: const EdgeInsets.fromLTRB(16, 12, 16, 20),
-              decoration: EduTheme.headerDecoration(gradient: EduTheme.goldGradient),
-              child: Column(
-                children: [
-                  const Text(
-                    '🏆 Papan Peringkat',
-                    style: TextStyle(
-                      fontSize: 22,
-                      fontWeight: FontWeight.w900,
-                      color: Colors.white,
-                    ),
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    'Siapa yang paling rajin belajar?',
-                    style: TextStyle(
-                      fontSize: 13,
-                      fontWeight: FontWeight.w700,
-                      color: Colors.white.withOpacity(0.8),
-                    ),
-                  ),
-                ],
-              ),
-            ),
+        child: Obx(() {
+          if (controller.isLoading.value) {
+            return const Center(child: CircularProgressIndicator(color: EduTheme.primary));
+          }
 
-            const SizedBox(height: 20),
+          final data = controller.leaderboardData;
+          
+          // Pisahkan top 3 untuk podium, sisanya untuk list
+          final top3 = data.length >= 3 ? data.sublist(0, 3) : data.toList();
+          final others = data.length > 3 ? data.sublist(3) : [];
 
-            // ── PODIUM TOP 3 ──
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 18),
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.end,
-                children: [
-                  Expanded(
-                    child: _podiumCard(
-                      name: "Budi",
-                      score: "2.450",
-                      height: 78,
-                      rank: "2",
-                      emoji: "🦁",
-                      color: const Color(0xFFC0C0C0),
-                      bgColor: const Color(0xFFF0F0F0),
-                    ),
-                  ),
-                  const SizedBox(width: 8),
-                  Expanded(
-                    child: _podiumCard(
-                      name: "Ani",
-                      score: "2.850",
-                      height: 110,
-                      rank: "1",
-                      emoji: "👸",
-                      color: EduTheme.gold,
-                      bgColor: const Color(0xFFFFF8E1),
-                      center: true,
-                    ),
-                  ),
-                  const SizedBox(width: 8),
-                  Expanded(
-                    child: _podiumCard(
-                      name: "Citra",
-                      score: "2.100",
-                      height: 65,
-                      rank: "3",
-                      emoji: "🐻",
-                      color: const Color(0xFFCD7F32),
-                      bgColor: const Color(0xFFFFF3E0),
-                    ),
-                  ),
-                ],
-              ),
-            ),
+          // Helper untuk mengambil data atau default
+          Map<String, dynamic> getRankData(int index) {
+            if (index < top3.length) return top3[index];
+            return {"name": "-", "score": "0", "emoji": "🧒"};
+          }
 
-            const SizedBox(height: 24),
+          final rank1 = getRankData(0);
+          final rank2 = getRankData(1);
+          final rank3 = getRankData(2);
 
-            // ── LIST HEADER ──
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 18),
-              child: const Align(
-                alignment: Alignment.centerLeft,
-                child: Text(
-                  'Peringkat Lainnya',
-                  style: TextStyle(
-                    fontWeight: FontWeight.w900,
-                    fontSize: 16,
-                    color: EduTheme.textDark,
-                  ),
+          return Column(
+            children: [
+              // ── HEADER ──
+              Container(
+                padding: const EdgeInsets.fromLTRB(16, 12, 16, 20),
+                decoration: EduTheme.headerDecoration(gradient: EduTheme.goldGradient),
+                child: Column(
+                  children: [
+                    const Text(
+                      '🏆 Papan Peringkat',
+                      style: TextStyle(
+                        fontSize: 22,
+                        fontWeight: FontWeight.w900,
+                        color: Colors.white,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      'Siapa yang paling rajin belajar?',
+                      style: TextStyle(
+                        fontSize: 13,
+                        fontWeight: FontWeight.w700,
+                        color: Colors.white.withOpacity(0.8),
+                      ),
+                    ),
+                  ],
                 ),
               ),
-            ),
 
-            const SizedBox(height: 10),
+              const SizedBox(height: 20),
 
-            // ── RANK LIST ──
-            Expanded(
-              child: ListView.builder(
-                padding: const EdgeInsets.symmetric(horizontal: 18),
-                itemCount: players.length,
-                itemBuilder: (context, index) {
-                  final item = players[index];
-                  return TweenAnimationBuilder<double>(
-                    tween: Tween(begin: 0, end: 1),
-                    duration: Duration(milliseconds: 400 + index * 100),
-                    curve: Curves.easeOutBack,
-                    builder: (_, v, child) => Transform.translate(
-                      offset: Offset(30 * (1 - v), 0),
-                      child: Opacity(opacity: v, child: child),
+              // ── PODIUM TOP 3 ──
+              if (top3.isNotEmpty)
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 18),
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.end,
+                    children: [
+                      if (top3.length >= 2)
+                        Expanded(
+                          child: _podiumCard(
+                            name: rank2["name"].toString(),
+                            score: rank2["score"].toString(),
+                            height: 78,
+                            rank: "2",
+                            emoji: rank2["emoji"].toString(),
+                            color: const Color(0xFFC0C0C0),
+                            bgColor: const Color(0xFFF0F0F0),
+                          ),
+                        )
+                      else
+                        const Expanded(child: SizedBox()),
+                      
+                      const SizedBox(width: 8),
+                      
+                      if (top3.isNotEmpty)
+                        Expanded(
+                          child: _podiumCard(
+                            name: rank1["name"].toString(),
+                            score: rank1["score"].toString(),
+                            height: 110,
+                            rank: "1",
+                            emoji: rank1["emoji"].toString(),
+                            color: EduTheme.gold,
+                            bgColor: const Color(0xFFFFF8E1),
+                            center: true,
+                          ),
+                        )
+                      else
+                        const Expanded(child: SizedBox()),
+                        
+                      const SizedBox(width: 8),
+                      
+                      if (top3.length >= 3)
+                        Expanded(
+                          child: _podiumCard(
+                            name: rank3["name"].toString(),
+                            score: rank3["score"].toString(),
+                            height: 65,
+                            rank: "3",
+                            emoji: rank3["emoji"].toString(),
+                            color: const Color(0xFFCD7F32),
+                            bgColor: const Color(0xFFFFF3E0),
+                          ),
+                        )
+                      else
+                        const Expanded(child: SizedBox()),
+                    ],
+                  ),
+                ),
+
+              const SizedBox(height: 24),
+
+              // ── LIST HEADER ──
+              if (others.isNotEmpty)
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 18),
+                  child: const Align(
+                    alignment: Alignment.centerLeft,
+                    child: Text(
+                      'Peringkat Lainnya',
+                      style: TextStyle(
+                        fontWeight: FontWeight.w900,
+                        fontSize: 16,
+                        color: EduTheme.textDark,
+                      ),
                     ),
-                    child: _rankTile(
-                      rank: item["rank"].toString(),
-                      name: item["name"].toString(),
-                      score: item["score"].toString(),
-                      emoji: item["emoji"]?.toString() ?? "🧒",
-                      active: item["active"] == true,
-                    ),
-                  );
-                },
+                  ),
+                ),
+
+              const SizedBox(height: 10),
+
+              // ── RANK LIST ──
+              Expanded(
+                child: ListView.builder(
+                  padding: const EdgeInsets.symmetric(horizontal: 18),
+                  itemCount: others.length,
+                  itemBuilder: (context, index) {
+                    final item = others[index];
+                    return TweenAnimationBuilder<double>(
+                      tween: Tween(begin: 0, end: 1),
+                      duration: Duration(milliseconds: 400 + index * 100),
+                      curve: Curves.easeOutBack,
+                      builder: (_, v, child) => Transform.translate(
+                        offset: Offset(30 * (1 - v), 0),
+                        child: Opacity(opacity: v, child: child),
+                      ),
+                      child: _rankTile(
+                        rank: item["rank"].toString(),
+                        name: item["name"].toString(),
+                        score: item["score"].toString(),
+                        emoji: item["emoji"]?.toString() ?? "🧒",
+                        active: item["active"] == true,
+                      ),
+                    );
+                  },
+                ),
               ),
-            ),
-          ],
-        ),
+            ],
+          );
+        }),
       ),
     );
   }

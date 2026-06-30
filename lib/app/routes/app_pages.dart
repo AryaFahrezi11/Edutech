@@ -18,6 +18,8 @@ import '../modules/spelling_exam/views/spelling_exam_view.dart';
 import '../modules/spelling_practice/bindings/spelling_practice_binding.dart';
 import '../modules/spelling_practice/views/spelling_category_view.dart';
 import '../modules/spelling_practice/views/spelling_practice_view.dart';
+import '../modules/spelling_practice/views/spelling_letter_selection_view.dart';
+import '../modules/spelling_practice/views/spelling_word_selection_view.dart';
 import '../modules/writing_exam/bindings/writing_exam_binding.dart';
 import '../modules/writing_exam/views/writing_exam_category_view.dart';
 import '../modules/writing_exam/views/writing_exam_view.dart';
@@ -27,6 +29,12 @@ import '../modules/writing_practice/views/letter_selection_view.dart';
 import '../modules/writing_practice/views/writing_category_view.dart';
 import '../modules/writing_practice/views/writing_practice_view.dart';
 import '../modules/writing_practice/views/word_selection_view.dart';
+import '../modules/writing_practice/views/word_practice_view.dart';
+import '../modules/object_hunt/bindings/object_hunt_binding.dart';
+import '../modules/object_hunt/views/object_hunt_intro_view.dart';
+import '../modules/object_hunt/views/object_hunt_camera_view.dart';
+import '../modules/object_hunt/views/object_hunt_exam_intro_view.dart';
+import '../modules/object_hunt/views/object_hunt_exam_camera_view.dart';
 import '../modules/writing_practice/views/word_practice_view.dart';
 import '../modules/writing_practice/bindings/word_practice_binding.dart';
 import '../modules/otp/bindings/otp_binding.dart';
@@ -105,6 +113,14 @@ class AppPages {
       binding: SpellingPracticeBinding(),
     ),
     GetPage(
+      name: Routes.SPELLING_LETTER_SELECTION,
+      page: () => const SpellingLetterSelectionView(),
+    ),
+    GetPage(
+      name: Routes.SPELLING_WORD_SELECTION,
+      page: () => const SpellingWordSelectionView(),
+    ),
+    GetPage(
       name: Routes.SPELLING_EXAM,
       page: () => const SpellingExamView(),
       binding: SpellingExamBinding(),
@@ -121,6 +137,25 @@ class AppPages {
       name: Routes.RAPORT,
       page: () => const RaportView(),
       binding: RaportBinding(),
+    ),
+    // Object Hunt
+    GetPage(
+      name: Routes.OBJECT_HUNT_PRACTICE,
+      page: () => const ObjectHuntIntroView(),
+      binding: ObjectHuntBinding(),
+    ),
+    GetPage(
+      name: Routes.OBJECT_HUNT_CAMERA,
+      page: () => const ObjectHuntCameraView(),
+    ),
+    GetPage(
+      name: Routes.OBJECT_HUNT_EXAM,
+      page: () => const ObjectHuntExamIntroView(),
+      binding: ObjectHuntExamBinding(),
+    ),
+    GetPage(
+      name: Routes.OBJECT_HUNT_EXAM_CAMERA,
+      page: () => const ObjectHuntExamCameraView(),
     ),
   ];
 }

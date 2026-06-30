@@ -6,6 +6,8 @@ enum MissionType {
   spellingPractice,  // Latihan Mengeja
   writingExam,       // Ujian Menulis (Boss)
   spellingExam,      // Ujian Mengeja (Boss)
+  objectHuntPractice, // Latihan Berburu Benda
+  objectHuntExam,     // Ujian Berburu Benda (Boss)
 }
 
 /// Data model untuk satu node misi di peta perjalanan

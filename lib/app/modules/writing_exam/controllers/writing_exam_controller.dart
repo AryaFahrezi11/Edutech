@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import '../../../services/tts_service.dart';
 import '../../../services/sfx_service.dart';
+import '../../../services/point_service.dart';
 
 enum ExamState { idle, countdown, drawing, checking, result }
 
@@ -189,9 +190,21 @@ class WritingExamController extends GetxController
   }
 
   void _showFinalResult() {
-    Get.find<TtsService>().speak("Hore! Ujian selesai! Kamu mendapat nilai ${score.value}");
+    final int total = questions.length * 20;
+    final percent = (score.value / total * 100).round();
+    
+    // Hitung bintang
+    int stars = 1;
+    if (percent >= 80) stars = 3;
+    else if (percent >= 60) stars = 2;
+
+    // Tambah poin
+    final String examId = 'exam_writing_${isLandscape.value ? "word" : "letter"}';
+    int earned = Get.find<PointService>().completeActivity(examId, isExam: true, stars: stars);
+
+    Get.find<TtsService>().speak("Hore! Ujian selesai! Kamu mendapat tambahan $earned poin!");
     Get.dialog(
-      _FinalResultDialog(score: score.value, total: questions.length * 20),
+      _FinalResultDialog(score: score.value, total: total, earnedPoints: earned),
       barrierDismissible: false,
     );
   }
@@ -211,7 +224,8 @@ class WritingExamController extends GetxController
 class _FinalResultDialog extends StatelessWidget {
   final int score;
   final int total;
-  const _FinalResultDialog({required this.score, required this.total});
+  final int earnedPoints;
+  const _FinalResultDialog({required this.score, required this.total, required this.earnedPoints});
 
   @override
   Widget build(BuildContext context) {
@@ -271,10 +285,10 @@ class _FinalResultDialog extends StatelessWidget {
                   const SizedBox(width: 24),
                   Column(
                     children: [
-                      Text('$percent%',
+                      Text('+$earnedPoints',
                           style: const TextStyle(
-                              fontSize: 40, fontWeight: FontWeight.w900, color: Colors.white)),
-                      const Text('Skor', style: TextStyle(color: Colors.white70, fontSize: 13)),
+                              fontSize: 40, fontWeight: FontWeight.w900, color: Color(0xFFFFD166))),
+                      const Text('Poin XP', style: TextStyle(color: Colors.white70, fontSize: 13)),
                     ],
                   ),
                 ],
