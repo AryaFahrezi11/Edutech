@@ -138,9 +138,7 @@ class _MissionNodeWidgetState extends State<MissionNodeWidget>
                 alignment: Alignment.center,
                 children: [
                   // Emoji utama atau icon status
-                  if (widget.isCompleted)
-                    const Text("✅", style: TextStyle(fontSize: 30))
-                  else if (!widget.isUnlocked)
+                  if (!widget.isUnlocked)
                     Icon(Icons.lock_rounded,
                         size: isBoss ? 32 : 26,
                         color: const Color(0xFF9CA3AF))

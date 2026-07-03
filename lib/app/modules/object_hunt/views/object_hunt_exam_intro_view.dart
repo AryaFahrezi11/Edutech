@@ -36,7 +36,7 @@ class ObjectHuntExamIntroView extends GetView<ObjectHuntExamController> {
                   ),
                   const Expanded(
                     child: Text(
-                      "Ujian Berburu ⏱️",
+                      "Ujian Detektif ⏱️",
                       style: TextStyle(fontSize: 20, fontWeight: FontWeight.w900, color: Colors.white),
                     ),
                   ),
@@ -101,6 +101,7 @@ class ObjectHuntExamIntroView extends GetView<ObjectHuntExamController> {
                       width: double.infinity,
                       child: GestureDetector(
                         onTap: () {
+                          controller.startExam();
                           Get.toNamed(Routes.OBJECT_HUNT_EXAM_CAMERA);
                         },
                         child: Container(

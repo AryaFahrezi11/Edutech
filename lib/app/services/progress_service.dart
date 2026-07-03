@@ -6,6 +6,7 @@ import '../../config/api_endpoints.dart';
 
 class ProgressService extends GetxService {
   var unlockedWritingLetter = 0.obs;
+  var unlockedWritingLowercase = 0.obs;
   var unlockedWritingWord = 0.obs;
   var unlockedSpellingLetter = 0.obs;
   var unlockedSpellingWord = 0.obs;
@@ -14,11 +15,15 @@ class ProgressService extends GetxService {
   var currentMissionIndex = 0.obs;
   var completedMissions = <int>[].obs;
   
+  // --- OBJECT HUNT STATE ---
+  var completedObjectHuntItems = <int>[].obs;
+  
   late SharedPreferences _prefs;
 
   Future<ProgressService> init() async {
     _prefs = await SharedPreferences.getInstance();
     unlockedWritingLetter.value = _prefs.getInt('unlocked_writing_letter') ?? 0;
+    unlockedWritingLowercase.value = _prefs.getInt('unlocked_writing_lowercase') ?? 0;
     unlockedWritingWord.value = _prefs.getInt('unlocked_writing_word') ?? 0;
     unlockedSpellingLetter.value = _prefs.getInt('unlocked_spelling_letter') ?? 0;
     unlockedSpellingWord.value = _prefs.getInt('unlocked_spelling_word') ?? 0;
@@ -27,6 +32,11 @@ class ProgressService extends GetxService {
     List<String>? savedMissions = _prefs.getStringList('completed_missions');
     if (savedMissions != null) {
       completedMissions.value = savedMissions.map((e) => int.parse(e)).toList();
+    }
+    
+    List<String>? savedHuntItems = _prefs.getStringList('completed_hunt_items');
+    if (savedHuntItems != null) {
+      completedObjectHuntItems.value = savedHuntItems.map((e) => int.parse(e)).toList();
     }
     return this;
   }
@@ -51,6 +61,13 @@ class ProgressService extends GetxService {
     }
   }
 
+  void completeWritingLowercase(int currentIndex) {
+    if (currentIndex >= unlockedWritingLowercase.value) {
+      unlockedWritingLowercase.value = currentIndex + 1;
+      _saveLocal('unlocked_writing_lowercase', unlockedWritingLowercase.value);
+    }
+  }
+
   void completeWritingWord(int currentIndex) {
     if (currentIndex >= unlockedWritingWord.value) {
       unlockedWritingWord.value = currentIndex + 1;
@@ -72,16 +89,31 @@ class ProgressService extends GetxService {
     }
   }
 
-  void completeObjectHunt(int currentIndex) {
-    // Tidak ada lock/unlock untuk object hunt — setiap item bisa diulang
-    // Fungsi ini tetap disimpan untuk consistency logging
-    _syncToBackend();
+  void completeObjectHunt(int currentIndex, int totalItems) {
+    if (!completedObjectHuntItems.contains(currentIndex)) {
+      completedObjectHuntItems.add(currentIndex);
+      
+      // Jika semua sudah ditemukan, reset agar bisa dimainkan lagi
+      if (completedObjectHuntItems.length >= totalItems) {
+        completedObjectHuntItems.clear();
+      }
+      
+      _prefs.setStringList(
+        'completed_hunt_items', 
+        completedObjectHuntItems.map((e) => e.toString()).toList()
+      );
+      _syncToBackend();
+    }
   }
   
   void fromJson(Map<String, dynamic> json) {
     if (json['unlocked_writing_letter'] != null) {
       unlockedWritingLetter.value = json['unlocked_writing_letter'];
       _prefs.setInt('unlocked_writing_letter', unlockedWritingLetter.value);
+    }
+    if (json['unlocked_writing_lowercase'] != null) {
+      unlockedWritingLowercase.value = json['unlocked_writing_lowercase'];
+      _prefs.setInt('unlocked_writing_lowercase', unlockedWritingLowercase.value);
     }
     if (json['unlocked_writing_word'] != null) {
       unlockedWritingWord.value = json['unlocked_writing_word'];
@@ -105,16 +137,24 @@ class ProgressService extends GetxService {
       completedMissions.value = missions;
       _prefs.setStringList('completed_missions', missions.map((e) => e.toString()).toList());
     }
+    
+    if (json['completed_hunt_items'] != null && json['completed_hunt_items'] is List) {
+      List<int> items = (json['completed_hunt_items'] as List).map((e) => int.parse(e.toString())).toList();
+      completedObjectHuntItems.value = items;
+      _prefs.setStringList('completed_hunt_items', items.map((e) => e.toString()).toList());
+    }
   }
 
   Map<String, dynamic> toJson() {
     return {
       "unlocked_writing_letter": unlockedWritingLetter.value,
+      "unlocked_writing_lowercase": unlockedWritingLowercase.value,
       "unlocked_writing_word": unlockedWritingWord.value,
       "unlocked_spelling_letter": unlockedSpellingLetter.value,
       "unlocked_spelling_word": unlockedSpellingWord.value,
       "current_mission_index": currentMissionIndex.value,
       "completed_missions": completedMissions.toList(),
+      "completed_hunt_items": completedObjectHuntItems.toList(),
     };
   }
   

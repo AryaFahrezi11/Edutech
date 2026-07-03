@@ -7,6 +7,7 @@ class ApiEndpoints {
   static const String login = "$baseUrl/login";
   static const String verifyOtp = "$baseUrl/verify-otp";
   static const String googleLogin = "$baseUrl/google-login";
+  static const String updateProfile = "$baseUrl/update-profile";
 
   // --- FITUR UJIAN ---
   static const String ujianMengeja = "$baseUrl/ujian-membaca";

@@ -111,10 +111,10 @@ class PointService extends GetxService {
       bool isFirstTime = !_completedItems.contains(itemId);
       
       if (isWord) {
-        earned += isFirstTime ? 50 : 5; // Bonus pertama kali jauh lebih besar
+        earned += isFirstTime ? 20 : 5; // Bonus pertama kali jauh lebih besar
         earned += 20; // Poin dasar latihan kata
       } else {
-        earned += isFirstTime ? 50 : 5;
+        earned += isFirstTime ? 20 : 5;
         earned += 10; // Poin dasar latihan huruf
       }
 

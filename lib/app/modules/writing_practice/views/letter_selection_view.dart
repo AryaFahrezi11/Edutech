@@ -17,7 +17,12 @@ class LetterSelectionView extends GetView<LetterSelectionController> {
             _buildHeader(),
             Expanded(
               child: Obx(() {
-                final progress = Get.find<ProgressService>().unlockedWritingLetter.value;
+                int progress = 0;
+                if (controller.category.value == 'lowercase') {
+                  progress = Get.find<ProgressService>().unlockedWritingLowercase.value;
+                } else {
+                  progress = Get.find<ProgressService>().unlockedWritingLetter.value;
+                }
                 return GridView.builder(
                   padding: const EdgeInsets.all(20),
                   gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
@@ -69,6 +74,7 @@ class LetterSelectionView extends GetView<LetterSelectionController> {
                           Get.toNamed(Routes.WRITING, arguments: {
                             'letter': letter,
                             'index': index,
+                            'category': controller.category.value,
                           });
                         },
                       ),

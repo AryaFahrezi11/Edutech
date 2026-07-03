@@ -44,22 +44,10 @@ class ObjectHuntIntroView extends GetView<ObjectHuntController> {
                         ),
                         const Expanded(
                           child: Text(
-                            "Berburu Benda 🔍",
+                            "Detektif Benda 🔍",
                             style: TextStyle(fontSize: 20, fontWeight: FontWeight.w900, color: Colors.white),
                           ),
                         ),
-                        // Progress indicator
-                        Obx(() => Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                          decoration: BoxDecoration(
-                            color: Colors.white.withValues(alpha: 0.2),
-                            borderRadius: BorderRadius.circular(20),
-                          ),
-                          child: Text(
-                            "${controller.currentIndex.value + 1}/${controller.sessionItems.length}",
-                            style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w900),
-                          ),
-                        )),
                       ],
                     ),
                   ],
@@ -184,7 +172,7 @@ class ObjectHuntIntroView extends GetView<ObjectHuntController> {
                                 Text("📸", style: TextStyle(fontSize: 24)),
                                 SizedBox(width: 12),
                                 Text(
-                                  "MULAI BERBURU",
+                                  "MULAI MENCARI",
                                   style: TextStyle(
                                     fontSize: 18,
                                     fontWeight: FontWeight.w900,
@@ -198,19 +186,7 @@ class ObjectHuntIntroView extends GetView<ObjectHuntController> {
                         ),
                       ),
 
-                      const SizedBox(height: 16),
 
-                      // ── TOMBOL LEWATI ──
-                      TextButton(
-                        onPressed: controller.skipItem,
-                        child: const Text(
-                          "Lewati benda ini →",
-                          style: TextStyle(
-                            color: EduTheme.textMedium,
-                            fontWeight: FontWeight.w700,
-                          ),
-                        ),
-                      ),
                     ],
                   ),
                 ),

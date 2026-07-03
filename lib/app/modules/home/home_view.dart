@@ -5,11 +5,13 @@ import 'home_controller.dart';
 
 import '../leaderboard/views/leaderboard_view.dart';
 import '../profile/views/profile_view.dart';
+import '../multiplayer/views/multiplayer_menu_view.dart';
 import 'widgets/mission_node_widget.dart';
 import 'widgets/mission_path_painter.dart';
 import 'widgets/stats_bar_widget.dart';
 
 import '/app/services/point_service.dart';
+import '../../routes/app_routes.dart';
 
 class HomeView extends GetView<HomeController> {
   const HomeView({Key? key}) : super(key: key);
@@ -23,6 +25,7 @@ class HomeView extends GetView<HomeController> {
           index: controller.tabIndex.value,
           children: [
             _buildMissionMapContent(),
+            const MultiplayerMenuView(), // NEW TAB
             const LeaderboardView(),
             const ProfileView(),
           ],
@@ -99,10 +102,10 @@ class HomeView extends GetView<HomeController> {
                   ),
                 ],
               ),
-              child: const CircleAvatar(
+              child: CircleAvatar(
                 radius: 22,
-                backgroundColor: Color(0xFFFFD166),
-                child: Text("🧒", style: TextStyle(fontSize: 26)),
+                backgroundColor: const Color(0xFFFFD166),
+                child: Obx(() => Text(controller.userAvatar.value, style: const TextStyle(fontSize: 26))),
               ),
             ),
             const SizedBox(width: 14),
@@ -111,14 +114,14 @@ class HomeView extends GetView<HomeController> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text(
-                    "Halo, Petualang! 🌟",
-                    style: TextStyle(
+                  Obx(() => Text(
+                    "Halo, ${controller.userName.value} ! 🌟",
+                    style: const TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.w900,
                       color: Colors.white,
                     ),
-                  ),
+                  )),
                   const SizedBox(height: 2),
                   Obx(
                     () => Text(
@@ -381,6 +384,10 @@ class HomeView extends GetView<HomeController> {
               BottomNavigationBarItem(
                 icon: Icon(Icons.map_rounded, size: 28),
                 label: 'Peta Misi',
+              ),
+              BottomNavigationBarItem(
+                icon: Icon(Icons.sports_esports_rounded, size: 28),
+                label: 'Arena Duel',
               ),
               BottomNavigationBarItem(
                 icon: Icon(Icons.emoji_events_rounded, size: 28),

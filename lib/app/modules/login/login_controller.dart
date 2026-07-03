@@ -1,3 +1,4 @@
+import 'package:edutech/app/services/log_service.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
@@ -55,12 +56,17 @@ class LoginController extends GetxController {
         token = data['token'];
         userData = data['user'];
 
-        // Simpan email ke shared preferences untuk dipakai Service melakukan sync
+        // Simpan email dan nama ke shared preferences untuk dipakai Service melakukan sync
         final prefs = await SharedPreferences.getInstance();
         await prefs.setString('user_email', userData['email']);
+        await prefs.setString('user_name', userData['nama_lengkap']);
+        await prefs.setString('user_avatar', userData['profile_pict'] ?? "🧒");
 
         // Fetch progres dari backend
         await _fetchProgressFromBackend(userData['email']);
+        
+        // Fetch log aktivitas agar tersinkronisasi di HP baru
+        Get.find<LogService>().fetchLogs();
 
         _showModernSnackbar(
           "Berhasil! 🎉",
@@ -139,7 +145,12 @@ class LoginController extends GetxController {
   Future<void> _fetchProgressFromBackend(String email) async {
     try {
       final url = Uri.parse("${ApiEndpoints.getProgress}?email=$email");
-      final response = await http.get(url);
+      final response = await http.get(
+        url,
+        headers: {
+          "ngrok-skip-browser-warning": "69420",
+        },
+      );
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
         if (data['status'] == 'success' && data['progress'] != null) {

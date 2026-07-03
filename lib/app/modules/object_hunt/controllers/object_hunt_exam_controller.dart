@@ -4,6 +4,8 @@ import 'package:get/get.dart';
 import 'package:ultralytics_yolo/ultralytics_yolo.dart';
 import '../../../services/point_service.dart';
 import '../../../services/log_service.dart';
+import '../../../services/tts_service.dart';
+import '../../../services/sfx_service.dart';
 import '../data/hunt_items.dart';
 
 class ObjectHuntExamController extends GetxController {
@@ -38,6 +40,10 @@ class ObjectHuntExamController extends GetxController {
 
   final _pointService = Get.find<PointService>();
   final _logService = Get.find<LogService>();
+  final _ttsService = Get.find<TtsService>();
+  final _sfxService = Get.find<SfxService>();
+  
+  DateTime? _firstDetectTime;
 
   @override
   void onInit() {
@@ -48,6 +54,12 @@ class ObjectHuntExamController extends GetxController {
     examItems = List.from(huntItems)..shuffle();
     // Ambil hanya sejumlah item yang ditarget
     examItems.retainWhere((_) => true); // shuffle sudah dilakukan
+    
+    // Sapaan awal di layar intro
+    _ttsService.speak("Selamat datang di Ujian Detektif Benda! Kamu harus menemukan 5 benda secara berurutan dalam waktu 60 detik. Apakah kamu siap?");
+  }
+
+  void startExam() {
     _loadNextItem();
     _startTimer();
   }
@@ -67,8 +79,12 @@ class ObjectHuntExamController extends GetxController {
     if (currentIndex.value < itemsToFind && currentIndex.value < examItems.length) {
       targetItem.value = examItems[currentIndex.value];
       isFound.value = false;
+      matchingResult.value = null;
+      _firstDetectTime = null;
       detectedLabel.value = '';
       confidence.value = 0.0;
+      
+      _ttsService.speak("Carilah ${targetItem.value!.nameId}");
     } else {
       _endExam();
     }
@@ -98,16 +114,29 @@ class ObjectHuntExamController extends GetxController {
       confidence.value = bestMatch.confidence;
 
       if (bestMatch.confidence >= 0.70) {
-        _onItemFound();
+        if (_firstDetectTime == null) {
+          _firstDetectTime = DateTime.now();
+        } else {
+          final diff = DateTime.now().difference(_firstDetectTime!);
+          // Di ujian cukup 1 detik stabil agar tidak memakan waktu
+          if (diff.inMilliseconds > 1000) {
+            _onItemFound();
+          }
+        }
+      } else {
+        _firstDetectTime = null;
       }
     } else {
       matchingResult.value = null; // Hilangkan kotak
+      _firstDetectTime = null;
     }
   }
 
   void _onItemFound() {
     isFound.value = true;
     foundCount.value++;
+    
+    _ttsService.speak("Bagus!");
 
     final item = targetItem.value!;
     _logService.addLog(
@@ -146,9 +175,12 @@ class ObjectHuntExamController extends GetxController {
       isExam: true,
       stars: stars,
     );
+    
+    _sfxService.playCoin();
+    _ttsService.speak("Hore! Waktu habis. Kamu menemukan ${foundCount.value} benda!");
 
     _logService.addLog(
-      "Ujian Berburu Benda",
+      "Ujian Detektif Benda",
       "Selesai! Berhasil menemukan ${foundCount.value} dari $itemsToFind benda ⭐${'⭐' * (stars - 1)}",
       earned,
     );

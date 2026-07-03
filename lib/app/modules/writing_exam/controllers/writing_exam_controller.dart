@@ -29,6 +29,13 @@ class WritingExamController extends GetxController
       {'letter': 'D', 'hint': 'Pintu setengah lingkaran', 'emoji': '🚪'},
       {'letter': 'E', 'hint': 'Tiga rak bertumpuk', 'emoji': '📚'},
     ],
+    'lowercase': [
+      {'letter': 'a', 'hint': 'Perut buncit bertopi', 'emoji': '🍎'},
+      {'letter': 'b', 'hint': 'Tiang dengan perut di bawah', 'emoji': '🫃'},
+      {'letter': 'c', 'hint': 'Bulan sabit kecil', 'emoji': '🌙'},
+      {'letter': 'd', 'hint': 'Perut di kiri tiang di kanan', 'emoji': '🚪'},
+      {'letter': 'e', 'hint': 'Mata setengah terbuka', 'emoji': '👁️'},
+    ],
     'word': [
       {'letter': 'Kucing', 'hint': 'Hewan berbulu yang suka minum susu', 'emoji': '🐱'},
       {'letter': 'Meja', 'hint': 'Tempat kita meletakkan buku', 'emoji': '📖'},

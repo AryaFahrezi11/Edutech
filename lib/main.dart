@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:audioplayers/audioplayers.dart';
 import 'app/routes/app_pages.dart';
 import 'app/routes/app_routes.dart';
 import 'app/services/bgm_service.dart';
@@ -11,6 +12,12 @@ import 'app/services/log_service.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  
+  // Konfigurasi agar AudioPlayers tidak mematikan suara satu sama lain
+  await AudioPlayer.global.setAudioContext(AudioContextConfig(
+    respectSilence: true,
+    focus: AudioContextConfigFocus.mixWithOthers,
+  ).build());
   
   // Initialize services
   Get.put(SfxService());
