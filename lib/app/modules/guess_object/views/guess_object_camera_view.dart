@@ -297,10 +297,10 @@ class GuessObjectCameraView extends GetView<GuessObjectController> {
               child: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  const Text("🪙", style: TextStyle(fontSize: 24)),
+                  const Text("⭐", style: TextStyle(fontSize: 24)),
                   const SizedBox(width: 8),
                   Text(
-                    "+${item.xpReward} Koin",
+                    "+${item.xpReward} Bintang",
                     style: TextStyle(
                       color: Colors.orange.shade800,
                       fontWeight: FontWeight.bold,

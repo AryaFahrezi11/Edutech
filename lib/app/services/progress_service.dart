@@ -11,6 +11,9 @@ class ProgressService extends GetxService {
   var unlockedSpellingLetter = 0.obs;
   var unlockedSpellingWord = 0.obs;
 
+  var unlockedSpellingExamLetter = 0.obs;
+  var unlockedSpellingExamWord = 0.obs;
+
   // --- MAPS MISSION STATE ---
   var currentMissionIndex = 0.obs;
   var completedMissions = <int>[].obs;
@@ -27,6 +30,8 @@ class ProgressService extends GetxService {
     unlockedWritingWord.value = _prefs.getInt('unlocked_writing_word') ?? 0;
     unlockedSpellingLetter.value = _prefs.getInt('unlocked_spelling_letter') ?? 0;
     unlockedSpellingWord.value = _prefs.getInt('unlocked_spelling_word') ?? 0;
+    unlockedSpellingExamLetter.value = _prefs.getInt('unlocked_spelling_exam_letter') ?? 0;
+    unlockedSpellingExamWord.value = _prefs.getInt('unlocked_spelling_exam_word') ?? 0;
 
     currentMissionIndex.value = _prefs.getInt('current_mission_index') ?? 0;
     List<String>? savedMissions = _prefs.getStringList('completed_missions');
@@ -89,6 +94,20 @@ class ProgressService extends GetxService {
     }
   }
 
+  void completeSpellingExamLetter(int currentIndex) {
+    if (currentIndex >= unlockedSpellingExamLetter.value) {
+      unlockedSpellingExamLetter.value = currentIndex + 1;
+      _saveLocal('unlocked_spelling_exam_letter', unlockedSpellingExamLetter.value);
+    }
+  }
+
+  void completeSpellingExamWord(int currentIndex) {
+    if (currentIndex >= unlockedSpellingExamWord.value) {
+      unlockedSpellingExamWord.value = currentIndex + 1;
+      _saveLocal('unlocked_spelling_exam_word', unlockedSpellingExamWord.value);
+    }
+  }
+
   void completeObjectHunt(int currentIndex, int totalItems) {
     if (!completedObjectHuntItems.contains(currentIndex)) {
       completedObjectHuntItems.add(currentIndex);
@@ -127,6 +146,14 @@ class ProgressService extends GetxService {
       unlockedSpellingWord.value = json['unlocked_spelling_word'];
       _prefs.setInt('unlocked_spelling_word', unlockedSpellingWord.value);
     }
+    if (json['unlocked_spelling_exam_letter'] != null) {
+      unlockedSpellingExamLetter.value = json['unlocked_spelling_exam_letter'];
+      _prefs.setInt('unlocked_spelling_exam_letter', unlockedSpellingExamLetter.value);
+    }
+    if (json['unlocked_spelling_exam_word'] != null) {
+      unlockedSpellingExamWord.value = json['unlocked_spelling_exam_word'];
+      _prefs.setInt('unlocked_spelling_exam_word', unlockedSpellingExamWord.value);
+    }
 
     if (json['current_mission_index'] != null) {
       currentMissionIndex.value = json['current_mission_index'];
@@ -152,6 +179,8 @@ class ProgressService extends GetxService {
       "unlocked_writing_word": unlockedWritingWord.value,
       "unlocked_spelling_letter": unlockedSpellingLetter.value,
       "unlocked_spelling_word": unlockedSpellingWord.value,
+      "unlocked_spelling_exam_letter": unlockedSpellingExamLetter.value,
+      "unlocked_spelling_exam_word": unlockedSpellingExamWord.value,
       "current_mission_index": currentMissionIndex.value,
       "completed_missions": completedMissions.toList(),
       "completed_hunt_items": completedObjectHuntItems.toList(),

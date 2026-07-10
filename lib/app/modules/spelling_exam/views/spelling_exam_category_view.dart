@@ -284,7 +284,7 @@ class _ExamCategoryCardState extends State<_ExamCategoryCard>
     }
 
     Get.toNamed(
-      Routes.SPELLING_EXAM,
+      Routes.SPELLING_EXAM_MENU,
 
       arguments: {
         'category': widget.data.categoryKey,

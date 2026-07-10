@@ -54,11 +54,11 @@ class SpellingPracticeController extends GetxController {
   ];
 
   final words = [
-    {'word': 'BOLA', 'spell': 'BO • LA', 'sound': 'BO... LA... BOLA'},
-    {'word': 'BUKU', 'spell': 'BU • KU', 'sound': 'BU... KU... BUKU'},
-    {'word': 'MEJA', 'spell': 'ME • JA', 'sound': 'ME... JA... MEJA'},
-    {'word': 'MOBIL', 'spell': 'MO • BIL', 'sound': 'MO... BIL... MOBIL'},
-    {'word': 'KUCING', 'spell': 'KU • CING', 'sound': 'KU... CING... KUCING'},
+    {'word': 'BOLA', 'spell': 'BO • LA', 'sound': 'BO... LA... BOLA', 'icon': '⚽'},
+    {'word': 'BUKU', 'spell': 'BU • KU', 'sound': 'BU... KU... BUKU', 'icon': '📚'},
+    {'word': 'MEJA', 'spell': 'ME • JA', 'sound': 'ME... JA... MEJA', 'icon': '🪑'},
+    {'word': 'MOBIL', 'spell': 'MO • BIL', 'sound': 'MO... BIL... MOBIL', 'icon': '🚗'},
+    {'word': 'KUCING', 'spell': 'KU • CING', 'sound': 'KU... CING... KUCING', 'icon': '🐱'},
   ];
 
   @override
@@ -107,7 +107,11 @@ class SpellingPracticeController extends GetxController {
   void _initSTT() async {
     await speech.initialize(
       onError: (error) => print('Error STT: $error'),
-      onStatus: (status) => print('Status STT: $status'),
+      onStatus: (status) {
+        if (status == 'done' || status == 'notListening') {
+          if (isListening.value) _verifyPronunciation();
+        }
+      },
     );
   }
 
@@ -166,6 +170,19 @@ class SpellingPracticeController extends GetxController {
   /// Contoh: "B. O. L. A. ... BO... LA... BOLA"
   var isSpelling = false.obs;
 
+  Future<void> stopListening() async {
+    if (!isListening.value) return; // Mencegah kepanggil 2x
+    isListening.value = false;
+    try {
+      speech.stop();
+    } catch (e) {
+      print("Error stop: $e");
+    }
+    
+    // Validasi final
+    _verifyPronunciation();
+  }
+
   Future<void> speakFullSpelling() async {
     if (isSpelling.value) return; // cegah double-tap
     isSpelling.value = true;
@@ -197,44 +214,110 @@ class SpellingPracticeController extends GetxController {
     isSpelling.value = false;
   }
 
+  // Cek kecocokan huruf tunggal berdasarkan bunyi (fonetik)
+  bool _isLetterMatch(String spoken, String target) {
+    if (spoken.isEmpty) return false;
+    
+    var words = spoken.split(' ');
+    
+    // Cek huruf langsung sebagai kata terpisah agar tidak tembus jika ada kata "ayam" untuk target "a"
+    if (words.contains(target) || spoken == target) return true;
+    
+    // Alias pengucapan fonetik (Indonesian & English STT fallback)
+    final Map<String, List<String>> aliases = {
+      'a': ['ah', 'aa', 'ha', 'i', 'a', 'uh', 'r', 'are', 'ei'],
+      'b': ['be', 'beh', 'bee', 'bi', 'b', 'bay', 'bear', 'bae', 'p'],
+      'c': ['ce', 'ceh', 'ci', 'c', 'che', 'chay', 'she', 'say', 'see'],
+      'd': ['de', 'deh', 'di', 'd', 'day', 'they', 'the', 'dee'],
+      'e': ['eh', 'ee', 'e', 'a', 'hey', 'i'],
+      'f': ['ef', 'ep', 'ev', 'f', 'eff', 'off', 'have'],
+      'g': ['ge', 'geh', 'ji', 'g', 'gay', 'k', 'gee'],
+      'h': ['ha', 'hah', 'h', 'huh', 'how', 'age'],
+      'i': ['ih', 'ii', 'hi', 'i', 'e', 'ee', 'he', 'ai'],
+      'j': ['je', 'jeh', 'ja', 'j', 'jay', 'z', 'g'],
+      'k': ['ka', 'kah', 'ke', 'k', 'car', 'cup', 'okay', 'kay'],
+      'l': ['el', 'le', 'l', 'all', 'hell'],
+      'm': ['em', 'me', 'm', 'am', 'aim'],
+      'n': ['en', 'ne', 'n', 'an', 'and', 'in'],
+      'o': ['oh', 'oo', 'ho', 'o', 'or', 'aw'],
+      'p': ['pe', 'peh', 'pi', 'p', 'pay', 'pee'],
+      'q': ['ki', 'qi', 'kyu', 'ku', 'q', 'key', 'queue'],
+      'r': ['er', 're', 'r', 'air', 'ear', 'are', 'error'],
+      's': ['es', 'se', 's', 'ace', 'ash', 'is', 'yes'],
+      't': ['te', 'teh', 'ti', 't', 'tay', 'the', 'tee'],
+      'u': ['uh', 'uu', 'hu', 'u', 'oo', 'ooh', 'you'],
+      'v': ['ve', 'veh', 'vi', 'fi', 'pi', 'v', 'vay', 'vee'],
+      'w': ['we', 'weh', 'w', 'way', 'why', 'double u'],
+      'x': ['eks', 'ex', 'x', 'ax', 'axe'],
+      'y': ['ye', 'yeh', 'ya', 'y', 'yay', 'why', 'yeah'],
+      'z': ['zet', 'zed', 'jet', 'z', 'set', 'zee'],
+    };
+
+    if (aliases.containsKey(target)) {
+      for (var alias in aliases[target]!) {
+        if (words.contains(alias) || spoken == alias) return true;
+      }
+    }
+    return false;
+  }
+
   // =========================================================
   // SPEECH-TO-TEXT (MIKROFON ANAK)
   // =========================================================
   void listen() async {
     if (!isListening.value) {
-      bool available = await speech.initialize();
-      if (available) {
+      if (speech.isAvailable || await speech.initialize()) {
+        
         isListening.value = true;
-        speech.listen(
-          localeId: "id_ID",
-          onResult: (val) {
-            spokenText.value = val.recognizedWords;
-            if (val.hasConfidenceRating && val.confidence > 0) {
-              // Jika sudah selesai bicara
-              _verifyPronunciation();
-            }
-          },
-        );
+        
+        try {
+          speech.listen(
+            localeId: isLetterMode ? "en_US" : "id_ID",
+            partialResults: true,
+            cancelOnError: false,
+            onResult: (val) {
+              spokenText.value = val.recognizedWords;
+              
+              String target = isLetterMode ? currentItem['upper'] : currentWord['word'];
+              target = target.toLowerCase();
+              String spoken = val.recognizedWords.toLowerCase();
+
+              // Deteksi dini super cepat
+              bool isMatch = isWordMode 
+                  ? spoken.contains(target) 
+                  : _isLetterMatch(spoken, target);
+
+              if (isMatch) {
+                stopListening();
+              } else if (val.hasConfidenceRating && val.confidence > 0) {
+                // Jika sudah ada result final tapi masih salah, tetap selesaikan
+                stopListening();
+              }
+            },
+          );
+        } catch (e) {
+          print("Error speech listen: $e");
+        }
       } else {
         Get.snackbar("Akses Mikrofon", "Mohon izinkan mikrofon untuk menggunakan fitur ini.");
       }
     } else {
-      isListening.value = false;
-      speech.stop();
+      stopListening();
     }
   }
 
   void _verifyPronunciation() {
-    isListening.value = false;
-    speech.stop();
-    
     String target = isLetterMode ? currentItem['upper'] : currentWord['word'];
     target = target.toLowerCase();
     String spoken = spokenText.value.toLowerCase().trim();
 
     if (spoken.isEmpty) return;
 
-    if (spoken.contains(target) || target.contains(spoken)) {
+    bool isCorrect = isWordMode
+        ? (spoken.contains(target) || target.contains(spoken))
+        : _isLetterMatch(spoken, target);
+
+    if (isCorrect) {
       _showSuccessDialog();
     } else {
       _showRetryDialog(spoken);

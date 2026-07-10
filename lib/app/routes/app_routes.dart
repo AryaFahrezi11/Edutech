@@ -7,6 +7,7 @@ abstract class Routes {
   static const WRITING = '/writing';
   static const LETTER_SELECTION = '/letter-selection';
   static const WRITING_EXAM = '/writing-exam';
+  static const WRITING_EXAM_MENU = '/writing-exam-menu';
   static const WORD_SELECTION = '/word-selection';
   static const WORD_PRACTICE = '/word-practice';
   static const SPELLING_PRACTICE = '/spelling-practice';
@@ -22,6 +23,7 @@ abstract class Routes {
   static const OBJECT_HUNT_EXAM = '/object-hunt-exam';
   static const OBJECT_HUNT_EXAM_CAMERA = '/object-hunt-exam-camera';
   static const SPELLING_EXAM = '/spelling-exam';
+  static const SPELLING_EXAM_MENU = '/spelling-exam-menu';
   static const SPELLING_CATEGORY = '/spelling-category';
   static const SPELLING_EXAM_CATEGORY = '/spelling-exam-category';
   static const RAPORT = '/raport';

@@ -64,8 +64,16 @@ class SpellingPracticeView extends GetView<SpellingPracticeController> {
                             const SizedBox(height: 35),
 
                             // =================================================
-                            // KATA
+                            // KATA & IKON
                             // =================================================
+                            if (word['icon'] != null)
+                              Text(
+                                word['icon'],
+                                style: const TextStyle(fontSize: 100),
+                              ),
+                            
+                            const SizedBox(height: 10),
+
                             Text(
                               word['word'],
                               style: const TextStyle(

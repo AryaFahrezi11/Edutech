@@ -196,39 +196,7 @@ class WritingPracticeView extends GetView<WritingPracticeController> {
                 ),
               ),
 
-              // 3. Tombol Navigasi Kiri
-              Positioned(
-                left: 12,
-                top: 0,
-                bottom: 0,
-                child: Center(
-                  child: Obx(() {
-                    final isFirst = controller.selectedLetter.value == 'A';
-                    return _navButton(
-                      icon: Icons.arrow_back_ios_rounded,
-                      color: isFirst ? Colors.grey.shade300 : const Color(0xFF1CB0F6),
-                      onTap: isFirst ? () {} : controller.prevLetter,
-                    );
-                  }),
-                ),
-              ),
-
-              // 4. Tombol Navigasi Kanan
-              Positioned(
-                right: 12,
-                top: 0,
-                bottom: 0,
-                child: Center(
-                  child: Obx(() {
-                    final isLast = controller.selectedLetter.value == 'Z';
-                    return _navButton(
-                      icon: Icons.arrow_forward_ios_rounded,
-                      color: isLast ? Colors.grey.shade300 : const Color(0xFF1CB0F6),
-                      onTap: isLast ? () {} : controller.nextLetter,
-                    );
-                  }),
-                ),
-              ),
+              // Tombol navigasi kiri dan kanan dihapus agar anak tidak bisa skip huruf sembarangan
             ],
           ),
         ),

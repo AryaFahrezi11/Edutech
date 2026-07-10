@@ -11,8 +11,15 @@ import '../../services/progress_service.dart';
 
 class LoginController extends GetxController {
   // Controller untuk menangkap inputan dari LoginView
-  final emailController = TextEditingController();
-  final passwordController = TextEditingController();
+  late TextEditingController emailController;
+  late TextEditingController passwordController;
+
+  @override
+  void onInit() {
+    super.onInit();
+    emailController = TextEditingController();
+    passwordController = TextEditingController();
+  }
 
   // Variabel untuk animasi loading di tombol
   var isLoading = false.obs;
@@ -90,6 +97,15 @@ class LoginController extends GetxController {
           Icons.mark_email_unread_rounded,
         );
         Get.toNamed(Routes.OTP, arguments: {'email': data['email']});
+      } else if (response.statusCode == 404 && data['status'] == 'unregistered') {
+        // --- LOGIN GAGAL: Akun belum terdaftar ---
+        _showModernSnackbar(
+          "Belum Terdaftar",
+          data['message'] ?? "Akun belum terdaftar, yuk daftar dulu!",
+          Colors.blueAccent,
+          Icons.person_add_rounded,
+        );
+        Get.toNamed(Routes.REGISTER);
       } else {
         // --- LOGIN GAGAL ---
         _showModernSnackbar(

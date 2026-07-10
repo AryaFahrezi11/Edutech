@@ -173,6 +173,8 @@ class ObjectHuntExamController extends GetxController {
     final earned = _pointService.completeActivity(
       'hunt_exam_${foundCount.value}',
       isExam: true,
+      isWord: true,
+      totalItems: foundCount.value > 0 ? foundCount.value : 1, // Minimal 1 pengali kalau mau
       stars: stars,
     );
     

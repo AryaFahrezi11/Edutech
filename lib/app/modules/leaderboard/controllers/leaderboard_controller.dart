@@ -65,7 +65,7 @@ class LeaderboardController extends GetxController {
         : rank == "3"
         ? "Juara 3"
         : "Peringkat $rank";
-    String speech = "$rankText, adalah $name, dengan total skor $score koin!";
+    String speech = "$rankText, adalah $name, dengan total $score bintang!";
     Get.find<TtsService>().speak(speech);
   }
 }

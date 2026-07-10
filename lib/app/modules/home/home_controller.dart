@@ -5,6 +5,7 @@ import '../../data/mission_node.dart';
 import '/app/services/progress_service.dart';
 import '/app/services/point_service.dart';
 import '/app/services/tts_service.dart';
+import '/app/services/sfx_service.dart';
 
 class HomeController extends GetxController {
   var tabIndex = 0.obs; // Untuk navigasi bawah
@@ -19,6 +20,74 @@ class HomeController extends GetxController {
   void onInit() {
     super.onInit();
     _loadUserName();
+  }
+
+  @override
+  void onReady() {
+    super.onReady();
+    _checkDailyReward();
+  }
+
+  void _checkDailyReward() {
+    int earned = pointService.checkDailyLogin();
+    if (earned > 0) {
+      Get.dialog(
+        Dialog(
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+          child: Padding(
+            padding: const EdgeInsets.all(24.0),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Text(
+                  "🎉 Hadiah Harian! 🎉",
+                  style: TextStyle(
+                    fontSize: 22,
+                    fontWeight: FontWeight.bold,
+                    color: Color(0xFF3A2F6B),
+                  ),
+                ),
+                const SizedBox(height: 16),
+                const Text(
+                  "⭐",
+                  style: TextStyle(fontSize: 60),
+                ),
+                const SizedBox(height: 16),
+                Text(
+                  "Kamu mendapatkan +$earned Bintang karena rajin belajar hari ini!",
+                  textAlign: TextAlign.center,
+                  style: const TextStyle(
+                    fontSize: 16,
+                    color: Colors.black87,
+                  ),
+                ),
+                const SizedBox(height: 24),
+                ElevatedButton(
+                  onPressed: () => Get.back(),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xFF1CB0F6),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 12),
+                  ),
+                  child: const Text(
+                    "Asyik!",
+                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white),
+                  ),
+                )
+              ],
+            ),
+          ),
+        ),
+        barrierDismissible: false,
+      );
+      
+      // Putar suara success/coin
+      try {
+        Get.find<SfxService>().playSuccess();
+      } catch (_) {}
+    }
   }
 
   Future<void> _loadUserName() async {
@@ -49,7 +118,7 @@ class HomeController extends GetxController {
       subtitle: "Uji Kapital!",
       emoji: "⚔️",
       type: MissionType.writingExam,
-      routeName: '/writing-exam',
+      routeName: '/writing-exam-menu',
       arguments: {'category': 'capital', 'title': 'Ujian Huruf Kapital'},
       isBoss: true,
       gradient: [Color(0xFFFF9F1C), Color(0xFFFFD166)],
@@ -71,7 +140,7 @@ class HomeController extends GetxController {
       subtitle: "Uji Kecil!",
       emoji: "🎓",
       type: MissionType.writingExam,
-      routeName: '/writing-exam',
+      routeName: '/writing-exam-menu',
       arguments: {'category': 'lowercase', 'title': 'Ujian Huruf Kecil'},
       isBoss: true,
       gradient: [Color(0xFF00C9FF), Color(0xFF92FE9D)],
@@ -92,7 +161,7 @@ class HomeController extends GetxController {
       subtitle: "Tantangan kata!",
       emoji: "🏆",
       type: MissionType.writingExam,
-      routeName: '/writing-exam',
+      routeName: '/writing-exam-menu',
       arguments: {'category': 'word', 'title': 'Ujian Menulis Kata'},
       isBoss: true,
       gradient: [Color(0xFFEF476F), Color(0xFFFF6B6B)],
@@ -114,8 +183,8 @@ class HomeController extends GetxController {
       subtitle: "Tebak suara huruf!",
       emoji: "🎤",
       type: MissionType.spellingExam,
-      routeName: '/spelling-exam',
-      arguments: {'category': 'letter', 'title': 'Ujian Mengeja Huruf'},
+      routeName: '/spelling-exam-menu',
+      arguments: {'category': 'capital', 'title': 'Ujian Mengeja Huruf'},
       isBoss: true,
       gradient: [Color(0xFF06D6A0), Color(0xFF1CB0F6)],
     ),
@@ -136,7 +205,7 @@ class HomeController extends GetxController {
       subtitle: "Eja seperti pro",
       emoji: "👑",
       type: MissionType.spellingExam,
-      routeName: '/spelling-exam',
+      routeName: '/spelling-exam-menu',
       arguments: {'category': 'word', 'title': 'Ujian Mengeja Kata'},
       isBoss: true,
       gradient: [Color(0xFFFF416C), Color(0xFFFF4B2B)],

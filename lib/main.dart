@@ -9,6 +9,8 @@ import 'app/services/point_service.dart';
 import 'app/services/tts_service.dart';
 import 'app/services/sfx_service.dart';
 import 'app/services/log_service.dart';
+import 'app/services/gemini_service.dart';
+import 'app/services/mongodb_service.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -25,6 +27,8 @@ void main() async {
   await Get.putAsync(() => PointService().init());
   await Get.putAsync(() => TtsService().init());
   await Get.putAsync(() => LogService().init());
+  await Get.putAsync(() => GeminiService().init());
+  await Get.putAsync(() => MongoDbService().init());
   Get.put(BackgroundMusicService());
 
 

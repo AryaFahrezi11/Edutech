@@ -1,11 +1,15 @@
-import 'package:flutter/material.dart';
+import 'package:flutter/material.dart' hide Ink;
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import '../../../services/tts_service.dart';
 import '../../../services/sfx_service.dart';
 import '../../../services/point_service.dart';
+import '../../../services/gemini_service.dart';
+import '../../../services/mongodb_service.dart';
+import '../../../services/progress_service.dart';
+import 'package:google_mlkit_digital_ink_recognition/google_mlkit_digital_ink_recognition.dart';
 
-enum ExamState { idle, countdown, drawing, checking, result }
+enum ExamState { idle, drawing, checking, evaluating, result }
 
 class WritingExamController extends GetxController
     with GetTickerProviderStateMixin {
@@ -13,40 +17,53 @@ class WritingExamController extends GetxController
   final examState = ExamState.idle.obs;
   final currentLetterIndex = 0.obs;
   final score = 0.obs;
-  final countdown = 3.obs;
   final isCorrect = false.obs;
 
   // ─── KATEGORI ──────────────────────────────────────────────────────────────
   final categoryTitle = 'Huruf Kapital'.obs;
   final isLandscape = false.obs; // true jika kategori membutuhkan landscape
 
-  // Bank soal berdasarkan kategori
-  static const Map<String, List<Map<String, dynamic>>> _questionBank = {
-    'capital': [
-      {'letter': 'A', 'hint': 'Seperti gunung kembar', 'emoji': '⛰️'},
-      {'letter': 'B', 'hint': 'Dua perut di kanan', 'emoji': '🫃'},
-      {'letter': 'C', 'hint': 'Bulan sabit', 'emoji': '🌙'},
-      {'letter': 'D', 'hint': 'Pintu setengah lingkaran', 'emoji': '🚪'},
-      {'letter': 'E', 'hint': 'Tiga rak bertumpuk', 'emoji': '📚'},
-    ],
-    'lowercase': [
-      {'letter': 'a', 'hint': 'Perut buncit bertopi', 'emoji': '🍎'},
-      {'letter': 'b', 'hint': 'Tiang dengan perut di bawah', 'emoji': '🫃'},
-      {'letter': 'c', 'hint': 'Bulan sabit kecil', 'emoji': '🌙'},
-      {'letter': 'd', 'hint': 'Perut di kiri tiang di kanan', 'emoji': '🚪'},
-      {'letter': 'e', 'hint': 'Mata setengah terbuka', 'emoji': '👁️'},
-    ],
-    'word': [
-      {'letter': 'Kucing', 'hint': 'Hewan berbulu yang suka minum susu', 'emoji': '🐱'},
-      {'letter': 'Meja', 'hint': 'Tempat kita meletakkan buku', 'emoji': '📖'},
-      {'letter': 'Buku', 'hint': 'Sumber ilmu pengetahuan', 'emoji': '📚'},
-      {'letter': 'Apel', 'hint': 'Buah berwarna merah atau hijau', 'emoji': '🍎'},
-      {'letter': 'Bola', 'hint': 'Dipakai untuk bermain sepak bola', 'emoji': '⚽'},
-    ],
-  };
+  // Bank soal dibuat dinamis A-Z
+  static Map<String, List<Map<String, dynamic>>> get questionBank {
+    List<Map<String, dynamic>> capitals = [];
+    List<Map<String, dynamic>> lowercases = [];
+    
+    for (int i = 0; i < 26; i++) {
+      String letter = String.fromCharCode(65 + i);
+      capitals.add({'letter': letter, 'hint': 'Tulis huruf $letter kapital', 'emoji': '✏️'});
+      lowercases.add({'letter': letter.toLowerCase(), 'hint': 'Tulis huruf ${letter.toLowerCase()} kecil', 'emoji': '✏️'});
+    }
+    
+    return {
+      'capital': capitals,
+      'lowercase': lowercases,
+      'word': [
+        {'letter': 'Kucing', 'hint': 'Hewan lucu yang mengeong', 'emoji': '🐱'},
+        {'letter': 'Apel', 'hint': 'Buah berwarna merah atau hijau', 'emoji': '🍎'},
+        {'letter': 'Bola', 'hint': 'Ditendang saat main bola', 'emoji': '⚽'},
+        {'letter': 'Kursi', 'hint': 'Tempat untuk duduk', 'emoji': '🪑'},
+        {'letter': 'Botol', 'hint': 'Tempat menyimpan air minum', 'emoji': '🍶'},
+        {'letter': 'Buku', 'hint': 'Benda untuk dibaca', 'emoji': '📚'},
+        {'letter': 'Gelas', 'hint': 'Wadah untuk minum air', 'emoji': '🥤'},
+        {'letter': 'Tas', 'hint': 'Tempat menyimpan buku sekolah', 'emoji': '🎒'},
+        {'letter': 'Jam', 'hint': 'Penunjuk waktu', 'emoji': '🕐'},
+        {'letter': 'Laptop', 'hint': 'Komputer yang bisa dilipat', 'emoji': '💻'},
+        {'letter': 'Gunting', 'hint': 'Alat memotong kertas', 'emoji': '✂️'},
+        {'letter': 'Meja', 'hint': 'Tempat meletakkan barang', 'emoji': '🍽️'},
+      ],
+
+    };
+  }
 
   // Soal yang sedang aktif
-  List<Map<String, dynamic>> questions = [];
+  Map<String, dynamic> get currentQuestion {
+    final cat = Get.arguments?['category'] as String? ?? 'capital';
+    final bank = questionBank[cat] ?? questionBank['capital']!;
+    if (currentLetterIndex.value >= 0 && currentLetterIndex.value < bank.length) {
+      return bank[currentLetterIndex.value];
+    }
+    return bank[0];
+  }
 
   // ─── CANVAS ────────────────────────────────────────────────────────────────
   var userPoints = <Offset?>[].obs;
@@ -70,9 +87,11 @@ class WritingExamController extends GetxController
     if (Get.arguments != null) {
       final cat = Get.arguments['category'] as String? ?? 'capital';
       final title = Get.arguments['title'] as String? ?? 'Huruf Kapital';
+      final idx = Get.arguments['index'] as int? ?? 0;
+      
       categoryTitle.value = title;
-      questions = List.from(_questionBank[cat] ?? _questionBank['capital']!);
-
+      currentLetterIndex.value = idx;
+      
       if (cat == 'word') {
         isLandscape.value = true;
         SystemChrome.setPreferredOrientations([
@@ -80,11 +99,29 @@ class WritingExamController extends GetxController
           DeviceOrientation.landscapeRight,
         ]);
       }
-    } else {
-      questions = List.from(_questionBank['capital']!);
     }
     
+    _initDigitalInk();
+    
+    // Langsung mulai ujian karena sudah dipilih dari Menu Peta
+    examState.value = ExamState.drawing;
     _announceStart();
+  }
+
+  final DigitalInkRecognizerModelManager _modelManager = DigitalInkRecognizerModelManager();
+  DigitalInkRecognizer? _recognizer;
+
+  Future<void> _initDigitalInk() async {
+    const language = 'en-US'; // Gunakan en-US untuk akurasi pengenalan huruf Latin (A-Z, a-z) terbaik
+    try {
+      bool isDownloaded = await _modelManager.isModelDownloaded(language);
+      if (!isDownloaded) {
+        await _modelManager.downloadModel(language);
+      }
+      _recognizer = DigitalInkRecognizer(languageCode: language);
+    } catch (e) {
+      print('Gagal inisiasi Digital Ink: $e');
+    }
   }
 
   void _announceStart() async {
@@ -104,35 +141,31 @@ class WritingExamController extends GetxController
       DeviceOrientation.portraitDown,
     ]);
     starsAnimController.dispose();
+    _recognizer?.close();
     super.onClose();
   }
 
   // ─── GETTERS ───────────────────────────────────────────────────────────────
-  Map<String, dynamic> get currentQuestion =>
-      questions[currentLetterIndex.value];
-  bool get isLastQuestion =>
-      currentLetterIndex.value >= questions.length - 1;
+  int get totalQuestions {
+    final cat = Get.arguments?['category'] as String? ?? 'capital';
+    final bank = questionBank[cat] ?? questionBank['capital']!;
+    return bank.length;
+  }
+  
+  bool get isLastQuestion {
+    return currentLetterIndex.value >= totalQuestions - 1;
+  }
 
   // ─── ACTIONS ───────────────────────────────────────────────────────────────
   void startExam() {
-    examState.value = ExamState.countdown;
-    currentLetterIndex.value = 0;
+    examState.value = ExamState.drawing;
     score.value = 0;
-    _startCountdown();
+    resetCanvas();
   }
 
-  void _startCountdown() {
-    countdown.value = 3;
-    Future.doWhile(() async {
-      await Future.delayed(const Duration(seconds: 1));
-      countdown.value--;
-      if (countdown.value <= 0) {
-        examState.value = ExamState.drawing;
-        resetCanvas();
-        return false;
-      }
-      return true;
-    });
+  void onPanStart(DragStartDetails details) {
+    if (examState.value != ExamState.drawing) return;
+    userPoints.add(details.localPosition);
   }
 
   void onPanUpdate(DragUpdateDetails details) {
@@ -142,7 +175,7 @@ class WritingExamController extends GetxController
 
   void onPanEnd() {
     if (examState.value != ExamState.drawing) return;
-    userPoints.add(null);
+    userPoints.add(null); // Penanda angkat tangan
   }
 
   void resetCanvas() {
@@ -152,200 +185,169 @@ class WritingExamController extends GetxController
   void submitAnswer() async {
     if (userPoints.isEmpty) {
       Get.snackbar(
-        '✏️ Hei!',
-        'Tulis dulu hurufnya ya!',
-        snackPosition: SnackPosition.BOTTOM,
-        backgroundColor: Colors.orange.withOpacity(0.9),
-        colorText: Colors.white,
-        borderRadius: 20,
-        margin: const EdgeInsets.all(16),
+        'Belum Menggambar',
+        'Coba tulis hurufnya dulu ya! ✏️',
+        snackPosition: SnackPosition.TOP,
+        backgroundColor: Colors.white,
+        colorText: const Color(0xFF3A2F6B),
       );
       return;
     }
 
     examState.value = ExamState.checking;
+    final ink = Ink();
+    Stroke stroke = Stroke();
+    int timestamp = DateTime.now().millisecondsSinceEpoch;
 
-    // Simulasi pengecekan AI
-    await Future.delayed(const Duration(milliseconds: 1500));
+    for (var point in userPoints) {
+      if (point != null) {
+        stroke.points.add(StrokePoint(
+          x: point.dx,
+          y: point.dy,
+          t: timestamp,
+        ));
+      } else {
+        if (stroke.points.isNotEmpty) {
+          ink.strokes.add(stroke);
+          stroke = Stroke();
+        }
+      }
+    }
+    if (stroke.points.isNotEmpty) {
+      ink.strokes.add(stroke);
+    }
 
-    // Simulasi: anggap jawaban benar jika cukup banyak coretan
-    final isAnswerCorrect = userPoints.whereType<Offset>().length > 30;
+    String recognizedText = "";
+    bool isAnswerCorrect = false;
+    final targetWord = currentQuestion['letter'] as String;
+
+    if (_recognizer != null) {
+      try {
+        final candidates = await _recognizer!.recognize(ink);
+        
+        final topCandidates = candidates.take(2).toList();
+        
+        for (final candidate in topCandidates) {
+          String candText = candidate.text.toLowerCase().replaceAll(RegExp(r'[^\w\s]'), '').trim();
+          String target = targetWord.toLowerCase().trim();
+          
+          if (target.length == 1) {
+            if (candText == target) {
+              recognizedText = candidate.text;
+              isAnswerCorrect = true;
+              break;
+            }
+          } else {
+            if (candText.contains(target)) {
+              recognizedText = candidate.text;
+              isAnswerCorrect = true;
+              break;
+            }
+          }
+        }
+        
+        if (!isAnswerCorrect && candidates.isNotEmpty) {
+          recognizedText = candidates.first.text;
+        }
+      } catch (e) {
+        print("ML Kit Error: $e");
+      }
+    }
+
     isCorrect.value = isAnswerCorrect;
 
     if (isAnswerCorrect) {
-      score.value += 20;
+      examState.value = ExamState.result;
+      
+      final progressService = Get.find<ProgressService>();
+      final cat = Get.arguments?['category'] as String? ?? 'capital';
+      if (cat == 'capital') {
+        progressService.completeWritingLetter(currentLetterIndex.value);
+      } else if (cat == 'lowercase') {
+        progressService.completeWritingLowercase(currentLetterIndex.value);
+      } else {
+        progressService.completeWritingWord(currentLetterIndex.value);
+      }
+
+      final String examId = 'writing_exam_${cat}_${currentLetterIndex.value}';
+      int earned = Get.find<PointService>().completeActivity(
+        examId, 
+        isExam: true, 
+        isWord: cat == 'word',
+        stars: 3
+      );
+
+      score.value += earned;
       starsAnimController.forward(from: 0);
       Get.find<SfxService>().playSuccess();
-      Get.find<TtsService>().speak("Wah, benar! Hebat sekali!");
-    } else {
-      Get.find<SfxService>().playWrong();
-      Get.find<TtsService>().speak("Aduh, masih kurang tepat. Tetap semangat ya!");
-    }
 
-    examState.value = ExamState.result;
+      await Get.find<TtsService>().speakAndWait("Wah, benar! Hebat sekali! Kamu dapat $earned bintang!");
+    } else {
+      examState.value = ExamState.evaluating;
+      Get.find<SfxService>().playWrong();
+      
+      final geminiService = Get.find<GeminiService>();
+      final mongoService = Get.find<MongoDbService>();
+      
+      final geminiResult = await geminiService.evaluateWriting(
+        targetWord: targetWord,
+        writtenWord: recognizedText.isEmpty ? "(tidak terdeteksi)" : recognizedText,
+      );
+
+      if (geminiResult != null) {
+        if (geminiResult['analytics_data'] != null) {
+          await mongoService.saveAnalytics(geminiResult['analytics_data']);
+        }
+        
+        final voiceFeedback = geminiResult['voice_feedback'] ?? "Aduh, masih kurang tepat. Tetap semangat ya!";
+        await Get.find<TtsService>().speakAndWait(voiceFeedback);
+      } else {
+        await Get.find<TtsService>().speakAndWait("Aduh, masih kurang tepat. Coba tulis ulang dengan lebih pelan ya!");
+      }
+      
+      resetCanvas();
+      examState.value = ExamState.drawing;
+    }
+  }
+
+  void goToNextLevel() {
+    final cat = Get.arguments?['category'] as String? ?? 'capital';
+    final bank = questionBank[cat] ?? questionBank['capital']!;
+    
+    // Jika belum mencapai akhir soal
+    if (currentLetterIndex.value < bank.length - 1) {
+      currentLetterIndex.value++;
+      
+      // Update unlocked index in progressService just to be safe 
+      // (meskipun di submitAnswer sudah dibuka)
+      
+      resetCanvas();
+      examState.value = ExamState.drawing;
+    } else {
+      // Jika ini level terakhir, kembali ke menu
+      Get.back(result: true);
+    }
+  }
+
+  void backToMenu() {
+    Get.back(result: false);
+  }
+
+  void retryLevel() {
+    resetCanvas();
+    examState.value = ExamState.drawing;
   }
 
   void nextQuestion() {
-    if (isLastQuestion) {
-      examState.value = ExamState.idle;
-      _showFinalResult();
-      return;
-    }
-    currentLetterIndex.value++;
-    examState.value = ExamState.countdown;
-    _startCountdown();
-  }
-
-  void _showFinalResult() {
-    final int total = questions.length * 20;
-    final percent = (score.value / total * 100).round();
-    
-    // Hitung bintang
-    int stars = 1;
-    if (percent >= 80) stars = 3;
-    else if (percent >= 60) stars = 2;
-
-    // Tambah poin
-    final String examId = 'exam_writing_${isLandscape.value ? "word" : "letter"}';
-    int earned = Get.find<PointService>().completeActivity(examId, isExam: true, stars: stars);
-
-    Get.find<TtsService>().speak("Hore! Ujian selesai! Kamu mendapat tambahan $earned poin!");
-    Get.dialog(
-      _FinalResultDialog(score: score.value, total: total, earnedPoints: earned),
-      barrierDismissible: false,
-    );
+    // Kembali ke peta menu agar anak bisa melihat progress huruf selanjutnya terbuka
+    Get.back();
   }
 
   void retryExam() {
-    Get.back(); // tutup dialog
     startExam();
   }
 
   void exitExam() {
-    Get.back(); // tutup dialog
     Get.back(); // kembali ke home
-  }
-}
-
-// Dialog hasil akhir (disimpan di controller agar mudah diakses)
-class _FinalResultDialog extends StatelessWidget {
-  final int score;
-  final int total;
-  final int earnedPoints;
-  const _FinalResultDialog({required this.score, required this.total, required this.earnedPoints});
-
-  @override
-  Widget build(BuildContext context) {
-    final percent = (score / total * 100).round();
-    final emoji = percent >= 80 ? '🏆' : percent >= 60 ? '⭐' : '💪';
-    final message = percent >= 80
-        ? 'Luar biasa! Kamu hebat!'
-        : percent >= 60
-            ? 'Bagus! Terus berlatih!'
-            : 'Jangan menyerah, coba lagi!';
-
-    return Dialog(
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(32)),
-      child: Container(
-        padding: const EdgeInsets.all(28),
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(32),
-          gradient: const LinearGradient(
-            colors: [Color(0xFF6C63FF), Color(0xFF48C6EF)],
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-          ),
-        ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Text(emoji, style: const TextStyle(fontSize: 64)),
-            const SizedBox(height: 12),
-            const Text(
-              'Ujian Selesai!',
-              style: TextStyle(fontSize: 24, fontWeight: FontWeight.w900, color: Colors.white),
-            ),
-            const SizedBox(height: 8),
-            Text(
-              message,
-              textAlign: TextAlign.center,
-              style: const TextStyle(fontSize: 15, color: Colors.white70),
-            ),
-            const SizedBox(height: 20),
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
-              decoration: BoxDecoration(
-                color: Colors.white.withOpacity(0.2),
-                borderRadius: BorderRadius.circular(20),
-              ),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Column(
-                    children: [
-                      Text('$score',
-                          style: const TextStyle(
-                              fontSize: 40, fontWeight: FontWeight.w900, color: Colors.white)),
-                      const Text('Nilai', style: TextStyle(color: Colors.white70, fontSize: 13)),
-                    ],
-                  ),
-                  const SizedBox(width: 24),
-                  Column(
-                    children: [
-                      Text('+$earnedPoints',
-                          style: const TextStyle(
-                              fontSize: 40, fontWeight: FontWeight.w900, color: Color(0xFFFFD166))),
-                      const Text('Poin XP', style: TextStyle(color: Colors.white70, fontSize: 13)),
-                    ],
-                  ),
-                ],
-              ),
-            ),
-            const SizedBox(height: 24),
-            Row(
-              children: [
-                Expanded(
-                  child: GestureDetector(
-                    onTap: Get.find<WritingExamController>().retryExam,
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(vertical: 14),
-                      decoration: BoxDecoration(
-                        color: Colors.white.withOpacity(0.25),
-                        borderRadius: BorderRadius.circular(16),
-                      ),
-                      child: const Center(
-                        child: Text('🔄 Ulangi',
-                            style: TextStyle(
-                                color: Colors.white, fontWeight: FontWeight.w800, fontSize: 15)),
-                      ),
-                    ),
-                  ),
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: GestureDetector(
-                    onTap: Get.find<WritingExamController>().exitExam,
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(vertical: 14),
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(16),
-                      ),
-                      child: const Center(
-                        child: Text('🏠 Selesai',
-                            style: TextStyle(
-                                color: Color(0xFF6C63FF),
-                                fontWeight: FontWeight.w800,
-                                fontSize: 15)),
-                      ),
-                    ),
-                  ),
-                ),
-              ],
-            )
-          ],
-        ),
-      ),
-    );
   }
 }

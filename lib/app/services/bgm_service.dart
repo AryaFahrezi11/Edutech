@@ -19,7 +19,7 @@ class BackgroundMusicService extends GetxService with WidgetsBindingObserver {
   Future<void> _initBgm() async {
     try {
       await _audioPlayer.setReleaseMode(ReleaseMode.loop);
-      await _audioPlayer.setVolume(0.3);
+      await _audioPlayer.setVolume(0.15); // Diturunkan agar tidak bentrok dengan TTS
       await _audioPlayer.setSource(AssetSource('audio/sound.mp3'));
       _isInitialized = true;
     } catch (e) {
@@ -32,7 +32,7 @@ class BackgroundMusicService extends GetxService with WidgetsBindingObserver {
     try {
       await _audioPlayer.stop();
       await _audioPlayer.setReleaseMode(ReleaseMode.loop);
-      await _audioPlayer.setVolume(0.3);
+      await _audioPlayer.setVolume(0.15); // Diturunkan agar lebih balance
       await _audioPlayer.play(AssetSource('audio/sound.mp3'));
       _isPlaying = true;
       _isInitialized = true;
@@ -46,7 +46,7 @@ class BackgroundMusicService extends GetxService with WidgetsBindingObserver {
     try {
       await _audioPlayer.stop();
       await _audioPlayer.setReleaseMode(ReleaseMode.loop);
-      await _audioPlayer.setVolume(0.5); // Sedikit lebih keras untuk battle
+      await _audioPlayer.setVolume(0.25); // Sedikit lebih keras untuk battle tapi tetap balance
       await _audioPlayer.play(AssetSource('audio/battle.mp3'));
       _isPlaying = true;
       _isInitialized = true;

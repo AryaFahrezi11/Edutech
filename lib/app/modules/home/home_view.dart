@@ -1,6 +1,7 @@
 import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:lottie/lottie.dart';
 import 'home_controller.dart';
 
 import '../leaderboard/views/leaderboard_view.dart';
@@ -155,7 +156,7 @@ class HomeView extends GetView<HomeController> {
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    const Text("🪙", style: TextStyle(fontSize: 16)),
+                    const Text("⭐", style: TextStyle(fontSize: 16)),
                     const SizedBox(width: 4),
                     Text(
                       "$points",
@@ -233,59 +234,78 @@ class HomeView extends GetView<HomeController> {
                   ),
 
                   // Mission Node Widgets — ditampilkan dari atas (node terakhir) ke bawah (node pertama)
-                  // Tapi secara logika: node index 0 di paling bawah, node terakhir di paling atas
                   ...List.generate(nodeCount, (i) {
-                    // Reverse: node 0 di bawah, node terakhir di atas
-                    // Tapi painter gambar dari atas ke bawah (index 0 di atas)
-                    // Jadi kita reverse saat menampilkan
                     final reversedIndex = nodeCount - 1 - i;
                     final node = controller.missionNodes[reversedIndex];
 
-                    // Posisi Y
                     final yPos = i * nodeSpacing + nodeSpacing / 2 - 34;
 
-                    // Posisi X zigzag
                     final screenWidth = Get.width;
                     final centerX = screenWidth / 2;
                     final patterns = [-zigzagOffset, 0.0, zigzagOffset, 0.0];
                     final xOffset = patterns[i % patterns.length];
-                    final xPos =
-                        centerX + xOffset - 50; // 50 = setengah lebar node
+                    final xPos = centerX + xOffset - 50;
 
-                    return Positioned(
-                      left: xPos,
-                      top: yPos,
-                      child: TweenAnimationBuilder<double>(
-                        tween: Tween(begin: 0, end: 1),
-                        duration: Duration(milliseconds: 400 + (i * 60)),
-                        curve: Curves.easeOutBack,
-                        builder: (_, v, child) {
-                          return Transform.scale(
-                            scale: v.clamp(0.0, 1.2),
-                            child: Opacity(
-                              opacity: v.clamp(0.0, 1.0),
-                              child: child,
+                    // Tentukan Lottie untuk lekukan
+                    String? lottieAsset;
+                    double? lottieX;
+                    if (i % 2 == 0) { // di lekukan (kiri/kanan), bukan di tengah (0.0)
+                       final lotties = [
+                        'assets/lotties/search.json',
+                        'assets/lotties/cute-cat.json',
+                        'assets/lotties/dog.json',
+                        'assets/lotties/owl.json',
+                        'assets/lotties/pencil.json',
+                        'assets/lotties/rabbit.json',
+                      ];
+                      lottieAsset = lotties[(i ~/ 2) % lotties.length];
+                      if (xOffset < 0) {
+                        lottieX = centerX + zigzagOffset + 10; // node kiri, lottie kanan
+                      } else if (xOffset > 0) {
+                        lottieX = centerX - zigzagOffset - 80; // node kanan, lottie kiri
+                      }
+                    }
+
+                    return [
+                      if (lottieAsset != null && lottieX != null)
+                        Positioned(
+                          left: lottieX,
+                          top: yPos - 10,
+                          child: Opacity(
+                            opacity: 0.85,
+                            child: Lottie.asset(lottieAsset, width: 80, height: 80),
+                          ),
+                        ),
+                      Positioned(
+                        left: xPos,
+                        top: yPos,
+                        child: TweenAnimationBuilder<double>(
+                          tween: Tween(begin: 0, end: 1),
+                          duration: Duration(milliseconds: 400 + (i * 60)),
+                          curve: Curves.easeOutBack,
+                          builder: (_, v, child) {
+                            return Transform.scale(
+                              scale: v.clamp(0.0, 1.2),
+                              child: Opacity(
+                                opacity: v.clamp(0.0, 1.0),
+                                child: child,
+                              ),
+                            );
+                          },
+                          child: SizedBox(
+                            width: 100,
+                            child: MissionNodeWidget(
+                              node: node,
+                              isCompleted: controller.isNodeCompleted(reversedIndex),
+                              isCurrent: controller.isCurrentNode(reversedIndex),
+                              isUnlocked: controller.isNodeUnlocked(reversedIndex),
+                              onTap: () => controller.navigateToNode(reversedIndex),
                             ),
-                          );
-                        },
-                        child: SizedBox(
-                          width: 100,
-                          child: MissionNodeWidget(
-                            node: node,
-                            isCompleted: controller.isNodeCompleted(
-                              reversedIndex,
-                            ),
-                            isCurrent: controller.isCurrentNode(reversedIndex),
-                            isUnlocked: controller.isNodeUnlocked(
-                              reversedIndex,
-                            ),
-                            onTap: () =>
-                                controller.navigateToNode(reversedIndex),
                           ),
                         ),
                       ),
-                    );
-                  }),
+                    ];
+                  }).expand((e) => e),
 
                   // Dekorasi: awan dan bintang di sepanjang path
                   ..._buildDecorations(nodeCount, nodeSpacing),
@@ -325,13 +345,13 @@ class HomeView extends GetView<HomeController> {
 
     for (int i = 0; i < nodeCount * 2; i++) {
       final yPos = random.nextDouble() * (nodeCount * nodeSpacing);
-      final xPos = random.nextBool()
-          ? random.nextDouble() * 50 +
-                10 // kiri
-          : Get.width - random.nextDouble() * 50 - 40; // kanan
+      final isLeft = random.nextBool();
+      final xPos = isLeft
+          ? random.nextDouble() * 50 + 10 // kiri
+          : Get.width - random.nextDouble() * 50 - 60; // kanan
+
       final emoji = emojis[random.nextInt(emojis.length)];
       final size = 14.0 + random.nextDouble() * 10;
-
       decorations.add(
         Positioned(
           left: xPos,
