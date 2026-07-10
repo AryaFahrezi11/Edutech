@@ -34,44 +34,46 @@ class PointService extends GetxService {
       _completedItems = savedItems.toSet();
     }
 
-    _checkDailyLogin();
   }
 
-  void _checkDailyLogin() {
+  int checkDailyLogin() {
     String? lastLoginStr = _prefs.getString('last_login_date');
     DateTime now = DateTime.now();
     String todayStr = "${now.year}-${now.month.toString().padLeft(2, '0')}-${now.day.toString().padLeft(2, '0')}";
 
-    if (lastLoginStr != todayStr) {
-      if (lastLoginStr != null) {
-        DateTime lastLoginDate = DateTime.parse(lastLoginStr);
-        // Jika login kemaren, tambah streak
-        if (now.difference(lastLoginDate).inDays == 1) {
-          streakDays.value++;
-        } else {
-          // Jika bolong, reset streak
-          streakDays.value = 1;
-        }
+    if (lastLoginStr == todayStr) return 0;
+
+    int pointsEarned = 10;
+    
+    if (lastLoginStr != null) {
+      DateTime lastLoginDate = DateTime.parse(lastLoginStr);
+      // Jika login kemaren, tambah streak
+      if (now.difference(lastLoginDate).inDays == 1) {
+        streakDays.value++;
       } else {
-        // Baru pertama kali install/login
+        // Jika bolong, reset streak
         streakDays.value = 1;
       }
-      
-      _prefs.setString('last_login_date', todayStr);
-      _prefs.setInt('streak_days', streakDays.value);
-
-      // Berikan poin login
-      addPoints(10);
-      Get.find<LogService>().addLog("Login Harian", "Rajin belajar setiap hari!", 10);
-      
-      if (streakDays.value >= 7) {
-        addPoints(200); // Bonus 1 minggu
-        Get.find<LogService>().addLog("Bonus 7 Hari", "Luar biasa! 7 hari berturut-turut!", 200);
-      } else if (streakDays.value >= 3) {
-        addPoints(50); // Bonus 3 hari
-        Get.find<LogService>().addLog("Bonus 3 Hari", "Keren! 3 hari berturut-turut!", 50);
-      }
+    } else {
+      // Baru pertama kali install/login
+      streakDays.value = 1;
     }
+    
+    _prefs.setString('last_login_date', todayStr);
+    _prefs.setInt('streak_days', streakDays.value);
+
+    Get.find<LogService>().addLog("Login Harian", "Rajin belajar setiap hari!", 10);
+    
+    if (streakDays.value >= 7) {
+      pointsEarned += 200; // Bonus 1 minggu
+      Get.find<LogService>().addLog("Bonus 7 Hari", "Luar biasa! 7 hari berturut-turut!", 200);
+    } else if (streakDays.value >= 3) {
+      pointsEarned += 50; // Bonus 3 hari
+      Get.find<LogService>().addLog("Bonus 3 Hari", "Keren! 3 hari berturut-turut!", 50);
+    }
+
+    addPoints(pointsEarned);
+    return pointsEarned;
   }
 
   void addPoints(int amount) {
@@ -100,28 +102,32 @@ class PointService extends GetxService {
 
   /// Memproses poin saat menyelesaikan suatu latihan.
   /// Return total poin yang didapatkan agar bisa dimunculkan di animasi.
-  int completeActivity(String itemId, {bool isWord = false, bool isExam = false, int stars = 3}) {
+  int completeActivity(String itemId, {bool isWord = false, bool isExam = false, int stars = 3, int totalItems = 1}) {
     int earned = 0;
+    bool isFirstTime = !_completedItems.contains(itemId);
 
-    if (isExam) {
-      if (stars == 3) earned += 100;
-      else if (stars == 2) earned += 50;
-      else earned += 20;
+    if (isFirstTime) {
+      // Tentukan poin dasar per item sesuai permintaan user (Pertama kali)
+      int basePerItem = 0;
+      if (!isExam && !isWord) basePerItem = 10; // Latihan Huruf
+      else if (isExam && !isWord) basePerItem = 20; // Ujian Huruf
+      else if (!isExam && isWord) basePerItem = 25; // Latihan Kata
+      else if (isExam && isWord) basePerItem = 35; // Ujian Kata
+
+      earned = basePerItem * totalItems;
+
+      // Sesuaikan dengan jumlah bintang (untuk ujian)
+      if (isExam) {
+        if (stars == 2) earned = (earned * 0.7).round();
+        else if (stars == 1) earned = (earned * 0.4).round();
+      }
+
+      // Catat item agar tau sudah dikerjakan
+      _completedItems.add(itemId);
+      _prefs.setStringList('completed_items', _completedItems.toList());
     } else {
-      bool isFirstTime = !_completedItems.contains(itemId);
-      
-      if (isWord) {
-        earned += isFirstTime ? 50 : 5; // Bonus pertama kali jauh lebih besar
-        earned += 20; // Poin dasar latihan kata
-      } else {
-        earned += isFirstTime ? 50 : 5;
-        earned += 10; // Poin dasar latihan huruf
-      }
-
-      if (isFirstTime) {
-        _completedItems.add(itemId);
-        _prefs.setStringList('completed_items', _completedItems.toList());
-      }
+      // Jika mengulang materi/ujian yang sama, berikan poin kecil agar tidak farming
+      earned = 5 * totalItems;
     }
 
     addPoints(earned);

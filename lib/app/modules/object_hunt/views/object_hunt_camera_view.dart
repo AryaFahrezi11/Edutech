@@ -256,8 +256,8 @@ class ObjectHuntCameraView extends GetView<ObjectHuntController> {
                                 const SizedBox(height: 20),
                                 GestureDetector(
                                   onTap: () {
-                                    Get.back(); // Kembali ke intro untuk item berikutnya
-                                    controller.goNext();
+                                    Get.back(); // Tutup CameraView
+                                    Get.back(); // Tutup IntroView (kembali ke SelectionView)
                                   },
                                   child: Container(
                                     padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 14),
@@ -269,7 +269,7 @@ class ObjectHuntCameraView extends GetView<ObjectHuntController> {
                                       boxShadow: EduTheme.buttonShadow(const Color(0xFF6C63FF)),
                                     ),
                                     child: const Text(
-                                      "Lanjut! →",
+                                      "Kembali",
                                       style: TextStyle(
                                         color: Colors.white,
                                         fontWeight: FontWeight.w900,

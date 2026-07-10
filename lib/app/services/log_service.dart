@@ -25,6 +25,15 @@ class ActivityLogModel {
       timestamp: json['timestamp'] ?? '',
     );
   }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'action': action,
+      'description': description,
+      'points_earned': pointsEarned,
+      'timestamp': timestamp,
+    };
+  }
 }
 
 class LogService extends GetxService {
@@ -35,7 +44,25 @@ class LogService extends GetxService {
 
   Future<LogService> init() async {
     _prefs = await SharedPreferences.getInstance();
+    _loadLocalLogs();
     return this;
+  }
+
+  void _loadLocalLogs() {
+    final String? cachedLogs = _prefs.getString('cached_logs');
+    if (cachedLogs != null && cachedLogs.isNotEmpty) {
+      try {
+        final List decoded = jsonDecode(cachedLogs);
+        logs.value = decoded.map((e) => ActivityLogModel.fromJson(e)).toList();
+      } catch (e) {
+        print("Error parsing cached logs: $e");
+      }
+    }
+  }
+
+  void _saveLocalLogs() {
+    final List<Map<String, dynamic>> data = logs.map((e) => e.toJson()).toList();
+    _prefs.setString('cached_logs', jsonEncode(data));
   }
 
   /// Menambahkan log baru ke backend
@@ -57,7 +84,17 @@ class LogService extends GetxService {
       );
 
       if (response.statusCode == 201) {
-        // Jika sedang di halaman profil, otomatis update daftar logs
+        // Optimistic update
+        final newLog = ActivityLogModel(
+          action: action,
+          description: description,
+          pointsEarned: points,
+          timestamp: DateTime.now().toIso8601String(),
+        );
+        logs.insert(0, newLog);
+        _saveLocalLogs();
+
+        // Tetap coba ambil dari API kalau berhasil
         fetchLogs();
       }
     } catch (e) {
@@ -87,6 +124,7 @@ class LogService extends GetxService {
         if (data['status'] == 'success') {
           final List logsData = data['logs'];
           logs.value = logsData.map((e) => ActivityLogModel.fromJson(e)).toList();
+          _saveLocalLogs(); // Simpan ke cache lokal
         }
       }
     } catch (e) {

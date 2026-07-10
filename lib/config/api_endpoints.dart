@@ -1,12 +1,13 @@
 class ApiEndpoints {
   // --- BASE URL ---
-  static const String baseUrl = "https://monoclinic-superboldly-tobi.ngrok-free.dev/api";
+  static const String baseUrl = "https://be-edutech.onrender.com/api";
 
   // --- AUTHENTICATION ---
   static const String register = "$baseUrl/register";
   static const String login = "$baseUrl/login";
   static const String verifyOtp = "$baseUrl/verify-otp";
   static const String googleLogin = "$baseUrl/google-login";
+  static const String updateProfile = "$baseUrl/update-profile";
 
   // --- FITUR UJIAN ---
   static const String ujianMengeja = "$baseUrl/ujian-membaca";

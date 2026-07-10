@@ -11,6 +11,7 @@ import '../../../widgets/point_animation.dart';
 
 class WritingPracticeController extends GetxController {
   var selectedLetter = 'A'.obs;
+  var category = 'uppercase'.obs;
   
   // Progress dari 0.0 sampai 1.0 pada stroke yang sedang aktif
   var currentStrokeProgress = 0.0.obs;
@@ -22,8 +23,7 @@ class WritingPracticeController extends GetxController {
   late Path currentLetterPath;
   late List<PathMetric> currentMetrics;
 
-  // Daftar alfabet untuk tombol navigasi
-  final List<String> alphabet = List.generate(26, (index) => String.fromCharCode(65 + index));
+  late List<String> alphabet;
 
   @override
   void onInit() {
@@ -31,6 +31,15 @@ class WritingPracticeController extends GetxController {
     
     if (Get.arguments != null && Get.arguments['letter'] != null) {
       selectedLetter.value = Get.arguments['letter'];
+    }
+    if (Get.arguments != null && Get.arguments['category'] != null) {
+      category.value = Get.arguments['category'];
+    }
+
+    if (category.value == 'lowercase') {
+      alphabet = List.generate(26, (index) => String.fromCharCode(97 + index));
+    } else {
+      alphabet = List.generate(26, (index) => String.fromCharCode(65 + index));
     }
 
     _loadCurrentLetterPath();
@@ -44,7 +53,12 @@ class WritingPracticeController extends GetxController {
   }
 
   void _loadCurrentLetterPath() {
-    final pathStr = LetterPaths.uppercasePaths[selectedLetter.value] ?? '';
+    String pathStr = '';
+    if (category.value == 'lowercase') {
+      pathStr = LetterPaths.lowercasePaths[selectedLetter.value] ?? '';
+    } else {
+      pathStr = LetterPaths.uppercasePaths[selectedLetter.value] ?? '';
+    }
     currentLetterPath = pathStr.isNotEmpty ? parseSvgPathData(pathStr) : Path();
     currentMetrics = currentLetterPath.computeMetrics().toList();
     
@@ -115,7 +129,11 @@ class WritingPracticeController extends GetxController {
   void checkGoresanAudit() {
     // Advance progress
     int currentIndex = alphabet.indexOf(selectedLetter.value);
-    Get.find<ProgressService>().completeWritingLetter(currentIndex);
+    if (category.value == 'lowercase') {
+      Get.find<ProgressService>().completeWritingLowercase(currentIndex);
+    } else {
+      Get.find<ProgressService>().completeWritingLetter(currentIndex);
+    }
 
     // Hitung poin
     int earned = Get.find<PointService>().completeActivity('write_letter_${selectedLetter.value}');

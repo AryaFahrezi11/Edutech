@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:audioplayers/audioplayers.dart';
 import 'app/routes/app_pages.dart';
 import 'app/routes/app_routes.dart';
 import 'app/services/bgm_service.dart';
@@ -8,9 +9,17 @@ import 'app/services/point_service.dart';
 import 'app/services/tts_service.dart';
 import 'app/services/sfx_service.dart';
 import 'app/services/log_service.dart';
+import 'app/services/gemini_service.dart';
+import 'app/services/mongodb_service.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  
+  // Konfigurasi agar AudioPlayers tidak mematikan suara satu sama lain
+  await AudioPlayer.global.setAudioContext(AudioContextConfig(
+    respectSilence: true,
+    focus: AudioContextConfigFocus.mixWithOthers,
+  ).build());
   
   // Initialize services
   Get.put(SfxService());
@@ -18,6 +27,8 @@ void main() async {
   await Get.putAsync(() => PointService().init());
   await Get.putAsync(() => TtsService().init());
   await Get.putAsync(() => LogService().init());
+  await Get.putAsync(() => GeminiService().init());
+  await Get.putAsync(() => MongoDbService().init());
   Get.put(BackgroundMusicService());
 
 

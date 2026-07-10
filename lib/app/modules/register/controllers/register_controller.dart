@@ -7,10 +7,19 @@ import '/config/api_endpoints.dart';
 import '/app/routes/app_routes.dart';
 
 class RegisterController extends GetxController {
-  final namaController = TextEditingController();
-  final emailController = TextEditingController();
-  final passwordController = TextEditingController();
-  final konfirmasiController = TextEditingController();
+  late TextEditingController namaController;
+  late TextEditingController emailController;
+  late TextEditingController passwordController;
+  late TextEditingController konfirmasiController;
+
+  @override
+  void onInit() {
+    super.onInit();
+    namaController = TextEditingController();
+    emailController = TextEditingController();
+    passwordController = TextEditingController();
+    konfirmasiController = TextEditingController();
+  }
 
   var isLoading = false.obs;
 

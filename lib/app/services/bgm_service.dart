@@ -19,7 +19,7 @@ class BackgroundMusicService extends GetxService with WidgetsBindingObserver {
   Future<void> _initBgm() async {
     try {
       await _audioPlayer.setReleaseMode(ReleaseMode.loop);
-      await _audioPlayer.setVolume(0.3);
+      await _audioPlayer.setVolume(0.15); // Diturunkan agar tidak bentrok dengan TTS
       await _audioPlayer.setSource(AssetSource('audio/sound.mp3'));
       _isInitialized = true;
     } catch (e) {
@@ -29,10 +29,29 @@ class BackgroundMusicService extends GetxService with WidgetsBindingObserver {
   
   Future<void> playBgm() async {
     _shouldPlay = true;
-    if (!_isInitialized) await _initBgm();
-    if (!_isPlaying) {
-      await _audioPlayer.resume();
+    try {
+      await _audioPlayer.stop();
+      await _audioPlayer.setReleaseMode(ReleaseMode.loop);
+      await _audioPlayer.setVolume(0.15); // Diturunkan agar lebih balance
+      await _audioPlayer.play(AssetSource('audio/sound.mp3'));
       _isPlaying = true;
+      _isInitialized = true;
+    } catch (e) {
+      print("Error memutar sound: $e");
+    }
+  }
+
+  Future<void> playBattleBgm() async {
+    _shouldPlay = true;
+    try {
+      await _audioPlayer.stop();
+      await _audioPlayer.setReleaseMode(ReleaseMode.loop);
+      await _audioPlayer.setVolume(0.25); // Sedikit lebih keras untuk battle tapi tetap balance
+      await _audioPlayer.play(AssetSource('audio/battle.mp3'));
+      _isPlaying = true;
+      _isInitialized = true;
+    } catch (e) {
+      print("Error memutar battle bgm: $e");
     }
   }
 

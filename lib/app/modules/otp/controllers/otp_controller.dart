@@ -6,7 +6,7 @@ import '/config/api_endpoints.dart';
 import '/app/routes/app_routes.dart';
 
 class OtpController extends GetxController {
-  final otpController = TextEditingController();
+  late TextEditingController otpController;
   var otpText = "".obs;
   var isLoading = false.obs;
   var email = "".obs;
@@ -14,6 +14,8 @@ class OtpController extends GetxController {
   @override
   void onInit() {
     super.onInit();
+    otpController = TextEditingController();
+    
     // Tangkap email dari argument (dari halaman Register atau Login)
     if (Get.arguments != null && Get.arguments['email'] != null) {
       email.value = Get.arguments['email'];

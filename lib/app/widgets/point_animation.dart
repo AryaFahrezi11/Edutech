@@ -30,10 +30,10 @@ class PointAnimation {
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    const Text("🪙", style: TextStyle(fontSize: 100)),
+                    const Text("⭐", style: TextStyle(fontSize: 100)),
                     const SizedBox(height: 16),
                     Text(
-                      "+$earnedPoints Poin!",
+                      "+$earnedPoints Bintang!",
                       style: const TextStyle(
                         fontSize: 32,
                         fontWeight: FontWeight.w900,

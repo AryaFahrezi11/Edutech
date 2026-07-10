@@ -1,4 +1,4 @@
-/// Data model dan daftar benda target untuk fitur Berburu Benda
+/// Data model dan daftar benda target untuk fitur Detektif Benda
 class HuntItem {
   final String id;
   final String nameId;     // Nama dalam Bahasa Indonesia

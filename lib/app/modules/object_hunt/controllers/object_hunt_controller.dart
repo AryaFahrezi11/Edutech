@@ -4,15 +4,16 @@ import 'package:permission_handler/permission_handler.dart';
 import '../../../services/point_service.dart';
 import '../../../services/progress_service.dart';
 import '../../../services/log_service.dart';
+import '../../../services/tts_service.dart';
+import '../../../services/sfx_service.dart';
 import '../data/hunt_items.dart';
 
 class ObjectHuntController extends GetxController {
-  // Benda yang harus dicari pada sesi ini (default latihan = 1 per sesi)
+  // Benda yang sedang dicari
   final targetItem = Rxn<HuntItem>();
-  final currentIndex = 0.obs;
+  int targetIndex = 0;
 
   // State deteksi
-  final isDetecting = false.obs;
   final isFound = false.obs;
   final detectedLabel = ''.obs;
   final confidence = 0.0.obs;
@@ -23,26 +24,32 @@ class ObjectHuntController extends GetxController {
   final matchingResult = Rxn<YOLOResult>();
   final yoloController = YOLOViewController();
 
-  // Progres latihan (berapa benda sudah ditemukan dari total)
-  final foundCount = 0.obs;
-  final totalItems = huntItems.length;
-
-  // Shuffle daftar benda agar urutannya acak setiap sesi
-  late final List<HuntItem> sessionItems;
-
   final _pointService = Get.find<PointService>();
   final _progressService = Get.find<ProgressService>();
   final _logService = Get.find<LogService>();
+  final _ttsService = Get.find<TtsService>();
+  final _sfxService = Get.find<SfxService>();
+
+  // Waktu pertama kali target terdeteksi secara konstan
+  DateTime? _firstDetectTime;
 
   @override
   void onInit() {
     super.onInit();
+    
+    // Dapatkan data dari navigasi (Selection Menu)
+    if (Get.arguments != null) {
+      targetItem.value = Get.arguments['item'];
+      targetIndex = Get.arguments['index'];
+      
+      // Sapaan saat masuk ke layar intro pencarian benda
+      if (targetItem.value != null) {
+        _ttsService.speak("Carilah ${targetItem.value!.nameId} di sekitarmu!");
+      }
+    }
+    
     // Matikan overlay bawaan dari package
     yoloController.setShowOverlays(false);
-    
-    // Acak urutan benda supaya tidak membosankan
-    sessionItems = List.from(huntItems)..shuffle();
-    _loadNextItem();
     _requestPermission();
   }
 
@@ -52,15 +59,6 @@ class ObjectHuntController extends GetxController {
       isCameraReady.value = true;
     } else {
       isPermissionDenied.value = true;
-    }
-  }
-
-  void _loadNextItem() {
-    if (currentIndex.value < sessionItems.length) {
-      targetItem.value = sessionItems[currentIndex.value];
-      isFound.value = false;
-      detectedLabel.value = '';
-      confidence.value = 0.0;
     }
   }
 
@@ -88,65 +86,43 @@ class ObjectHuntController extends GetxController {
       confidence.value = bestMatch.confidence;
 
       if (bestMatch.confidence > 0.7) {
-        isFound.value = true;
-        _pointService.addPoints(10);
-        foundCount.value++;
-        
-        // Catat aktivitas di log
-        _logService.addLog(
-          "Berhasil menemukan ${targetItem.value!.nameId} di Latihan Berburu!",
-          "practice",
-          10,
-        );
+        if (_firstDetectTime == null) {
+          _firstDetectTime = DateTime.now();
+        } else {
+          final diff = DateTime.now().difference(_firstDetectTime!);
+          if (diff.inMilliseconds > 1500) {
+            isFound.value = true;
+            final reward = targetItem.value!.xpReward;
+            _pointService.addPoints(reward);
+            _sfxService.playCoin();
+            
+            _ttsService.speak("Yey, kamu berhasil menemukan ${targetItem.value!.nameId}! Hebat sekali!");
+            
+            // Catat aktivitas di log
+            _logService.addLog(
+              "Latihan Detektif Benda",
+              "Berhasil menemukan ${targetItem.value!.nameId}!",
+              reward,
+            );
 
-        Future.delayed(const Duration(seconds: 2), () {
-          _loadNextItem();
-        });
+            // Simpan progress
+            _progressService.completeObjectHunt(targetIndex, huntItems.length);
+
+            // Beri jeda lebih lama sedikit agar anak menikmati momen
+            Future.delayed(const Duration(seconds: 4), () {
+              // Kembali ke halaman pemilihan
+              Get.back(); // Tutup CameraView
+              Get.back(); // Tutup IntroView (kembali ke SelectionView)
+            });
+          }
+        }
+      } else {
+        _firstDetectTime = null;
       }
     } else {
       matchingResult.value = null; // Hilangkan kotak jika target hilang
+      _firstDetectTime = null;
     }
   }
 
-  void _onItemFound() {
-    isFound.value = true;
-    foundCount.value++;
-
-    final item = targetItem.value!;
-    final earned = _pointService.completeActivity(
-      'hunt_${item.id}',
-      isWord: false,
-      isExam: false,
-    );
-
-    _logService.addLog(
-      "Berburu Benda",
-      "Berhasil menemukan ${item.nameId} ${item.emoji}!",
-      earned,
-    );
-
-    // Update progres kunci latihan
-    _progressService.completeObjectHunt(currentIndex.value);
-  }
-
-  /// User tap "Lanjut" setelah berhasil menemukan satu benda
-  void goNext() {
-    currentIndex.value++;
-    if (currentIndex.value >= sessionItems.length) {
-      // Selesai semua — kembali ke home
-      Get.offAllNamed('/home');
-    } else {
-      _loadNextItem();
-    }
-  }
-
-  /// User tap "Lewati" (skip) benda ini
-  void skipItem() {
-    currentIndex.value++;
-    if (currentIndex.value >= sessionItems.length) {
-      Get.offAllNamed('/home');
-    } else {
-      _loadNextItem();
-    }
-  }
 }

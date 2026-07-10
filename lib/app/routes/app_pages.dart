@@ -13,32 +13,44 @@ import '../modules/raport/views/raport_view.dart';
 import '../modules/register/bindings/register_binding.dart';
 import '../modules/register/views/register_view.dart';
 import '../modules/spelling_exam/bindings/spelling_exam_binding.dart';
+import '../modules/spelling_exam/bindings/spelling_exam_menu_binding.dart';
 import '../modules/spelling_exam/views/spelling_exam_category_view.dart';
 import '../modules/spelling_exam/views/spelling_exam_view.dart';
+import '../modules/spelling_exam/views/spelling_exam_menu_view.dart';
 import '../modules/spelling_practice/bindings/spelling_practice_binding.dart';
 import '../modules/spelling_practice/views/spelling_category_view.dart';
 import '../modules/spelling_practice/views/spelling_practice_view.dart';
 import '../modules/spelling_practice/views/spelling_letter_selection_view.dart';
 import '../modules/spelling_practice/views/spelling_word_selection_view.dart';
 import '../modules/writing_exam/bindings/writing_exam_binding.dart';
-import '../modules/writing_exam/views/writing_exam_category_view.dart';
 import '../modules/writing_exam/views/writing_exam_view.dart';
 import '../modules/writing_practice/bindings/letter_selection_binding.dart';
 import '../modules/writing_practice/bindings/writing_practice_binding.dart';
 import '../modules/writing_practice/views/letter_selection_view.dart';
-import '../modules/writing_practice/views/writing_category_view.dart';
 import '../modules/writing_practice/views/writing_practice_view.dart';
 import '../modules/writing_practice/views/word_selection_view.dart';
 import '../modules/writing_practice/views/word_practice_view.dart';
 import '../modules/object_hunt/bindings/object_hunt_binding.dart';
+import '../modules/object_hunt/bindings/object_hunt_selection_binding.dart';
+import '../modules/object_hunt/views/object_hunt_selection_view.dart';
 import '../modules/object_hunt/views/object_hunt_intro_view.dart';
 import '../modules/object_hunt/views/object_hunt_camera_view.dart';
 import '../modules/object_hunt/views/object_hunt_exam_intro_view.dart';
 import '../modules/object_hunt/views/object_hunt_exam_camera_view.dart';
-import '../modules/writing_practice/views/word_practice_view.dart';
+import '../modules/guess_object/bindings/guess_object_binding.dart';
+import '../modules/guess_object/views/guess_object_camera_view.dart';
 import '../modules/writing_practice/bindings/word_practice_binding.dart';
 import '../modules/otp/bindings/otp_binding.dart';
 import '../modules/otp/views/otp_view.dart';
+import '../modules/activity_log/views/activity_log_view.dart';
+import '../modules/edit_profile/bindings/edit_profile_binding.dart';
+import '../modules/edit_profile/views/edit_profile_view.dart';
+import '../modules/multiplayer/bindings/multiplayer_battle_binding.dart';
+import '../modules/multiplayer/views/multiplayer_menu_view.dart';
+import '../modules/multiplayer/views/multiplayer_lobby_view.dart';
+import '../modules/multiplayer/views/multiplayer_battle_view.dart';
+import '../modules/writing_exam/views/writing_exam_menu_view.dart';
+import '../modules/writing_exam/controllers/writing_exam_menu_controller.dart';
 import 'app_routes.dart';
 
 class AppPages {
@@ -81,10 +93,6 @@ class AppPages {
       binding: WritingPracticeBinding(),
     ),
     GetPage(
-      name: Routes.WRITING_CATEGORY,
-      page: () => const WritingCategoryView(),
-    ),
-    GetPage(
       name: Routes.LETTER_SELECTION,
       page: () => const LetterSelectionView(),
       binding: LetterSelectionBinding(),
@@ -95,8 +103,11 @@ class AppPages {
       binding: WritingExamBinding(),
     ),
     GetPage(
-      name: Routes.WRITING_EXAM_CATEGORY,
-      page: () => const WritingExamCategoryView(),
+      name: Routes.WRITING_EXAM_MENU,
+      page: () => const WritingExamMenuView(),
+      binding: BindingsBuilder(() {
+        Get.lazyPut<WritingExamMenuController>(() => WritingExamMenuController());
+      }),
     ),
     GetPage(
       name: Routes.WORD_SELECTION,
@@ -130,6 +141,11 @@ class AppPages {
       page: () => const SpellingCategoryView(),
     ),
     GetPage(
+      name: Routes.SPELLING_EXAM_MENU,
+      page: () => const SpellingExamMenuView(),
+      binding: SpellingExamMenuBinding(),
+    ),
+    GetPage(
       name: Routes.SPELLING_EXAM_CATEGORY,
       page: () => const SpellingExamCategoryView(),
     ),
@@ -140,13 +156,23 @@ class AppPages {
     ),
     // Object Hunt
     GetPage(
-      name: Routes.OBJECT_HUNT_PRACTICE,
+      name: Routes.OBJECT_HUNT_SELECTION,
+      page: () => const ObjectHuntSelectionView(),
+      binding: ObjectHuntSelectionBinding(),
+    ),
+    GetPage(
+      name: Routes.OBJECT_HUNT_INTRO,
       page: () => const ObjectHuntIntroView(),
       binding: ObjectHuntBinding(),
     ),
     GetPage(
       name: Routes.OBJECT_HUNT_CAMERA,
       page: () => const ObjectHuntCameraView(),
+    ),
+    GetPage(
+      name: Routes.GUESS_OBJECT_CAMERA,
+      page: () => const GuessObjectCameraView(),
+      binding: GuessObjectBinding(),
     ),
     GetPage(
       name: Routes.OBJECT_HUNT_EXAM,
@@ -156,6 +182,34 @@ class AppPages {
     GetPage(
       name: Routes.OBJECT_HUNT_EXAM_CAMERA,
       page: () => const ObjectHuntExamCameraView(),
+    ),
+    GetPage(
+      name: Routes.ACTIVITY_LOG,
+      page: () => const ActivityLogView(),
+      transition: Transition.rightToLeft,
+    ),
+    GetPage(
+      name: Routes.EDIT_PROFILE,
+      page: () => const EditProfileView(),
+      binding: EditProfileBinding(),
+      transition: Transition.downToUp,
+    ),
+    // Multiplayer
+    GetPage(
+      name: Routes.MULTIPLAYER_MENU,
+      page: () => const MultiplayerMenuView(),
+      transition: Transition.fadeIn,
+    ),
+    GetPage(
+      name: Routes.MULTIPLAYER_LOBBY,
+      page: () => const MultiplayerLobbyView(),
+      transition: Transition.rightToLeft,
+    ),
+    GetPage(
+      name: Routes.MULTIPLAYER_BATTLE,
+      page: () => const MultiplayerBattleView(),
+      binding: MultiplayerBattleBinding(),
+      transition: Transition.zoom,
     ),
   ];
 }

@@ -1,15 +1,18 @@
 import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:lottie/lottie.dart';
 import 'home_controller.dart';
 
 import '../leaderboard/views/leaderboard_view.dart';
 import '../profile/views/profile_view.dart';
+import '../multiplayer/views/multiplayer_menu_view.dart';
 import 'widgets/mission_node_widget.dart';
 import 'widgets/mission_path_painter.dart';
 import 'widgets/stats_bar_widget.dart';
 
 import '/app/services/point_service.dart';
+import '../../routes/app_routes.dart';
 
 class HomeView extends GetView<HomeController> {
   const HomeView({Key? key}) : super(key: key);
@@ -23,6 +26,7 @@ class HomeView extends GetView<HomeController> {
           index: controller.tabIndex.value,
           children: [
             _buildMissionMapContent(),
+            const MultiplayerMenuView(), // NEW TAB
             const LeaderboardView(),
             const ProfileView(),
           ],
@@ -99,10 +103,10 @@ class HomeView extends GetView<HomeController> {
                   ),
                 ],
               ),
-              child: const CircleAvatar(
+              child: CircleAvatar(
                 radius: 22,
-                backgroundColor: Color(0xFFFFD166),
-                child: Text("🧒", style: TextStyle(fontSize: 26)),
+                backgroundColor: const Color(0xFFFFD166),
+                child: Obx(() => Text(controller.userAvatar.value, style: const TextStyle(fontSize: 26))),
               ),
             ),
             const SizedBox(width: 14),
@@ -111,14 +115,14 @@ class HomeView extends GetView<HomeController> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text(
-                    "Halo, Petualang! 🌟",
-                    style: TextStyle(
+                  Obx(() => Text(
+                    "Halo, ${controller.userName.value} ! 🌟",
+                    style: const TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.w900,
                       color: Colors.white,
                     ),
-                  ),
+                  )),
                   const SizedBox(height: 2),
                   Obx(
                     () => Text(
@@ -152,7 +156,7 @@ class HomeView extends GetView<HomeController> {
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    const Text("🪙", style: TextStyle(fontSize: 16)),
+                    const Text("⭐", style: TextStyle(fontSize: 16)),
                     const SizedBox(width: 4),
                     Text(
                       "$points",
@@ -230,59 +234,78 @@ class HomeView extends GetView<HomeController> {
                   ),
 
                   // Mission Node Widgets — ditampilkan dari atas (node terakhir) ke bawah (node pertama)
-                  // Tapi secara logika: node index 0 di paling bawah, node terakhir di paling atas
                   ...List.generate(nodeCount, (i) {
-                    // Reverse: node 0 di bawah, node terakhir di atas
-                    // Tapi painter gambar dari atas ke bawah (index 0 di atas)
-                    // Jadi kita reverse saat menampilkan
                     final reversedIndex = nodeCount - 1 - i;
                     final node = controller.missionNodes[reversedIndex];
 
-                    // Posisi Y
                     final yPos = i * nodeSpacing + nodeSpacing / 2 - 34;
 
-                    // Posisi X zigzag
                     final screenWidth = Get.width;
                     final centerX = screenWidth / 2;
                     final patterns = [-zigzagOffset, 0.0, zigzagOffset, 0.0];
                     final xOffset = patterns[i % patterns.length];
-                    final xPos =
-                        centerX + xOffset - 50; // 50 = setengah lebar node
+                    final xPos = centerX + xOffset - 50;
 
-                    return Positioned(
-                      left: xPos,
-                      top: yPos,
-                      child: TweenAnimationBuilder<double>(
-                        tween: Tween(begin: 0, end: 1),
-                        duration: Duration(milliseconds: 400 + (i * 60)),
-                        curve: Curves.easeOutBack,
-                        builder: (_, v, child) {
-                          return Transform.scale(
-                            scale: v.clamp(0.0, 1.2),
-                            child: Opacity(
-                              opacity: v.clamp(0.0, 1.0),
-                              child: child,
+                    // Tentukan Lottie untuk lekukan
+                    String? lottieAsset;
+                    double? lottieX;
+                    if (i % 2 == 0) { // di lekukan (kiri/kanan), bukan di tengah (0.0)
+                       final lotties = [
+                        'assets/lotties/search.json',
+                        'assets/lotties/cute-cat.json',
+                        'assets/lotties/dog.json',
+                        'assets/lotties/owl.json',
+                        'assets/lotties/pencil.json',
+                        'assets/lotties/rabbit.json',
+                      ];
+                      lottieAsset = lotties[(i ~/ 2) % lotties.length];
+                      if (xOffset < 0) {
+                        lottieX = centerX + zigzagOffset + 10; // node kiri, lottie kanan
+                      } else if (xOffset > 0) {
+                        lottieX = centerX - zigzagOffset - 80; // node kanan, lottie kiri
+                      }
+                    }
+
+                    return [
+                      if (lottieAsset != null && lottieX != null)
+                        Positioned(
+                          left: lottieX,
+                          top: yPos - 10,
+                          child: Opacity(
+                            opacity: 0.85,
+                            child: Lottie.asset(lottieAsset, width: 80, height: 80),
+                          ),
+                        ),
+                      Positioned(
+                        left: xPos,
+                        top: yPos,
+                        child: TweenAnimationBuilder<double>(
+                          tween: Tween(begin: 0, end: 1),
+                          duration: Duration(milliseconds: 400 + (i * 60)),
+                          curve: Curves.easeOutBack,
+                          builder: (_, v, child) {
+                            return Transform.scale(
+                              scale: v.clamp(0.0, 1.2),
+                              child: Opacity(
+                                opacity: v.clamp(0.0, 1.0),
+                                child: child,
+                              ),
+                            );
+                          },
+                          child: SizedBox(
+                            width: 100,
+                            child: MissionNodeWidget(
+                              node: node,
+                              isCompleted: controller.isNodeCompleted(reversedIndex),
+                              isCurrent: controller.isCurrentNode(reversedIndex),
+                              isUnlocked: controller.isNodeUnlocked(reversedIndex),
+                              onTap: () => controller.navigateToNode(reversedIndex),
                             ),
-                          );
-                        },
-                        child: SizedBox(
-                          width: 100,
-                          child: MissionNodeWidget(
-                            node: node,
-                            isCompleted: controller.isNodeCompleted(
-                              reversedIndex,
-                            ),
-                            isCurrent: controller.isCurrentNode(reversedIndex),
-                            isUnlocked: controller.isNodeUnlocked(
-                              reversedIndex,
-                            ),
-                            onTap: () =>
-                                controller.navigateToNode(reversedIndex),
                           ),
                         ),
                       ),
-                    );
-                  }),
+                    ];
+                  }).expand((e) => e),
 
                   // Dekorasi: awan dan bintang di sepanjang path
                   ..._buildDecorations(nodeCount, nodeSpacing),
@@ -322,13 +345,13 @@ class HomeView extends GetView<HomeController> {
 
     for (int i = 0; i < nodeCount * 2; i++) {
       final yPos = random.nextDouble() * (nodeCount * nodeSpacing);
-      final xPos = random.nextBool()
-          ? random.nextDouble() * 50 +
-                10 // kiri
-          : Get.width - random.nextDouble() * 50 - 40; // kanan
+      final isLeft = random.nextBool();
+      final xPos = isLeft
+          ? random.nextDouble() * 50 + 10 // kiri
+          : Get.width - random.nextDouble() * 50 - 60; // kanan
+
       final emoji = emojis[random.nextInt(emojis.length)];
       final size = 14.0 + random.nextDouble() * 10;
-
       decorations.add(
         Positioned(
           left: xPos,
@@ -381,6 +404,10 @@ class HomeView extends GetView<HomeController> {
               BottomNavigationBarItem(
                 icon: Icon(Icons.map_rounded, size: 28),
                 label: 'Peta Misi',
+              ),
+              BottomNavigationBarItem(
+                icon: Icon(Icons.sports_esports_rounded, size: 28),
+                label: 'Arena Duel',
               ),
               BottomNavigationBarItem(
                 icon: Icon(Icons.emoji_events_rounded, size: 28),

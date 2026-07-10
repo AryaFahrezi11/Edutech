@@ -10,9 +10,9 @@ class SfxService extends GetxService {
   @override
   void onInit() {
     super.onInit();
-    _successPlayer.setVolume(1.0);
-    _wrongPlayer.setVolume(1.0);
-    _coinPlayer.setVolume(1.0);
+    _successPlayer.setVolume(0.7); // Sedikit diturunkan agar balance dengan TTS
+    _wrongPlayer.setVolume(0.7);
+    _coinPlayer.setVolume(0.8);
   }
 
   Future<void> playSuccess() async {
