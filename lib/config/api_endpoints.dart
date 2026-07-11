@@ -10,6 +10,7 @@ class ApiEndpoints {
   static const String updateProfile = "$baseUrl/update-profile";
   static const String forgotPassword = "$baseUrl/forgot-password";
   static const String resetPassword = "$baseUrl/reset-password";
+  static const String evaluateAi = "$baseUrl/evaluate-ai";
 
   // --- FITUR UJIAN ---
   static const String ujianMengeja = "$baseUrl/ujian-membaca";
