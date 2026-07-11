@@ -249,6 +249,39 @@ class ProgressService extends GetxService {
       "completed_hunt_items": completedObjectHuntItems.toList(),
     };
   }
+
+  void clearData() {
+    unlockedWritingLetter.value = 0;
+    unlockedWritingLowercase.value = 0;
+    unlockedWritingWord.value = 0;
+    unlockedSpellingLetter.value = 0;
+    unlockedSpellingWord.value = 0;
+    unlockedSpellingExamLetter.value = 0;
+    unlockedSpellingExamWord.value = 0;
+    unlockedWritingExamLetter.value = 0;
+    unlockedWritingExamLowercase.value = 0;
+    unlockedWritingExamWord.value = 0;
+    
+    currentMissionIndex.value = 0;
+    completedMissions.clear();
+    completedObjectHuntItems.clear();
+    hasNewUnlockedNode.value = false;
+
+    _prefs.remove('unlocked_writing_letter');
+    _prefs.remove('unlocked_writing_lowercase');
+    _prefs.remove('unlocked_writing_word');
+    _prefs.remove('unlocked_spelling_letter');
+    _prefs.remove('unlocked_spelling_word');
+    _prefs.remove('unlocked_spelling_exam_letter');
+    _prefs.remove('unlocked_spelling_exam_word');
+    _prefs.remove('unlocked_writing_exam_letter');
+    _prefs.remove('unlocked_writing_exam_lowercase');
+    _prefs.remove('unlocked_writing_exam_word');
+    _prefs.remove('current_mission_index');
+    _prefs.remove('completed_missions');
+    _prefs.remove('completed_hunt_items');
+    _prefs.remove('has_new_unlocked_node');
+  }
   
   void _syncToBackend() async {
     try {

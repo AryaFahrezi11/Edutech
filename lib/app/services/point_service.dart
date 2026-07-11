@@ -100,6 +100,18 @@ class PointService extends GetxService {
     currentCombo.value = 0;
   }
 
+  void clearData() {
+    totalPoints.value = 0;
+    streakDays.value = 0;
+    currentCombo.value = 0;
+    _completedItems.clear();
+    
+    _prefs.remove('total_points');
+    _prefs.remove('streak_days');
+    _prefs.remove('last_login_date');
+    _prefs.remove('completed_items');
+  }
+
   /// Memproses poin saat menyelesaikan suatu latihan.
   /// Return total poin yang didapatkan agar bisa dimunculkan di animasi.
   int completeActivity(String itemId, {bool isWord = false, bool isExam = false, int stars = 3, int totalItems = 1}) {

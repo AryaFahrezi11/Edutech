@@ -65,6 +65,11 @@ class LogService extends GetxService {
     _prefs.setString('cached_logs', jsonEncode(data));
   }
 
+  void clearData() {
+    logs.clear();
+    _prefs.remove('cached_logs');
+  }
+
   /// Menambahkan log baru ke backend
   Future<void> addLog(String action, String description, int points) async {
     try {
