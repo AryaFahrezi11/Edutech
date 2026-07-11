@@ -39,9 +39,10 @@ class WritingExamController extends GetxController
       'capital': capitals,
       'lowercase': lowercases,
       'word': [
-        {'letter': 'Kucing', 'hint': 'Hewan lucu yang mengeong', 'emoji': '🐱'},
-        {'letter': 'Apel', 'hint': 'Buah berwarna merah atau hijau', 'emoji': '🍎'},
         {'letter': 'Bola', 'hint': 'Ditendang saat main bola', 'emoji': '⚽'},
+        {'letter': 'Gigi', 'hint': 'Digunakan untuk mengunyah makanan', 'emoji': '🦷'},
+        {'letter': 'Kucing', 'hint': 'Hewan lucu yang mengeong', 'emoji': '🐱'},
+        {'letter': 'Mobil', 'hint': 'Kendaraan beroda empat', 'emoji': '🚗'},
         {'letter': 'Kursi', 'hint': 'Tempat untuk duduk', 'emoji': '🪑'},
         {'letter': 'Botol', 'hint': 'Tempat menyimpan air minum', 'emoji': '🍶'},
         {'letter': 'Buku', 'hint': 'Benda untuk dibaca', 'emoji': '📚'},
@@ -51,6 +52,7 @@ class WritingExamController extends GetxController
         {'letter': 'Laptop', 'hint': 'Komputer yang bisa dilipat', 'emoji': '💻'},
         {'letter': 'Gunting', 'hint': 'Alat memotong kertas', 'emoji': '✂️'},
         {'letter': 'Meja', 'hint': 'Tempat meletakkan barang', 'emoji': '🍽️'},
+        {'letter': 'Handphone', 'hint': 'Alat komunikasi untuk menelepon', 'emoji': '📱'},
       ],
 
     };
@@ -264,15 +266,21 @@ class WritingExamController extends GetxController
       final progressService = Get.find<ProgressService>();
       final cat = Get.arguments?['category'] as String? ?? 'capital';
       if (cat == 'capital') {
-        progressService.completeWritingLetter(currentLetterIndex.value);
+        progressService.completeWritingExamLetter(currentLetterIndex.value);
       } else if (cat == 'lowercase') {
-        progressService.completeWritingLowercase(currentLetterIndex.value);
+        progressService.completeWritingExamLowercase(currentLetterIndex.value);
       } else {
-        progressService.completeWritingWord(currentLetterIndex.value);
+        progressService.completeWritingExamWord(currentLetterIndex.value);
       }
 
       if (missionIndex != null) {
-        progressService.completeMissionNode(missionIndex!);
+        if (cat == 'capital' && progressService.unlockedWritingExamLetter.value >= 5) {
+          progressService.completeMissionNode(missionIndex!);
+        } else if (cat == 'lowercase' && progressService.unlockedWritingExamLowercase.value >= 5) {
+          progressService.completeMissionNode(missionIndex!);
+        } else if (cat == 'word' && progressService.unlockedWritingExamWord.value >= 5) {
+          progressService.completeMissionNode(missionIndex!);
+        }
       }
 
       final String examId = 'writing_exam_${cat}_${currentLetterIndex.value}';

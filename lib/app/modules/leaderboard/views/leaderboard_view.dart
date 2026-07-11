@@ -203,7 +203,7 @@ class LeaderboardView extends GetView<LeaderboardController> {
                             curve: Curves.easeOutBack,
                             builder: (_, v, child) => Transform.translate(
                               offset: Offset(30 * (1 - v), 0),
-                              child: Opacity(opacity: v, child: child),
+                              child: Opacity(opacity: v.clamp(0.0, 1.0), child: child),
                             ),
                             child: _rankTile(
                               rank: item["rank"].toString(),

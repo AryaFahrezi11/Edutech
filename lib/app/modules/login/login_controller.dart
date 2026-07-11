@@ -69,7 +69,12 @@ class LoginController extends GetxController {
         await prefs.setString('user_name', userData['nama_lengkap']);
         await prefs.setString('user_avatar', userData['profile_pict'] ?? "🧒");
 
-        // Fetch progres dari backend
+        // Bersihkan data lokal lama (untuk mencegah kebocoran data jika beda akun)
+        Get.find<PointService>().clearData();
+        Get.find<ProgressService>().clearData();
+        Get.find<LogService>().clearData();
+
+        // Fetch progres dari backend (akan menimpa data kosong jika ada riwayat)
         await _fetchProgressFromBackend(userData['email']);
         
         // Fetch log aktivitas agar tersinkronisasi di HP baru

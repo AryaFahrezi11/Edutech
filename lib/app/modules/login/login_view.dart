@@ -162,6 +162,23 @@ class LoginView extends GetView<LoginController> {
                         obscure: true,
                         controller: controller.passwordController,
                       ),
+                      const SizedBox(height: 12),
+                      
+                      Align(
+                        alignment: Alignment.centerRight,
+                        child: GestureDetector(
+                          onTap: () {
+                            Get.toNamed(Routes.FORGOT_PASSWORD);
+                          },
+                          child: const Text(
+                            "Lupa Password?",
+                            style: TextStyle(
+                              color: EduTheme.primary,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ),
+                      ),
 
                       const SizedBox(height: 24),
 

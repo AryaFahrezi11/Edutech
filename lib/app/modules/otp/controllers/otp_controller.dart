@@ -74,7 +74,7 @@ class OtpController extends GetxController {
 
         // Bawa ke halaman login
         Future.delayed(const Duration(seconds: 2), () {
-          Get.offAllNamed(Routes.LOGIN);
+          Get.until((route) => route.settings.name == Routes.LOGIN);
         });
       } else {
         // --- VERIFIKASI GAGAL ---

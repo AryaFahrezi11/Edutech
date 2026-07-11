@@ -32,11 +32,6 @@ class ProfileController extends GetxController {
   int get totalPoints => pointService.totalPoints.value;
   int get streakDays => pointService.streakDays.value;
   
-  // Karena _completedItems bersifat private di PointService,
-  // kita ambil jumlah dari gabungan progress yang ada.
-  // Tapi progressService memiliki getUnlockedLetters, dll yang bisa dihitung.
-  int get totalMissions => progressService.unlockedWritingLetter.value 
-                         + progressService.unlockedWritingWord.value
-                         + progressService.unlockedSpellingLetter.value
-                         + progressService.unlockedSpellingWord.value;
+  // Mengambil total Misi yang benar-benar telah diselesaikan dari Peta Misi
+  int get totalMissions => progressService.completedMissions.length;
 }

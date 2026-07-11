@@ -82,14 +82,6 @@ class ProfileView extends GetView<ProfileController> {
               ),
 
               _buildMenuButton(
-                emoji: '🏆',
-                title: 'Pencapaianku',
-                subtitle: 'Lihat piala dan medali',
-                color: EduTheme.gold,
-                onTap: () {},
-              ),
-
-              _buildMenuButton(
                 emoji: '📊',
                 title: 'Rapor Belajar',
                 subtitle: 'Cek perkembangan hebatmu',
@@ -114,7 +106,9 @@ class ProfileView extends GetView<ProfileController> {
                 title: 'Pengaturan',
                 subtitle: 'Suara, musik, dan privasi',
                 color: EduTheme.textLight,
-                onTap: () {},
+                onTap: () {
+                  Get.toNamed('/settings');
+                },
               ),
 
               const SizedBox(height: 20),

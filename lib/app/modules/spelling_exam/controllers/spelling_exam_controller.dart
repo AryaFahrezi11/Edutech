@@ -56,18 +56,20 @@ class SpellingExamController extends GetxController with GetSingleTickerProvider
     
     if (cat == 'word') {
       return [
-        {'answer': 'KUCING', 'icon': '🐱'},
-        {'answer': 'APEL', 'icon': '🍎'},
         {'answer': 'BOLA', 'icon': '⚽'},
+        {'answer': 'GIGI', 'icon': '🦷'},
+        {'answer': 'KUCING', 'icon': '🐱'},
+        {'answer': 'MOBIL', 'icon': '🚗'},
         {'answer': 'KURSI', 'icon': '🪑'},
-        {'answer': 'BOTOL', 'icon': '🍼'},
+        {'answer': 'BOTOL', 'icon': '🍶'},
         {'answer': 'BUKU', 'icon': '📚'},
-        {'answer': 'GELAS', 'icon': '🥛'},
+        {'answer': 'GELAS', 'icon': '🥤'},
         {'answer': 'TAS', 'icon': '🎒'},
-        {'answer': 'JAM', 'icon': '⏰'},
+        {'answer': 'JAM', 'icon': '🕐'},
         {'answer': 'LAPTOP', 'icon': '💻'},
         {'answer': 'GUNTING', 'icon': '✂️'},
-        {'answer': 'MEJA', 'icon': '🪑'},
+        {'answer': 'MEJA', 'icon': '🍽️'},
+        {'answer': 'HANDPHONE', 'icon': '📱'},
       ];
     } else if (cat == 'lowercase') {
       return lowercases;
@@ -279,7 +281,11 @@ class SpellingExamController extends GetxController with GetSingleTickerProvider
       }
 
       if (missionIndex != null) {
-        progressService.completeMissionNode(missionIndex!);
+        if (category == 'word' && progressService.unlockedSpellingExamWord.value >= 5) {
+          progressService.completeMissionNode(missionIndex!);
+        } else if (category != 'word' && progressService.unlockedSpellingExamLetter.value >= 5) {
+          progressService.completeMissionNode(missionIndex!);
+        }
       }
 
       final String examId = 'exam_spelling_${category}_${currentQuestionIndex.value}';

@@ -1,6 +1,8 @@
 abstract class Routes {
   static const SPLASH = '/splash';
   static const LOGIN = '/login';
+  static const FORGOT_PASSWORD = '/forgot-password';
+  static const RESET_PASSWORD = '/reset-password';
   static const HOME = '/home';
   static const REGISTER = '/register';
   static const LEADERBOARD = '/leaderboard';
@@ -37,4 +39,7 @@ abstract class Routes {
   static const MULTIPLAYER_MENU = '/multiplayer-menu';
   static const MULTIPLAYER_LOBBY = '/multiplayer-lobby';
   static const MULTIPLAYER_BATTLE = '/multiplayer-battle';
+  
+  // Settings
+  static const SETTINGS = '/settings';
 }

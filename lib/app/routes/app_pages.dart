@@ -12,6 +12,10 @@ import '../modules/raport/bindings/raport_binding.dart';
 import '../modules/raport/views/raport_view.dart';
 import '../modules/register/bindings/register_binding.dart';
 import '../modules/register/views/register_view.dart';
+import '../modules/forgot_password/bindings/forgot_password_binding.dart';
+import '../modules/forgot_password/views/forgot_password_view.dart';
+import '../modules/reset_password/bindings/reset_password_binding.dart';
+import '../modules/reset_password/views/reset_password_view.dart';
 import '../modules/spelling_exam/bindings/spelling_exam_binding.dart';
 import '../modules/spelling_exam/bindings/spelling_exam_menu_binding.dart';
 import '../modules/spelling_exam/views/spelling_exam_category_view.dart';
@@ -51,6 +55,8 @@ import '../modules/multiplayer/views/multiplayer_lobby_view.dart';
 import '../modules/multiplayer/views/multiplayer_battle_view.dart';
 import '../modules/writing_exam/views/writing_exam_menu_view.dart';
 import '../modules/writing_exam/controllers/writing_exam_menu_controller.dart';
+import '../modules/settings/views/settings_view.dart';
+import '../modules/settings/bindings/settings_binding.dart';
 import 'app_routes.dart';
 
 class AppPages {
@@ -76,6 +82,16 @@ class AppPages {
       name: Routes.REGISTER,
       page: () => const RegisterView(),
       binding: RegisterBinding(),
+    ),
+    GetPage(
+      name: Routes.FORGOT_PASSWORD,
+      page: () => const ForgotPasswordView(),
+      binding: ForgotPasswordBinding(),
+    ),
+    GetPage(
+      name: Routes.RESET_PASSWORD,
+      page: () => const ResetPasswordView(),
+      binding: ResetPasswordBinding(),
     ),
     GetPage(
       name: Routes.LEADERBOARD,
@@ -210,6 +226,12 @@ class AppPages {
       page: () => const MultiplayerBattleView(),
       binding: MultiplayerBattleBinding(),
       transition: Transition.zoom,
+    ),
+    GetPage(
+      name: Routes.SETTINGS,
+      page: () => const SettingsView(),
+      binding: SettingsBinding(),
+      transition: Transition.rightToLeft,
     ),
   ];
 }
