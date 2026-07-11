@@ -60,10 +60,10 @@ class WordPracticeController extends GetxController {
     List<LetterData> tempData = [];
     for (int i = 0; i < word.length; i++) {
       String char = word[i].toUpperCase();
-      
-      // Khusus untuk huruf I, gunakan 'i' kecil agar ada titiknya sesuai permintaan
-      if (char == 'I') {
-        char = 'i';
+      // Khusus untuk huruf I dan J, gunakan huruf kecil agar ada titiknya sesuai permintaan user
+      // dan tidak ada sabuk/garis horizontal di atas/bawah
+      if (char == 'I' || char == 'J') {
+        char = char.toLowerCase();
       }
 
       String pathStr = '';
