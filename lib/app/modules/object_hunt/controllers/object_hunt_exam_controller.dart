@@ -71,6 +71,7 @@ class ObjectHuntExamController extends GetxController {
   }
 
   void _startTimer() {
+    _timer?.cancel(); // Cancel any existing timer to prevent lost reference bugs
     isExamActive.value = true;
     _timer = Timer.periodic(const Duration(seconds: 1), (t) {
       if (timeLeft.value <= 0) {
@@ -161,6 +162,8 @@ class ObjectHuntExamController extends GetxController {
   }
 
   void _endExam() {
+    if (isExamFinished.value) return; // Prevent multiple calls
+
     _timer?.cancel();
     isExamActive.value = false;
     isExamFinished.value = true;
@@ -175,14 +178,17 @@ class ObjectHuntExamController extends GetxController {
       stars = 1;
     }
 
-    // Berikan poin
-    final earned = _pointService.completeActivity(
-      'hunt_exam_${foundCount.value}',
-      isExam: true,
-      isWord: true,
-      totalItems: foundCount.value > 0 ? foundCount.value : 1, // Minimal 1 pengali kalau mau
-      stars: stars,
-    );
+    // Berikan poin (jika 0 yang ditemukan, tidak ada koin sama sekali)
+    int earned = 0;
+    if (foundCount.value > 0) {
+      earned = _pointService.completeActivity(
+        'hunt_exam_${foundCount.value}',
+        isExam: true,
+        isWord: true,
+        totalItems: foundCount.value,
+        stars: stars,
+      );
+    }
     
     _sfxService.playCoin();
     _ttsService.speak("Hore! Waktu habis. Kamu menemukan ${foundCount.value} benda!");
