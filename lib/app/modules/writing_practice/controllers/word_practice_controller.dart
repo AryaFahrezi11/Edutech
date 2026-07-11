@@ -33,6 +33,7 @@ class WordPracticeController extends GetxController {
   var lettersData = <LetterData>[].obs;
 
   late int wordIndex;
+  int? missionIndex;
 
   @override
   void onInit() {
@@ -44,6 +45,7 @@ class WordPracticeController extends GetxController {
     
     word = Get.arguments?['word'] ?? 'BOLA';
     wordIndex = Get.arguments?['index'] ?? 0;
+    missionIndex = Get.arguments?['mission_index'];
     _initLetters();
     _announceStart();
   }
@@ -126,6 +128,10 @@ class WordPracticeController extends GetxController {
   void checkGoresanAudit() {
     // Advance progress
     Get.find<ProgressService>().completeWritingWord(wordIndex);
+    
+    if (missionIndex != null && Get.find<ProgressService>().unlockedWritingWord.value >= 5) {
+      Get.find<ProgressService>().completeMissionNode(missionIndex!);
+    }
 
     // Hitung Poin
     int earned = Get.find<PointService>().completeActivity('write_word_$word', isWord: true);

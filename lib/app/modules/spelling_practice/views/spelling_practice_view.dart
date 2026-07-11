@@ -479,7 +479,11 @@ class SpellingPracticeView extends GetView<SpellingPracticeController> {
                                     icon: controller.isListening.value 
                                         ? const Icon(Icons.mic_rounded, size: 26)
                                         : const Icon(Icons.mic_none_rounded, size: 26),
-                                    label: const Text("LAFALKAN", style: TextStyle(fontWeight: FontWeight.bold)),
+                                    label: Text(
+                                      controller.isListening.value 
+                                        ? "MENDENGAR..." 
+                                        : "BILANG: HURUF ${controller.currentItem['upper']}", 
+                                      style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 12)),
                                     style: ElevatedButton.styleFrom(
                                       backgroundColor: controller.isListening.value ? Colors.red : const Color(0xFF1CB0F6),
                                       foregroundColor: Colors.white,

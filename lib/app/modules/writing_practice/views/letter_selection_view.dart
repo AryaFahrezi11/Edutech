@@ -75,6 +75,7 @@ class LetterSelectionView extends GetView<LetterSelectionController> {
                             'letter': letter,
                             'index': index,
                             'category': controller.category.value,
+                            'mission_index': controller.missionIndex,
                           });
                         },
                       ),

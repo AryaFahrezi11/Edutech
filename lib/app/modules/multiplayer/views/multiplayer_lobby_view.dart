@@ -37,6 +37,7 @@ class _MultiplayerLobbyViewState extends State<MultiplayerLobbyView> {
   }
 
   void _startBattle() {
+    final missionIndex = Get.arguments?['mission_index'] as int?;
     String p1 = player1Controller.text.trim();
     String p2 = player2Controller.text.trim();
 
@@ -46,6 +47,7 @@ class _MultiplayerLobbyViewState extends State<MultiplayerLobbyView> {
     Get.toNamed(Routes.MULTIPLAYER_BATTLE, arguments: {
       'player1': p1,
       'player2': p2,
+      'mission_index': missionIndex,
     });
   }
 

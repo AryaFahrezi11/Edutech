@@ -4,6 +4,7 @@ import '../../../services/tts_service.dart';
 class LetterSelectionController extends GetxController {
   late List<String> letters;
   var category = 'uppercase'.obs;
+  int? missionIndex;
 
   @override
   void onInit() {
@@ -11,6 +12,11 @@ class LetterSelectionController extends GetxController {
     
     if (Get.arguments != null && Get.arguments['category'] != null) {
       category.value = Get.arguments['category'];
+    }
+    
+    // Simpan mission_index jika ada
+    if (Get.arguments != null && Get.arguments['mission_index'] != null) {
+      missionIndex = Get.arguments['mission_index'];
     }
 
     if (category.value == 'lowercase') {

@@ -9,14 +9,17 @@ import 'package:flutter/material.dart';
 class SpellingExamMenuController extends GetxController {
   final ProgressService progressService = Get.find<ProgressService>();
   final ScrollController scrollController = ScrollController();
-  
   final category = 'capital'.obs;
+  int? missionIndex;
 
   @override
   void onInit() {
     super.onInit();
     if (Get.arguments != null && Get.arguments['category'] != null) {
       category.value = Get.arguments['category'];
+    }
+    if (Get.arguments != null && Get.arguments['mission_index'] != null) {
+      missionIndex = Get.arguments['mission_index'];
     }
 
     final tts = Get.find<TtsService>();
@@ -66,6 +69,7 @@ class SpellingExamMenuController extends GetxController {
       'index': index,
       'category': category.value,
       'title': category.value == 'capital' ? 'Huruf Kapital' : (category.value == 'word' ? 'Kata Mudah' : 'Huruf Kecil'),
+      'mission_index': missionIndex,
     });
 
     if (result == true) {

@@ -7,11 +7,15 @@ class ObjectHuntSelectionController extends GetxController {
   final items = huntItems;
   final progressService = Get.find<ProgressService>();
   final ttsService = Get.find<TtsService>();
+  int? missionIndex;
 
   @override
   void onInit() {
     super.onInit();
     ttsService.speak("Pilihlah benda yang ingin kamu cari!");
+    if (Get.arguments != null && Get.arguments['mission_index'] != null) {
+      missionIndex = Get.arguments['mission_index'];
+    }
   }
 
   void speakItemName(String name) {

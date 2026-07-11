@@ -13,24 +13,24 @@ class SpellingExamMenuView extends GetView<SpellingExamMenuController> {
   Map<String, dynamic> _getTheme(String category) {
     if (category == 'lowercase') {
       return {
-        'gradient': const [Color(0xFFFF9A9E), Color(0xFFFECFEF), Color(0xFFFFF1EB)],
-        'primary': const Color(0xFFFF6B6B),
-        'shadow': const Color(0xFFCC5555),
-        'emojis': ["🌸", "☁️", "✨", "🌺", "⭐"],
+        'gradient': const [Color(0xFFF2994A), Color(0xFFF2C94C), Color(0xFFFFF8E1)],
+        'primary': const Color(0xFFFF9800),
+        'shadow': const Color(0xFFF57C00),
+        'emojis': ["☀️", "🐪", "🌵", "🏜️", "✨"],
       };
     } else if (category == 'word') {
       return {
-        'gradient': const [Color(0xFF2B5876), Color(0xFF4E4376), Color(0xFF152336)],
-        'primary': const Color(0xFF9D4EDD),
-        'shadow': const Color(0xFF5A189A),
-        'emojis': ["⭐", "🌙", "🚀", "✨", "🪐"],
+        'gradient': const [Color(0xFF00C9FF), Color(0xFF92FE9D), Color(0xFFE0F7FA)],
+        'primary': const Color(0xFF00BCD4),
+        'shadow': const Color(0xFF0097A7),
+        'emojis': ["🌊", "🐠", "🦀", "🐳", "🫧"],
       };
     } else {
       return {
-        'gradient': const [Color(0xFF87CEEB), Color(0xFFB3E5FC), Color(0xFFE8F5E9)],
-        'primary': const Color(0xFF1CB0F6),
-        'shadow': const Color(0xFF1480B0),
-        'emojis': ["☁️", "⭐", "🎤", "🎵", "✨", "🎶"],
+        'gradient': const [Color(0xFF56AB2F), Color(0xFFA8E063), Color(0xFFE8F5E9)],
+        'primary': const Color(0xFF4CAF50),
+        'shadow': const Color(0xFF2E7D32),
+        'emojis': ["🌳", "🌿", "🦜", "🐛", "🌻"],
       };
     }
   }

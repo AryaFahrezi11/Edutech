@@ -17,6 +17,7 @@ class ProgressService extends GetxService {
   // --- MAPS MISSION STATE ---
   var currentMissionIndex = 0.obs;
   var completedMissions = <int>[].obs;
+  var hasNewUnlockedNode = false.obs;
   
   // --- OBJECT HUNT STATE ---
   var completedObjectHuntItems = <int>[].obs;
@@ -38,6 +39,7 @@ class ProgressService extends GetxService {
     if (savedMissions != null) {
       completedMissions.value = savedMissions.map((e) => int.parse(e)).toList();
     }
+    hasNewUnlockedNode.value = _prefs.getBool('has_new_unlocked_node') ?? false;
     
     List<String>? savedHuntItems = _prefs.getStringList('completed_hunt_items');
     if (savedHuntItems != null) {
@@ -57,6 +59,24 @@ class ProgressService extends GetxService {
     _prefs.setInt('current_mission_index', index);
     _prefs.setStringList('completed_missions', completed.map((e) => e.toString()).toList());
     _syncToBackend();
+  }
+
+  void completeMissionNode(int missionIndex) {
+    if (!completedMissions.contains(missionIndex)) {
+      List<int> newCompleted = List.from(completedMissions);
+      newCompleted.add(missionIndex);
+
+      int nextMissionIndex = currentMissionIndex.value;
+      if (missionIndex == currentMissionIndex.value) {
+        nextMissionIndex++;
+        
+        // Simpan flag bahwa ada node baru yang terbuka (untuk trigger animasi)
+        hasNewUnlockedNode.value = true;
+        _prefs.setBool('has_new_unlocked_node', true);
+      }
+
+      updateMissionProgress(nextMissionIndex, newCompleted);
+    }
   }
 
   void completeWritingLetter(int currentIndex) {

@@ -11,9 +11,13 @@ import 'app/services/sfx_service.dart';
 import 'app/services/log_service.dart';
 import 'app/services/gemini_service.dart';
 import 'app/services/mongodb_service.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  
+  // Load file .env untuk mengamankan API Key
+  await dotenv.load(fileName: ".env");
   
   // Konfigurasi agar AudioPlayers tidak mematikan suara satu sama lain
   await AudioPlayer.global.setAudioContext(AudioContextConfig(

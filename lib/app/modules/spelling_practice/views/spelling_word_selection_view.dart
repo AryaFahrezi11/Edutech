@@ -9,6 +9,8 @@ class SpellingWordSelectionView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final missionIndex = Get.arguments?['mission_index'] as int?;
+
     final words = [
       {'word': 'BOLA', 'emoji': '⚽', 'color': EduTheme.orange},
       {'word': 'BUKU', 'emoji': '📚', 'color': EduTheme.blue},
@@ -76,6 +78,7 @@ class SpellingWordSelectionView extends StatelessWidget {
                         Get.toNamed(Routes.SPELLING_PRACTICE, arguments: {
                           'type': 'word',
                           'index': index,
+                          'mission_index': missionIndex,
                         });
                       },
                       child: Container(

@@ -8,6 +8,8 @@ class SpellingLetterSelectionView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final missionIndex = Get.arguments?['mission_index'] as int?;
+
     return Scaffold(
       backgroundColor: const Color(0xFFF7F7F7),
       body: SafeArea(
@@ -69,6 +71,7 @@ class SpellingLetterSelectionView extends StatelessWidget {
                           Get.toNamed(Routes.SPELLING_PRACTICE, arguments: {
                             'type': 'letter',
                             'index': index,
+                            'mission_index': missionIndex,
                           });
                         },
                       ),

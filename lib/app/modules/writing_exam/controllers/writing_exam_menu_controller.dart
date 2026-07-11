@@ -12,11 +12,16 @@ class WritingExamMenuController extends GetxController {
   // Kategori apa yang sedang dibuka (misal: 'capital' atau 'lowercase')
   final category = 'capital'.obs;
 
+  int? missionIndex;
+
   @override
   void onInit() {
     super.onInit();
     if (Get.arguments != null && Get.arguments['category'] != null) {
       category.value = Get.arguments['category'];
+    }
+    if (Get.arguments != null && Get.arguments['mission_index'] != null) {
+      missionIndex = Get.arguments['mission_index'];
     }
     
     // Auto-scroll ke posisi node terakhir yang terbuka saat peta misi pertama kali dibuka
@@ -63,6 +68,7 @@ class WritingExamMenuController extends GetxController {
       'index': index,
       'category': category.value,
       'title': category.value == 'capital' ? 'Huruf Kapital' : 'Huruf Kecil',
+      'mission_index': missionIndex,
     });
 
     if (result == true) {

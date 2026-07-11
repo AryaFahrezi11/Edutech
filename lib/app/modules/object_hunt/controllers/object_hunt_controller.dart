@@ -6,12 +6,14 @@ import '../../../services/progress_service.dart';
 import '../../../services/log_service.dart';
 import '../../../services/tts_service.dart';
 import '../../../services/sfx_service.dart';
+import '../../../services/mongodb_service.dart';
 import '../data/hunt_items.dart';
 
 class ObjectHuntController extends GetxController {
   // Benda yang sedang dicari
   final targetItem = Rxn<HuntItem>();
   int targetIndex = 0;
+  int? missionIndex;
 
   // State deteksi
   final isFound = false.obs;
@@ -41,6 +43,7 @@ class ObjectHuntController extends GetxController {
     if (Get.arguments != null) {
       targetItem.value = Get.arguments['item'];
       targetIndex = Get.arguments['index'];
+      missionIndex = Get.arguments['mission_index'];
       
       // Sapaan saat masuk ke layar intro pencarian benda
       if (targetItem.value != null) {
@@ -105,8 +108,22 @@ class ObjectHuntController extends GetxController {
               reward,
             );
 
+            // Simpan Analitik Sukses
+            Get.find<MongoDbService>().saveAnalytics({
+              "mode": "observasi",
+              "target_word": targetItem.value!.nameId,
+              "written_word": targetItem.value!.nameId,
+              "accuracy_score": 100,
+              "error_type": "benar",
+              "wrong_letters": []
+            });
+
             // Simpan progress
             _progressService.completeObjectHunt(targetIndex, huntItems.length);
+            
+            if (missionIndex != null && _progressService.completedObjectHuntItems.length >= 5) {
+              _progressService.completeMissionNode(missionIndex!);
+            }
 
             // Beri jeda lebih lama sedikit agar anak menikmati momen
             Future.delayed(const Duration(seconds: 4), () {

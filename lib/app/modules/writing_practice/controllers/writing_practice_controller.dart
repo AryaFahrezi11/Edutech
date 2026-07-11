@@ -12,6 +12,7 @@ import '../../../widgets/point_animation.dart';
 class WritingPracticeController extends GetxController {
   var selectedLetter = 'A'.obs;
   var category = 'uppercase'.obs;
+  int? missionIndex;
   
   // Progress dari 0.0 sampai 1.0 pada stroke yang sedang aktif
   var currentStrokeProgress = 0.0.obs;
@@ -34,6 +35,9 @@ class WritingPracticeController extends GetxController {
     }
     if (Get.arguments != null && Get.arguments['category'] != null) {
       category.value = Get.arguments['category'];
+    }
+    if (Get.arguments != null && Get.arguments['mission_index'] != null) {
+      missionIndex = Get.arguments['mission_index'];
     }
 
     if (category.value == 'lowercase') {
@@ -131,8 +135,14 @@ class WritingPracticeController extends GetxController {
     int currentIndex = alphabet.indexOf(selectedLetter.value);
     if (category.value == 'lowercase') {
       Get.find<ProgressService>().completeWritingLowercase(currentIndex);
+      if (missionIndex != null && Get.find<ProgressService>().unlockedWritingLowercase.value >= 5) {
+        Get.find<ProgressService>().completeMissionNode(missionIndex!);
+      }
     } else {
       Get.find<ProgressService>().completeWritingLetter(currentIndex);
+      if (missionIndex != null && Get.find<ProgressService>().unlockedWritingLetter.value >= 5) {
+        Get.find<ProgressService>().completeMissionNode(missionIndex!);
+      }
     }
 
     // Hitung poin
