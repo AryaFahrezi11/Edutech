@@ -61,7 +61,7 @@ class ResetPasswordController extends GetxController {
           colorText: Colors.white,
           duration: const Duration(seconds: 3),
         );
-        Get.offAllNamed(Routes.LOGIN);
+        Get.until((route) => route.settings.name == Routes.LOGIN);
       } else {
         Get.snackbar(
           "Gagal",
