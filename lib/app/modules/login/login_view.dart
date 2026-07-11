@@ -152,6 +152,7 @@ class LoginView extends GetView<LoginController> {
                         hint: 'Masukkan alamat email',
                         icon: Icons.email_outlined,
                         controller: controller.emailController,
+                        textInputAction: TextInputAction.next,
                       ),
                       const SizedBox(height: 16),
 
@@ -161,6 +162,8 @@ class LoginView extends GetView<LoginController> {
                         icon: Icons.lock_outline,
                         obscure: true,
                         controller: controller.passwordController,
+                        textInputAction: TextInputAction.done,
+                        onSubmitted: (_) => controller.loginProcess(),
                       ),
                       const SizedBox(height: 12),
                       
@@ -286,6 +289,8 @@ class LoginView extends GetView<LoginController> {
     required IconData icon,
     bool obscure = false,
     TextEditingController? controller,
+    TextInputAction? textInputAction,
+    void Function(String)? onSubmitted,
   }) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -298,6 +303,8 @@ class LoginView extends GetView<LoginController> {
         TextField(
           controller: controller,
           obscureText: obscure,
+          textInputAction: textInputAction,
+          onSubmitted: onSubmitted,
           decoration: InputDecoration(
             hintText: hint,
             hintStyle: const TextStyle(color: EduTheme.textLight),
