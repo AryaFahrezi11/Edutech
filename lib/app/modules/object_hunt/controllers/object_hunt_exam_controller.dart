@@ -66,6 +66,16 @@ class ObjectHuntExamController extends GetxController {
   }
 
   void startExam() {
+    // Selalu acak ulang target benda setiap kali ujian dimulai
+    examItems.shuffle();
+    
+    // Reset semua state ujian
+    currentIndex.value = 0;
+    foundCount.value = 0;
+    timeLeft.value = examDurationSeconds;
+    isExamActive.value = false;
+    isExamFinished.value = false;
+    
     _loadNextItem();
     _startTimer();
   }
