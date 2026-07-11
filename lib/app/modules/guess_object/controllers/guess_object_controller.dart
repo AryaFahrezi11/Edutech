@@ -7,6 +7,7 @@ import '../../../services/point_service.dart';
 import '../../../services/log_service.dart';
 import '../../../services/tts_service.dart';
 import '../../../services/sfx_service.dart';
+import '../../../services/progress_service.dart';
 import '../../object_hunt/data/hunt_items.dart';
 
 enum GuessState { scanning, locked, listening, success, failed }
@@ -14,6 +15,8 @@ enum GuessState { scanning, locked, listening, success, failed }
 class GuessObjectController extends GetxController {
   // State
   final currentState = GuessState.scanning.obs;
+  final successCount = 0.obs;
+  int? missionIndex;
   
   // Object Detection
   final isCameraReady = false.obs;
@@ -44,6 +47,10 @@ class GuessObjectController extends GetxController {
     Future.delayed(const Duration(milliseconds: 500), () {
       _ttsService.speak("Selamat datang di Tebak Benda! Arahkan kameramu ke benda di sekitarmu!");
     });
+    
+    if (Get.arguments != null && Get.arguments['mission_index'] != null) {
+      missionIndex = Get.arguments['mission_index'];
+    }
     
     _initPermissions();
   }
@@ -171,6 +178,11 @@ class GuessObjectController extends GetxController {
 
   void _onSuccess() {
     currentState.value = GuessState.success;
+    successCount.value++;
+    
+    if (missionIndex != null && successCount.value >= 5) {
+      Get.find<ProgressService>().completeMissionNode(missionIndex!);
+    }
     
     final reward = targetItem.value!.xpReward;
     _pointService.addPoints(reward);

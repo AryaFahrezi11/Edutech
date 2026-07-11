@@ -9,6 +9,7 @@ class MissionNodeWidget extends StatefulWidget {
   final bool isCompleted;
   final bool isCurrent;
   final bool isUnlocked;
+  final bool animateUnlock;
   final VoidCallback onTap;
 
   const MissionNodeWidget({
@@ -17,6 +18,7 @@ class MissionNodeWidget extends StatefulWidget {
     required this.isCompleted,
     required this.isCurrent,
     required this.isUnlocked,
+    this.animateUnlock = false,
     required this.onTap,
   }) : super(key: key);
 
@@ -70,9 +72,19 @@ class _MissionNodeWidgetState extends State<MissionNodeWidget>
 
     return GestureDetector(
       onTap: widget.isUnlocked ? widget.onTap : _showLockedMessage,
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
+      child: TweenAnimationBuilder<double>(
+        tween: Tween(begin: widget.animateUnlock ? 0.0 : 1.0, end: 1.0),
+        duration: const Duration(milliseconds: 1500),
+        curve: Curves.elasticOut,
+        builder: (context, val, child) {
+          return Transform.scale(
+            scale: val,
+            child: child,
+          );
+        },
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
           // Crown/Star untuk boss node
           if (isBoss && widget.isUnlocked) ...[
             TweenAnimationBuilder<double>(
@@ -231,7 +243,7 @@ class _MissionNodeWidgetState extends State<MissionNodeWidget>
           ],
         ],
       ),
-    );
+    ));
   }
 
   void _showLockedMessage() {

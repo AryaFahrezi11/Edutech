@@ -4,6 +4,8 @@ import 'package:get/get.dart';
 import '../../../services/sfx_service.dart';
 import '../../../services/bgm_service.dart';
 import '../../../services/tts_service.dart';
+import '../../../services/mongodb_service.dart';
+import '../../../services/progress_service.dart';
 
 class PKChallenge {
   final String word;
@@ -32,6 +34,7 @@ class MultiplayerBattleController extends GetxController {
 
   final player1 = PlayerState();
   final player2 = PlayerState();
+  int? missionIndex;
 
   // PK Bar ratio
   var pkRatio = 0.5.obs;
@@ -64,6 +67,7 @@ class MultiplayerBattleController extends GetxController {
     super.onInit();
     player1Name = Get.arguments?['player1'] ?? "Tim Merah";
     player2Name = Get.arguments?['player2'] ?? "Tim Biru";
+    missionIndex = Get.arguments?['mission_index'];
 
     final shuffled = List<PKChallenge>.from(allChallenges)..shuffle();
     p1Challenges = List.from(shuffled);
@@ -100,6 +104,26 @@ class MultiplayerBattleController extends GetxController {
     isGameOver.value = true;
     _sfx.playSuccess();
     _bgm.stopBgm(); // Stop battle music
+
+    // Hitung akurasi: asumsi minimal menang itu dianggap cukup akurat (100) atau rasio
+    // Untuk sederhana, kirim 1 record analitik per duel.
+    int s1 = player1.score.value;
+    int s2 = player2.score.value;
+    double pkAccuracy = (s1 + s2) > 0 ? 100.0 : 0.0;
+    
+    Get.find<MongoDbService>().saveAnalytics({
+      "mode": "duel",
+      "target_word": "Multiplayer Duel",
+      "written_word": "Skor: $s1 vs $s2",
+      "accuracy_score": pkAccuracy,
+      "error_type": "benar",
+      "wrong_letters": []
+    });
+
+    if (missionIndex != null && (s1 > 0 || s2 > 0)) {
+      Get.find<ProgressService>().completeMissionNode(missionIndex!);
+    }
+
     _showWinnerDialog();
   }
 

@@ -6,6 +6,7 @@ import '../../../services/point_service.dart';
 import '../../../services/log_service.dart';
 import '../../../services/tts_service.dart';
 import '../../../services/sfx_service.dart';
+import '../../../services/progress_service.dart';
 import '../data/hunt_items.dart';
 
 class ObjectHuntExamController extends GetxController {
@@ -44,6 +45,7 @@ class ObjectHuntExamController extends GetxController {
   final _sfxService = Get.find<SfxService>();
   
   DateTime? _firstDetectTime;
+  int? missionIndex;
 
   @override
   void onInit() {
@@ -57,6 +59,10 @@ class ObjectHuntExamController extends GetxController {
     
     // Sapaan awal di layar intro
     _ttsService.speak("Selamat datang di Ujian Detektif Benda! Kamu harus menemukan 5 benda secara berurutan dalam waktu 60 detik. Apakah kamu siap?");
+    
+    if (Get.arguments != null && Get.arguments['mission_index'] != null) {
+      missionIndex = Get.arguments['mission_index'];
+    }
   }
 
   void startExam() {
@@ -186,6 +192,10 @@ class ObjectHuntExamController extends GetxController {
       "Selesai! Berhasil menemukan ${foundCount.value} dari $itemsToFind benda ⭐${'⭐' * (stars - 1)}",
       earned,
     );
+    
+    if (missionIndex != null && foundCount.value >= 3) {
+      Get.find<ProgressService>().completeMissionNode(missionIndex!);
+    }
 
     // Tampilkan dialog hasil
     _showResultDialog(stars, earned);

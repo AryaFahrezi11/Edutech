@@ -198,7 +198,7 @@ class LeaderboardView extends GetView<LeaderboardController> {
                         (context, index) {
                           final item = others[index];
                           return TweenAnimationBuilder<double>(
-                            tween: Tween(begin: 0, end: 1),
+                            tween: Tween<double>(begin: 0.0, end: 1.0),
                             duration: Duration(milliseconds: 400 + index * 100),
                             curve: Curves.easeOutBack,
                             builder: (_, v, child) => Transform.translate(
@@ -240,7 +240,7 @@ class LeaderboardView extends GetView<LeaderboardController> {
     bool center = false,
   }) {
     return TweenAnimationBuilder<double>(
-      tween: Tween(begin: 0, end: 1),
+      tween: Tween<double>(begin: 0.0, end: 1.0),
       duration: Duration(milliseconds: center ? 600 : 800),
       curve: Curves.easeOutBack,
       builder: (_, v, child) => Transform.scale(

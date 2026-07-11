@@ -7,6 +7,8 @@ class MultiplayerMenuView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final missionIndex = Get.arguments?['mission_index'] as int?;
+
     return Container(
       color: const Color(0xFFF0F7FF), // Same background as Home
       child: SafeArea(
@@ -63,7 +65,7 @@ class MultiplayerMenuView extends StatelessWidget {
                     title: "Susun Kata",
                     emoji: "🧩",
                     gradient: const [Color(0xFFFF416C), Color(0xFFFF4B2B)],
-                    onTap: () => Get.toNamed(Routes.MULTIPLAYER_LOBBY),
+                    onTap: () => Get.toNamed(Routes.MULTIPLAYER_LOBBY, arguments: {'mission_index': missionIndex}),
                   ),
                   _buildMenuBox(
                     title: "Balap Nulis",

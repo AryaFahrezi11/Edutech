@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 import '../../../data/edu_theme.dart';
 import '../controllers/profile_controller.dart';
 import '../../../services/log_service.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class ProfileView extends GetView<ProfileController> {
   const ProfileView({super.key});
@@ -133,7 +134,11 @@ class ProfileView extends GetView<ProfileController> {
                     confirmTextColor: Colors.white,
                     cancelTextColor: EduTheme.textDark,
                     buttonColor: EduTheme.red,
-                    onConfirm: () => Get.offAllNamed('/login'),
+                    onConfirm: () async {
+                      final prefs = await SharedPreferences.getInstance();
+                      await prefs.clear();
+                      Get.offAllNamed('/login');
+                    },
                   );
                 },
                 child: Container(

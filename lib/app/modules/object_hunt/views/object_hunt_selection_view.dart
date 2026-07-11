@@ -71,6 +71,7 @@ class ObjectHuntSelectionView extends GetView<ObjectHuntSelectionController> {
                           Get.toNamed(Routes.OBJECT_HUNT_INTRO, arguments: {
                             'item': item,
                             'index': index,
+                            'mission_index': controller.missionIndex,
                           });
                         },
                       ),

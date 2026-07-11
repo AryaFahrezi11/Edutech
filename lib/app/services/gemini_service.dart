@@ -1,10 +1,11 @@
 import 'dart:convert';
 import 'package:get/get.dart';
 import 'package:google_generative_ai/google_generative_ai.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 class GeminiService extends GetxService {
-  // TODO: Masukkan API Key Gemini di sini atau ambil dari .env
-  static const String _apiKey = 'API_KEY_GEMINI_ANDA_DISINI'; 
+  // Ambil API Key dari .env agar aman dari git push
+  static String get _apiKey => dotenv.env['GEMINI_API_KEY'] ?? ''; 
 
   late GenerativeModel _model;
 

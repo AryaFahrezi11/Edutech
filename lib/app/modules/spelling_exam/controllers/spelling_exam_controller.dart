@@ -42,6 +42,7 @@ class SpellingExamController extends GetxController with GetSingleTickerProvider
 
   // CATEGORY
   late String category;
+  int? missionIndex;
 
   static List<Map<String, dynamic>> getQuestionBank(String cat) {
     List<Map<String, dynamic>> capitals = [];
@@ -80,6 +81,7 @@ class SpellingExamController extends GetxController with GetSingleTickerProvider
     final args = Get.arguments ?? {};
     category = args['category'] ?? 'capital';
     currentQuestionIndex.value = args['index'] ?? 0;
+    missionIndex = args['mission_index'];
     
     // Inisialisasi awal
     speech.initialize(
@@ -125,50 +127,60 @@ class SpellingExamController extends GetxController with GetSingleTickerProvider
   }
 
   // Cek kecocokan huruf tunggal berdasarkan bunyi (fonetik)
+  // Strategi: gunakan id_ID locale + minta anak bilang "huruf A"
   bool _isLetterMatch(String spoken, String target) {
     if (spoken.isEmpty) return false;
     
+    // Normalisasi: hilangkan tanda baca dan trim
+    spoken = spoken.replaceAll(RegExp(r'[^a-z0-9\s]'), '').trim();
     var words = spoken.split(' ');
     
-    // Cek huruf langsung sebagai kata terpisah agar tidak tembus jika ada kata "ayam" untuk target "a"
+    // 1. Cek exact match langsung
     if (words.contains(target) || spoken == target) return true;
     
-    // Alias cara pengucapan anak-anak
-    // Alias pengucapan fonetik (Indonesian & English STT fallback)
+    // 2. Cek pola "huruf X"
+    if (spoken.contains('huruf $target') || spoken.contains('huruf ${target.toUpperCase()}')) return true;
+    
+    // 3. Alias pengucapan fonetik Indonesia
     final Map<String, List<String>> aliases = {
-      'a': ['ah', 'aa', 'ha', 'i', 'a', 'uh', 'r', 'are'],
-      'b': ['be', 'beh', 'bee', 'bi', 'b', 'bay', 'bear', 'bae', 'p'],
-      'c': ['ce', 'ceh', 'ci', 'c', 'che', 'chay', 'she', 'say', 'see'],
-      'd': ['de', 'deh', 'di', 'd', 'day', 'they', 'the', 'dee'],
-      'e': ['eh', 'ee', 'e', 'a', 'hey'],
-      'f': ['ef', 'ep', 'ev', 'f', 'eff', 'off', 'have'],
-      'g': ['ge', 'geh', 'ji', 'g', 'gay', 'k', 'gee'],
-      'h': ['ha', 'hah', 'h', 'huh', 'how'],
-      'i': ['ih', 'ii', 'hi', 'i', 'e', 'ee', 'he'],
-      'j': ['je', 'jeh', 'ja', 'j', 'jay', 'z', 'g'],
-      'k': ['ka', 'kah', 'ke', 'k', 'car', 'cup', 'okay'],
-      'l': ['el', 'le', 'l', 'all', 'hell'],
-      'm': ['em', 'me', 'm', 'am', 'aim'],
-      'n': ['en', 'ne', 'n', 'an', 'and', 'in'],
-      'o': ['oh', 'oo', 'ho', 'o', 'or', 'aw'],
-      'p': ['pe', 'peh', 'pi', 'p', 'pay', 'pee'],
-      'q': ['ki', 'qi', 'kyu', 'ku', 'q', 'key', 'queue'],
-      'r': ['er', 're', 'r', 'air', 'ear', 'are', 'error'],
-      's': ['es', 'se', 's', 'ace', 'ash', 'is', 'yes'],
-      't': ['te', 'teh', 'ti', 't', 'tay', 'the', 'tee'],
-      'u': ['uh', 'uu', 'hu', 'u', 'oo', 'ooh', 'you'],
-      'v': ['ve', 'veh', 'vi', 'fi', 'pi', 'v', 'vay', 'vee'],
-      'w': ['we', 'weh', 'w', 'way', 'why'],
-      'x': ['eks', 'ex', 'x', 'ax', 'axe'],
-      'y': ['ye', 'yeh', 'ya', 'y', 'yay', 'why', 'yeah'],
-      'z': ['zet', 'zed', 'jet', 'z', 'set', 'zee'],
+      'a': ['ah', 'aa', 'ha', 'a', 'huruf a', 'uh', 'ar'],
+      'b': ['be', 'beh', 'bee', 'bi', 'b', 'bay', 'bae', 'huruf b', 'huruf be', 'pe'],
+      'c': ['ce', 'ceh', 'ci', 'c', 'se', 'she', 'si', 'huruf c', 'huruf ce', 'see'],
+      'd': ['de', 'deh', 'di', 'd', 'the', 'dee', 'huruf d', 'huruf de'],
+      'e': ['eh', 'ee', 'e', 'i', 'hey', 'ye', 'huruf e'],
+      'f': ['ef', 'ep', 'ev', 'f', 'eff', 'huruf f', 'huruf ef'],
+      'g': ['ge', 'geh', 'ji', 'g', 'je', 'gee', 'huruf g', 'huruf ge'],
+      'h': ['ha', 'hah', 'h', 'huh', 'huruf h', 'huruf ha', 'aha'],
+      'i': ['ih', 'ii', 'hi', 'i', 'e', 'ee', 'he', 'ai', 'huruf i'],
+      'j': ['je', 'jeh', 'ja', 'j', 'jay', 'jey', 'huruf j', 'huruf je'],
+      'k': ['ka', 'kah', 'ke', 'k', 'car', 'kay', 'okay', 'huruf k', 'huruf ka'],
+      'l': ['el', 'le', 'l', 'all', 'huruf l', 'huruf el', 'al'],
+      'm': ['em', 'me', 'm', 'am', 'aim', 'huruf m', 'huruf em'],
+      'n': ['en', 'ne', 'n', 'an', 'huruf n', 'huruf en'],
+      'o': ['oh', 'oo', 'ho', 'o', 'or', 'huruf o', 'kok'],
+      'p': ['pe', 'peh', 'pi', 'p', 'pay', 'pee', 'huruf p', 'huruf pe'],
+      'q': ['ki', 'qi', 'kyu', 'ku', 'q', 'kiu', 'huruf q', 'huruf ki'],
+      'r': ['er', 're', 'r', 'air', 'ear', 'are', 'huruf r', 'huruf er'],
+      's': ['es', 'se', 's', 'ace', 'huruf s', 'huruf es', 'as'],
+      't': ['te', 'teh', 'ti', 't', 'tay', 'tee', 'the', 'huruf t', 'huruf te'],
+      'u': ['uh', 'uu', 'hu', 'u', 'oo', 'ooh', 'you', 'huruf u'],
+      'v': ['ve', 'veh', 'vi', 'fi', 'v', 'vee', 'fee', 'huruf v', 'huruf ve'],
+      'w': ['we', 'weh', 'w', 'way', 'double', 'huruf w', 'huruf we'],
+      'x': ['eks', 'ex', 'x', 'ax', 'axe', 'iks', 'huruf x', 'huruf eks'],
+      'y': ['ye', 'yeh', 'ya', 'y', 'yay', 'yeah', 'yak', 'huruf y', 'huruf ye'],
+      'z': ['zet', 'zed', 'jet', 'z', 'set', 'zee', 'sed', 'huruf z', 'huruf zet'],
     };
 
     if (aliases.containsKey(target)) {
       for (var alias in aliases[target]!) {
-        if (words.contains(alias) || spoken == alias) return true;
+        if (words.contains(alias)) return true;
+        if (alias.length >= 2 && spoken.contains(alias)) return true;
       }
     }
+    
+    // 4. Fallback: cek huruf pertama dari ucapan
+    if (spoken.isNotEmpty && spoken[0] == target && spoken.length <= 3) return true;
+    
     return false;
   }
 
@@ -183,17 +195,28 @@ class SpellingExamController extends GetxController with GetSingleTickerProvider
       spokenText.value = '';
       isListening.value = true;
       examState.value = ExamState.listening;
+      
+      bool isWord = category == 'word';
+      
+      // Beri instruksi suara ke anak untuk mode huruf
+      if (!isWord) {
+        Get.find<TtsService>().speak("Coba bilang: huruf ${currentQuestion['answer']}");
+        await Future.delayed(const Duration(milliseconds: 1500));
+      }
 
       await speech.listen(
-        localeId: category == 'word' ? 'id_ID' : 'en_US',
+        // Gunakan id_ID untuk semua mode karena anak-anak Indonesia
+        localeId: 'id_ID',
         partialResults: true,
         cancelOnError: false,
+        // Beri waktu lebih lama agar engine punya cukup audio
+        listenFor: const Duration(seconds: 8),
+        pauseFor: const Duration(seconds: 3),
         onResult: (result) {
           spokenText.value = result.recognizedWords;
           
           String spoken = result.recognizedWords.toLowerCase();
           String target = currentQuestion['answer'].toString().toLowerCase();
-          bool isWord = category == 'word';
 
           // Deteksi dini super cepat
           bool isMatch = isWord 
@@ -203,7 +226,8 @@ class SpellingExamController extends GetxController with GetSingleTickerProvider
           if (isMatch) {
             stopListening();
           } 
-          else if (result.hasConfidenceRating && result.confidence > 0) {
+          else if (result.finalResult && spoken.isNotEmpty) {
+            // Hanya selesaikan jika ini BENAR-BENAR final result
             stopListening();
           }
         },
@@ -254,6 +278,10 @@ class SpellingExamController extends GetxController with GetSingleTickerProvider
         progressService.completeSpellingExamLetter(currentQuestionIndex.value);
       }
 
+      if (missionIndex != null) {
+        progressService.completeMissionNode(missionIndex!);
+      }
+
       final String examId = 'exam_spelling_${category}_${currentQuestionIndex.value}';
       int earned = Get.find<PointService>().completeActivity(
         examId, 
@@ -266,6 +294,17 @@ class SpellingExamController extends GetxController with GetSingleTickerProvider
       Get.find<SfxService>().playSuccess();
       animController.forward(from: 0); // Trigger animasi pop-up
       PointAnimation.showPointAnimation(earned, onComplete: () {}); // Panggil animasi koin
+      
+      // SIMPAN ANALITIK SUKSES
+      Get.find<MongoDbService>().saveAnalytics({
+        "mode": "spelling",
+        "target_word": currentQuestion['answer'],
+        "written_word": currentQuestion['answer'],
+        "accuracy_score": 100,
+        "error_type": "benar",
+        "wrong_letters": []
+      });
+
       await Get.find<TtsService>().speakAndWait("Wah, benar! Hebat sekali! Kamu dapat $earned bintang!");
     } else {
       examState.value = ExamState.evaluating;

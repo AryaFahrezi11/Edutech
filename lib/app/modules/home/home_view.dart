@@ -299,6 +299,8 @@ class HomeView extends GetView<HomeController> {
                               isCompleted: controller.isNodeCompleted(reversedIndex),
                               isCurrent: controller.isCurrentNode(reversedIndex),
                               isUnlocked: controller.isNodeUnlocked(reversedIndex),
+                              animateUnlock: controller.isCurrentNode(reversedIndex) && 
+                                           controller.progress.hasNewUnlockedNode.value,
                               onTap: () => controller.navigateToNode(reversedIndex),
                             ),
                           ),

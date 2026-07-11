@@ -255,10 +255,9 @@ class HomeController extends GetxController {
     }
   }
 
-  /// [DEV MODE] Semua node terbuka untuk keperluan testing
-  /// Kembalikan ke: return index <= progress.currentMissionIndex.value; saat deploy
+  /// Cek apakah node terkunci
   bool isNodeUnlocked(int index) {
-    return true;
+    return index <= progress.currentMissionIndex.value;
   }
 
   /// Cek apakah node pada index tertentu sudah selesai
@@ -290,14 +289,26 @@ class HomeController extends GetxController {
 
   /// Navigasi ke halaman latihan/ujian yang sesuai
   void navigateToNode(int index) {
-    if (!isNodeUnlocked(index)) return;
+    if (!isNodeUnlocked(index)) {
+      Get.snackbar(
+        "Terkunci 🔒", 
+        "Selesaikan misi sebelumnya dulu ya!",
+        snackPosition: SnackPosition.TOP,
+        backgroundColor: Colors.orange.withOpacity(0.9),
+        colorText: Colors.white,
+      );
+      return;
+    }
+
+    if (index == progress.currentMissionIndex.value && progress.hasNewUnlockedNode.value) {
+      progress.hasNewUnlockedNode.value = false;
+      SharedPreferences.getInstance().then((prefs) => prefs.setBool('has_new_unlocked_node', false));
+    }
 
     final node = missionNodes[index];
+    final args = node.arguments != null ? Map<String, dynamic>.from(node.arguments!) : <String, dynamic>{};
+    args['mission_index'] = index;
 
-    // Simulasi: Tandai node selesai saat dinavigasi
-    // (Di production, ini harusnya setelah user benar-benar menyelesaikan latihan)
-    completeNode(index);
-
-    Get.toNamed(node.routeName, arguments: node.arguments);
+    Get.toNamed(node.routeName, arguments: args);
   }
 }

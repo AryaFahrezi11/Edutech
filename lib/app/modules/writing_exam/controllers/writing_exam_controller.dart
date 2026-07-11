@@ -22,6 +22,7 @@ class WritingExamController extends GetxController
   // ─── KATEGORI ──────────────────────────────────────────────────────────────
   final categoryTitle = 'Huruf Kapital'.obs;
   final isLandscape = false.obs; // true jika kategori membutuhkan landscape
+  int? missionIndex;
 
   // Bank soal dibuat dinamis A-Z
   static Map<String, List<Map<String, dynamic>>> get questionBank {
@@ -88,6 +89,7 @@ class WritingExamController extends GetxController
       final cat = Get.arguments['category'] as String? ?? 'capital';
       final title = Get.arguments['title'] as String? ?? 'Huruf Kapital';
       final idx = Get.arguments['index'] as int? ?? 0;
+      missionIndex = Get.arguments['mission_index'] as int?;
       
       categoryTitle.value = title;
       currentLetterIndex.value = idx;
@@ -269,6 +271,10 @@ class WritingExamController extends GetxController
         progressService.completeWritingWord(currentLetterIndex.value);
       }
 
+      if (missionIndex != null) {
+        progressService.completeMissionNode(missionIndex!);
+      }
+
       final String examId = 'writing_exam_${cat}_${currentLetterIndex.value}';
       int earned = Get.find<PointService>().completeActivity(
         examId, 
@@ -280,6 +286,16 @@ class WritingExamController extends GetxController
       score.value += earned;
       starsAnimController.forward(from: 0);
       Get.find<SfxService>().playSuccess();
+
+      // SIMPAN ANALITIK SUKSES
+      Get.find<MongoDbService>().saveAnalytics({
+        "mode": "writing",
+        "target_word": targetWord,
+        "written_word": targetWord,
+        "accuracy_score": 100,
+        "error_type": "benar",
+        "wrong_letters": []
+      });
 
       await Get.find<TtsService>().speakAndWait("Wah, benar! Hebat sekali! Kamu dapat $earned bintang!");
     } else {
