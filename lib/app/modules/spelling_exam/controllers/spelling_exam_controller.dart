@@ -56,18 +56,16 @@ class SpellingExamController extends GetxController with GetSingleTickerProvider
     
     if (cat == 'word') {
       return [
-        {'answer': 'KUCING', 'icon': '🐱'},
-        {'answer': 'APEL', 'icon': '🍎'},
-        {'answer': 'BOLA', 'icon': '⚽'},
         {'answer': 'KURSI', 'icon': '🪑'},
-        {'answer': 'BOTOL', 'icon': '🍼'},
+        {'answer': 'BOTOL', 'icon': '🍶'},
         {'answer': 'BUKU', 'icon': '📚'},
-        {'answer': 'GELAS', 'icon': '🥛'},
+        {'answer': 'GELAS', 'icon': '🥤'},
         {'answer': 'TAS', 'icon': '🎒'},
-        {'answer': 'JAM', 'icon': '⏰'},
+        {'answer': 'JAM', 'icon': '🕐'},
         {'answer': 'LAPTOP', 'icon': '💻'},
         {'answer': 'GUNTING', 'icon': '✂️'},
-        {'answer': 'MEJA', 'icon': '🪑'},
+        {'answer': 'MEJA', 'icon': '🍽️'},
+        {'answer': 'HANDPHONE', 'icon': '📱'},
       ];
     } else if (cat == 'lowercase') {
       return lowercases;

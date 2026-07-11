@@ -39,9 +39,6 @@ class WritingExamController extends GetxController
       'capital': capitals,
       'lowercase': lowercases,
       'word': [
-        {'letter': 'Kucing', 'hint': 'Hewan lucu yang mengeong', 'emoji': '🐱'},
-        {'letter': 'Apel', 'hint': 'Buah berwarna merah atau hijau', 'emoji': '🍎'},
-        {'letter': 'Bola', 'hint': 'Ditendang saat main bola', 'emoji': '⚽'},
         {'letter': 'Kursi', 'hint': 'Tempat untuk duduk', 'emoji': '🪑'},
         {'letter': 'Botol', 'hint': 'Tempat menyimpan air minum', 'emoji': '🍶'},
         {'letter': 'Buku', 'hint': 'Benda untuk dibaca', 'emoji': '📚'},
@@ -51,6 +48,7 @@ class WritingExamController extends GetxController
         {'letter': 'Laptop', 'hint': 'Komputer yang bisa dilipat', 'emoji': '💻'},
         {'letter': 'Gunting', 'hint': 'Alat memotong kertas', 'emoji': '✂️'},
         {'letter': 'Meja', 'hint': 'Tempat meletakkan barang', 'emoji': '🍽️'},
+        {'letter': 'Handphone', 'hint': 'Alat komunikasi untuk menelepon', 'emoji': '📱'},
       ],
 
     };

@@ -55,11 +55,16 @@ class SpellingPracticeController extends GetxController {
   ];
 
   final words = [
-    {'word': 'BOLA', 'spell': 'BO • LA', 'sound': 'BO... LA... BOLA', 'icon': '⚽'},
+    {'word': 'KURSI', 'spell': 'KUR • SI', 'sound': 'KUR... SI... KURSI', 'icon': '🪑'},
+    {'word': 'BOTOL', 'spell': 'BO • TOL', 'sound': 'BO... TOL... BOTOL', 'icon': '🍶'},
     {'word': 'BUKU', 'spell': 'BU • KU', 'sound': 'BU... KU... BUKU', 'icon': '📚'},
-    {'word': 'MEJA', 'spell': 'ME • JA', 'sound': 'ME... JA... MEJA', 'icon': '🪑'},
-    {'word': 'MOBIL', 'spell': 'MO • BIL', 'sound': 'MO... BIL... MOBIL', 'icon': '🚗'},
-    {'word': 'KUCING', 'spell': 'KU • CING', 'sound': 'KU... CING... KUCING', 'icon': '🐱'},
+    {'word': 'GELAS', 'spell': 'GE • LAS', 'sound': 'GE... LAS... GELAS', 'icon': '🥤'},
+    {'word': 'TAS', 'spell': 'TAS', 'sound': 'TAS... TAS', 'icon': '🎒'},
+    {'word': 'JAM', 'spell': 'JAM', 'sound': 'JAM... JAM', 'icon': '🕐'},
+    {'word': 'LAPTOP', 'spell': 'LAP • TOP', 'sound': 'LAP... TOP... LAPTOP', 'icon': '💻'},
+    {'word': 'GUNTING', 'spell': 'GUN • TING', 'sound': 'GUN... TING... GUNTING', 'icon': '✂️'},
+    {'word': 'MEJA', 'spell': 'ME • JA', 'sound': 'ME... JA... MEJA', 'icon': '🍽️'},
+    {'word': 'HANDPHONE', 'spell': 'HAND • PHONE', 'sound': 'HAND... PHONE... HANDPHONE', 'icon': '📱'},
   ];
 
   @override

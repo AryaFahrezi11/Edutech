@@ -60,7 +60,19 @@ class WordPracticeController extends GetxController {
     List<LetterData> tempData = [];
     for (int i = 0; i < word.length; i++) {
       String char = word[i].toUpperCase();
-      final pathStr = LetterPaths.uppercasePaths[char] ?? '';
+      
+      // Khusus untuk huruf I, gunakan 'i' kecil agar ada titiknya sesuai permintaan
+      if (char == 'I') {
+        char = 'i';
+      }
+
+      String pathStr = '';
+      if (char == 'i') {
+        pathStr = LetterPaths.lowercasePaths['i'] ?? '';
+      } else {
+        pathStr = LetterPaths.uppercasePaths[char] ?? '';
+      }
+      
       Path path = pathStr.isNotEmpty ? parseSvgPathData(pathStr) : Path();
       List<PathMetric> metrics = path.computeMetrics().toList();
       

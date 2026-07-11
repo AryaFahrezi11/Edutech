@@ -12,12 +12,16 @@ class WordSelectionView extends StatelessWidget {
     final missionIndex = Get.arguments?['mission_index'] as int?;
 
     final words = [
-      {'word': 'BOLA', 'emoji': '⚽', 'color': EduTheme.orange},
-      {'word': 'BUKU', 'emoji': '📚', 'color': EduTheme.blue},
-      {'word': 'MEJA', 'emoji': '🪑', 'color': EduTheme.primary},
-      {'word': 'GIGI', 'emoji': '🦷', 'color': EduTheme.red},
-      {'word': 'KUCING', 'emoji': '🐱', 'color': EduTheme.purple},
-      {'word': 'MOBIL', 'emoji': '🚗', 'color': const Color(0xFF0096C7)},
+      {'word': 'KURSI', 'emoji': '🪑', 'color': EduTheme.orange},
+      {'word': 'BOTOL', 'emoji': '🍶', 'color': EduTheme.blue},
+      {'word': 'BUKU', 'emoji': '📚', 'color': EduTheme.primary},
+      {'word': 'GELAS', 'emoji': '🥤', 'color': EduTheme.red},
+      {'word': 'TAS', 'emoji': '🎒', 'color': EduTheme.purple},
+      {'word': 'JAM', 'emoji': '🕐', 'color': const Color(0xFF0096C7)},
+      {'word': 'LAPTOP', 'emoji': '💻', 'color': EduTheme.orange},
+      {'word': 'GUNTING', 'emoji': '✂️', 'color': EduTheme.blue},
+      {'word': 'MEJA', 'emoji': '🍽️', 'color': EduTheme.primary},
+      {'word': 'HANDPHONE', 'emoji': '📱', 'color': EduTheme.purple},
     ];
 
     return Scaffold(
