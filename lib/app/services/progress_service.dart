@@ -14,6 +14,10 @@ class ProgressService extends GetxService {
   var unlockedSpellingExamLetter = 0.obs;
   var unlockedSpellingExamWord = 0.obs;
 
+  var unlockedWritingExamLetter = 0.obs;
+  var unlockedWritingExamLowercase = 0.obs;
+  var unlockedWritingExamWord = 0.obs;
+
   // --- MAPS MISSION STATE ---
   var currentMissionIndex = 0.obs;
   var completedMissions = <int>[].obs;
@@ -33,6 +37,9 @@ class ProgressService extends GetxService {
     unlockedSpellingWord.value = _prefs.getInt('unlocked_spelling_word') ?? 0;
     unlockedSpellingExamLetter.value = _prefs.getInt('unlocked_spelling_exam_letter') ?? 0;
     unlockedSpellingExamWord.value = _prefs.getInt('unlocked_spelling_exam_word') ?? 0;
+    unlockedWritingExamLetter.value = _prefs.getInt('unlocked_writing_exam_letter') ?? 0;
+    unlockedWritingExamLowercase.value = _prefs.getInt('unlocked_writing_exam_lowercase') ?? 0;
+    unlockedWritingExamWord.value = _prefs.getInt('unlocked_writing_exam_word') ?? 0;
 
     currentMissionIndex.value = _prefs.getInt('current_mission_index') ?? 0;
     List<String>? savedMissions = _prefs.getStringList('completed_missions');
@@ -97,6 +104,27 @@ class ProgressService extends GetxService {
     if (currentIndex >= unlockedWritingWord.value) {
       unlockedWritingWord.value = currentIndex + 1;
       _saveLocal('unlocked_writing_word', unlockedWritingWord.value);
+    }
+  }
+
+  void completeWritingExamLetter(int currentIndex) {
+    if (currentIndex >= unlockedWritingExamLetter.value) {
+      unlockedWritingExamLetter.value = currentIndex + 1;
+      _saveLocal('unlocked_writing_exam_letter', unlockedWritingExamLetter.value);
+    }
+  }
+
+  void completeWritingExamLowercase(int currentIndex) {
+    if (currentIndex >= unlockedWritingExamLowercase.value) {
+      unlockedWritingExamLowercase.value = currentIndex + 1;
+      _saveLocal('unlocked_writing_exam_lowercase', unlockedWritingExamLowercase.value);
+    }
+  }
+
+  void completeWritingExamWord(int currentIndex) {
+    if (currentIndex >= unlockedWritingExamWord.value) {
+      unlockedWritingExamWord.value = currentIndex + 1;
+      _saveLocal('unlocked_writing_exam_word', unlockedWritingExamWord.value);
     }
   }
 
@@ -174,6 +202,18 @@ class ProgressService extends GetxService {
       unlockedSpellingExamWord.value = json['unlocked_spelling_exam_word'];
       _prefs.setInt('unlocked_spelling_exam_word', unlockedSpellingExamWord.value);
     }
+    if (json['unlocked_writing_exam_letter'] != null) {
+      unlockedWritingExamLetter.value = json['unlocked_writing_exam_letter'];
+      _prefs.setInt('unlocked_writing_exam_letter', unlockedWritingExamLetter.value);
+    }
+    if (json['unlocked_writing_exam_lowercase'] != null) {
+      unlockedWritingExamLowercase.value = json['unlocked_writing_exam_lowercase'];
+      _prefs.setInt('unlocked_writing_exam_lowercase', unlockedWritingExamLowercase.value);
+    }
+    if (json['unlocked_writing_exam_word'] != null) {
+      unlockedWritingExamWord.value = json['unlocked_writing_exam_word'];
+      _prefs.setInt('unlocked_writing_exam_word', unlockedWritingExamWord.value);
+    }
 
     if (json['current_mission_index'] != null) {
       currentMissionIndex.value = json['current_mission_index'];
@@ -201,6 +241,9 @@ class ProgressService extends GetxService {
       "unlocked_spelling_word": unlockedSpellingWord.value,
       "unlocked_spelling_exam_letter": unlockedSpellingExamLetter.value,
       "unlocked_spelling_exam_word": unlockedSpellingExamWord.value,
+      "unlocked_writing_exam_letter": unlockedWritingExamLetter.value,
+      "unlocked_writing_exam_lowercase": unlockedWritingExamLowercase.value,
+      "unlocked_writing_exam_word": unlockedWritingExamWord.value,
       "current_mission_index": currentMissionIndex.value,
       "completed_missions": completedMissions.toList(),
       "completed_hunt_items": completedObjectHuntItems.toList(),

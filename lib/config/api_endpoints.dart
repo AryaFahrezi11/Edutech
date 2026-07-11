@@ -1,6 +1,6 @@
 class ApiEndpoints {
   // --- BASE URL ---
-  static const String baseUrl = "https://be-edutech.onrender.com/api";
+  static const String baseUrl = "https://be-edutech.vercel.app/api";
 
   // --- AUTHENTICATION ---
   static const String register = "$baseUrl/register";
@@ -17,7 +17,7 @@ class ApiEndpoints {
   static const String syncProgress = "$baseUrl/sync-progress";
   static const String getProgress = "$baseUrl/get-progress";
   static const String leaderboard = "$baseUrl/leaderboard";
-  
+
   // LOGS
   static const String addActivityLog = "$baseUrl/activity/log";
   static const String getActivityLogs = "$baseUrl/activity/logs";

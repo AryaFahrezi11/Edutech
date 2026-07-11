@@ -43,11 +43,11 @@ class WritingExamMenuController extends GetxController {
   // Mendapatkan index level tertinggi yang sudah terbuka untuk kategori ini
   int get unlockedIndex {
     if (category.value == 'capital') {
-      return progressService.unlockedWritingLetter.value;
+      return progressService.unlockedWritingExamLetter.value;
     } else if (category.value == 'lowercase') {
-      return progressService.unlockedWritingLowercase.value;
+      return progressService.unlockedWritingExamLowercase.value;
     } else {
-      return progressService.unlockedWritingWord.value;
+      return progressService.unlockedWritingExamWord.value;
     }
   }
 

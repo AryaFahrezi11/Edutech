@@ -5,8 +5,10 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 class MongoDbService extends GetxService {
   // IP 192.168.1.94 adalah IP Laptop Mas saat ini agar bisa diakses dari HP
-  static const String _flaskApiUrl = 'https://be-edutech.onrender.com/api/analytics';
-  static const String _flaskRaportUrl = 'https://be-edutech.onrender.com/api/raport';
+  static const String _flaskApiUrl =
+      'https://be-edutech.vercel.app/api/analytics';
+  static const String _flaskRaportUrl =
+      'https://be-edutech.vercel.app/api/raport';
 
   Future<MongoDbService> init() async {
     return this;
@@ -17,12 +19,12 @@ class MongoDbService extends GetxService {
     try {
       final prefs = await SharedPreferences.getInstance();
       final email = prefs.getString('user_email') ?? '';
-      
+
       // Tambahkan email agar data ini ketahuan milik siapa
       if (email.isNotEmpty) {
         analyticsData['email'] = email;
       }
-      
+
       // Tambahkan timestamp saat data dikirim
       analyticsData['timestamp'] = DateTime.now().toIso8601String();
 
@@ -51,15 +53,13 @@ class MongoDbService extends GetxService {
     try {
       final prefs = await SharedPreferences.getInstance();
       final email = prefs.getString('user_email') ?? '';
-      
+
       if (email.isEmpty) return null;
 
       final url = Uri.parse('$_flaskRaportUrl?email=$email');
       final response = await http.get(
         url,
-        headers: {
-          'ngrok-skip-browser-warning': 'true',
-        },
+        headers: {'ngrok-skip-browser-warning': 'true'},
       );
 
       if (response.statusCode == 200) {

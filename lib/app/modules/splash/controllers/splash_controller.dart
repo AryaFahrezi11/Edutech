@@ -28,7 +28,7 @@ class SplashController extends GetxController {
       await videoController.play();
       
       // Mainkan suara sambutan awal
-      Get.find<TtsService>().speak("Edutech, aplikasi belajar anak hebat!");
+      Get.find<TtsService>().speak("Edutech, aplikasi belajar anak berbasis AI!");
       
       // Listen to the video position
       videoController.addListener(_checkVideoProgress);

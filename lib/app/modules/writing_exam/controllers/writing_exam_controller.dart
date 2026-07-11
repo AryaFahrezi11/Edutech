@@ -264,15 +264,21 @@ class WritingExamController extends GetxController
       final progressService = Get.find<ProgressService>();
       final cat = Get.arguments?['category'] as String? ?? 'capital';
       if (cat == 'capital') {
-        progressService.completeWritingLetter(currentLetterIndex.value);
+        progressService.completeWritingExamLetter(currentLetterIndex.value);
       } else if (cat == 'lowercase') {
-        progressService.completeWritingLowercase(currentLetterIndex.value);
+        progressService.completeWritingExamLowercase(currentLetterIndex.value);
       } else {
-        progressService.completeWritingWord(currentLetterIndex.value);
+        progressService.completeWritingExamWord(currentLetterIndex.value);
       }
 
       if (missionIndex != null) {
-        progressService.completeMissionNode(missionIndex!);
+        if (cat == 'capital' && progressService.unlockedWritingExamLetter.value >= 5) {
+          progressService.completeMissionNode(missionIndex!);
+        } else if (cat == 'lowercase' && progressService.unlockedWritingExamLowercase.value >= 5) {
+          progressService.completeMissionNode(missionIndex!);
+        } else if (cat == 'word' && progressService.unlockedWritingExamWord.value >= 5) {
+          progressService.completeMissionNode(missionIndex!);
+        }
       }
 
       final String examId = 'writing_exam_${cat}_${currentLetterIndex.value}';

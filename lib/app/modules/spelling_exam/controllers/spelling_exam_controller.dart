@@ -279,7 +279,11 @@ class SpellingExamController extends GetxController with GetSingleTickerProvider
       }
 
       if (missionIndex != null) {
-        progressService.completeMissionNode(missionIndex!);
+        if (category == 'word' && progressService.unlockedSpellingExamWord.value >= 5) {
+          progressService.completeMissionNode(missionIndex!);
+        } else if (category != 'word' && progressService.unlockedSpellingExamLetter.value >= 5) {
+          progressService.completeMissionNode(missionIndex!);
+        }
       }
 
       final String examId = 'exam_spelling_${category}_${currentQuestionIndex.value}';

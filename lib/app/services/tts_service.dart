@@ -11,6 +11,9 @@ class TtsService extends GetxService {
 
   Future<TtsService> init() async {
     await flutterTts.setLanguage("id-ID");
+    if (GetPlatform.isAndroid) {
+      await flutterTts.setEngine("com.google.android.tts");
+    }
     await flutterTts.setSpeechRate(0.45);
     await flutterTts.setPitch(1.1);
     await flutterTts.awaitSpeakCompletion(true); // Memastikan speak() mengembalikan future saat selesai
