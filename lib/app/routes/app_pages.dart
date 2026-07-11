@@ -12,6 +12,10 @@ import '../modules/raport/bindings/raport_binding.dart';
 import '../modules/raport/views/raport_view.dart';
 import '../modules/register/bindings/register_binding.dart';
 import '../modules/register/views/register_view.dart';
+import '../modules/forgot_password/bindings/forgot_password_binding.dart';
+import '../modules/forgot_password/views/forgot_password_view.dart';
+import '../modules/reset_password/bindings/reset_password_binding.dart';
+import '../modules/reset_password/views/reset_password_view.dart';
 import '../modules/spelling_exam/bindings/spelling_exam_binding.dart';
 import '../modules/spelling_exam/bindings/spelling_exam_menu_binding.dart';
 import '../modules/spelling_exam/views/spelling_exam_category_view.dart';
@@ -78,6 +82,16 @@ class AppPages {
       name: Routes.REGISTER,
       page: () => const RegisterView(),
       binding: RegisterBinding(),
+    ),
+    GetPage(
+      name: Routes.FORGOT_PASSWORD,
+      page: () => const ForgotPasswordView(),
+      binding: ForgotPasswordBinding(),
+    ),
+    GetPage(
+      name: Routes.RESET_PASSWORD,
+      page: () => const ResetPasswordView(),
+      binding: ResetPasswordBinding(),
     ),
     GetPage(
       name: Routes.LEADERBOARD,

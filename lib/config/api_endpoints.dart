@@ -8,6 +8,8 @@ class ApiEndpoints {
   static const String verifyOtp = "$baseUrl/verify-otp";
   static const String googleLogin = "$baseUrl/google-login";
   static const String updateProfile = "$baseUrl/update-profile";
+  static const String forgotPassword = "$baseUrl/forgot-password";
+  static const String resetPassword = "$baseUrl/reset-password";
 
   // --- FITUR UJIAN ---
   static const String ujianMengeja = "$baseUrl/ujian-membaca";
