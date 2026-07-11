@@ -47,7 +47,7 @@ class MyApp extends StatelessWidget {
     return GetMaterialApp(
       title: 'Edutech',
       debugShowCheckedModeBanner: false,
-      initialRoute: Routes.LOGIN,
+      initialRoute: Routes.SPLASH,
       getPages: AppPages.pages,
       routingCallback: (routing) {
         if (routing != null) {
