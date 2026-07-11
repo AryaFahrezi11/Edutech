@@ -4,6 +4,7 @@ import 'package:permission_handler/permission_handler.dart';
 import 'package:ultralytics_yolo/ultralytics_yolo.dart';
 import '../../../data/edu_theme.dart';
 import '../controllers/object_hunt_controller.dart';
+import '../../../widgets/point_animation.dart';
 
 class ObjectHuntCameraView extends GetView<ObjectHuntController> {
   const ObjectHuntCameraView({super.key});
@@ -253,11 +254,30 @@ class ObjectHuntCameraView extends GetView<ObjectHuntController> {
                                   "Ditemukan!",
                                   style: TextStyle(fontSize: 16, color: EduTheme.textMedium),
                                 ),
-                                const SizedBox(height: 20),
+                                const SizedBox(height: 16),
+                                Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    const Text("⭐", style: TextStyle(fontSize: 28)),
+                                    const SizedBox(width: 8),
+                                    Text(
+                                      "+${item.xpReward} Bintang",
+                                      style: const TextStyle(
+                                        fontSize: 22,
+                                        fontWeight: FontWeight.w900,
+                                        color: Color(0xFFFFB703), // Warna kuning emas
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                const SizedBox(height: 24),
                                 GestureDetector(
                                   onTap: () {
-                                    Get.back(); // Tutup CameraView
-                                    Get.back(); // Tutup IntroView (kembali ke SelectionView)
+                                    // Gunakan PointAnimation statis yang sudah diimport
+                                    PointAnimation.showPointAnimation(item.xpReward, onComplete: () {
+                                      Get.back(); // Tutup CameraView
+                                      Get.back(); // Tutup IntroView (kembali ke SelectionView)
+                                    });
                                   },
                                   child: Container(
                                     padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 14),

@@ -124,13 +124,6 @@ class ObjectHuntController extends GetxController {
             if (missionIndex != null && _progressService.completedObjectHuntItems.length >= 5) {
               _progressService.completeMissionNode(missionIndex!);
             }
-
-            // Beri jeda lebih lama sedikit agar anak menikmati momen
-            Future.delayed(const Duration(seconds: 4), () {
-              // Kembali ke halaman pemilihan
-              Get.back(); // Tutup CameraView
-              Get.back(); // Tutup IntroView (kembali ke SelectionView)
-            });
           }
         }
       } else {
