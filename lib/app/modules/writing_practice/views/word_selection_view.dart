@@ -12,6 +12,10 @@ class WordSelectionView extends StatelessWidget {
     final missionIndex = Get.arguments?['mission_index'] as int?;
 
     final words = [
+      {'word': 'BOLA', 'emoji': '⚽', 'color': EduTheme.orange},
+      {'word': 'GIGI', 'emoji': '🦷', 'color': EduTheme.red},
+      {'word': 'KUCING', 'emoji': '🐱', 'color': EduTheme.purple},
+      {'word': 'MOBIL', 'emoji': '🚗', 'color': const Color(0xFF0096C7)},
       {'word': 'KURSI', 'emoji': '🪑', 'color': EduTheme.orange},
       {'word': 'BOTOL', 'emoji': '🍶', 'color': EduTheme.blue},
       {'word': 'BUKU', 'emoji': '📚', 'color': EduTheme.primary},

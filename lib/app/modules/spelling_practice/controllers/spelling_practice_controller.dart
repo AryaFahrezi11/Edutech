@@ -55,6 +55,10 @@ class SpellingPracticeController extends GetxController {
   ];
 
   final words = [
+    {'word': 'BOLA', 'spell': 'BO • LA', 'sound': 'BO... LA... BOLA', 'icon': '⚽'},
+    {'word': 'GIGI', 'spell': 'GI • GI', 'sound': 'GI... GI... GIGI', 'icon': '🦷'},
+    {'word': 'KUCING', 'spell': 'KU • CING', 'sound': 'KU... CING... KUCING', 'icon': '🐱'},
+    {'word': 'MOBIL', 'spell': 'MO • BIL', 'sound': 'MO... BIL... MOBIL', 'icon': '🚗'},
     {'word': 'KURSI', 'spell': 'KUR • SI', 'sound': 'KUR... SI... KURSI', 'icon': '🪑'},
     {'word': 'BOTOL', 'spell': 'BO • TOL', 'sound': 'BO... TOL... BOTOL', 'icon': '🍶'},
     {'word': 'BUKU', 'spell': 'BU • KU', 'sound': 'BU... KU... BUKU', 'icon': '📚'},

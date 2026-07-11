@@ -56,6 +56,10 @@ class SpellingExamController extends GetxController with GetSingleTickerProvider
     
     if (cat == 'word') {
       return [
+        {'answer': 'BOLA', 'icon': '⚽'},
+        {'answer': 'GIGI', 'icon': '🦷'},
+        {'answer': 'KUCING', 'icon': '🐱'},
+        {'answer': 'MOBIL', 'icon': '🚗'},
         {'answer': 'KURSI', 'icon': '🪑'},
         {'answer': 'BOTOL', 'icon': '🍶'},
         {'answer': 'BUKU', 'icon': '📚'},
