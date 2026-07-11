@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'package:flutter_tts/flutter_tts.dart';
 import 'package:get/get.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class TtsService extends GetxService {
   final FlutterTts flutterTts = FlutterTts();
@@ -8,8 +9,13 @@ class TtsService extends GetxService {
   
   // State untuk mendeteksi apakah AI sedang berbicara (berguna untuk sinkronisasi animasi mulut Lottie)
   final RxBool isSpeaking = false.obs;
+  
+  RxBool isTtsEnabled = true.obs;
 
   Future<TtsService> init() async {
+    final prefs = await SharedPreferences.getInstance();
+    isTtsEnabled.value = prefs.getBool('tts_enabled') ?? true;
+
     await flutterTts.setLanguage("id-ID");
     if (GetPlatform.isAndroid) {
       await flutterTts.setEngine("com.google.android.tts");
@@ -39,12 +45,23 @@ class TtsService extends GetxService {
 
     return this;
   }
+  
+  Future<void> toggleTts(bool val) async {
+    isTtsEnabled.value = val;
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool('tts_enabled', val);
+    if (!val) {
+      stop();
+    }
+  }
 
   Future<void> speak(String text) async {
+    if (!isTtsEnabled.value) return;
     await flutterTts.speak(text);
   }
 
   Future<void> speakAndWait(String text) async {
+    if (!isTtsEnabled.value) return;
     _ttsCompleter = Completer<void>();
     try {
       // Timeout 15 detik untuk antisipasi kalimat yang cukup panjang dari AI

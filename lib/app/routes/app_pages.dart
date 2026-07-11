@@ -51,6 +51,8 @@ import '../modules/multiplayer/views/multiplayer_lobby_view.dart';
 import '../modules/multiplayer/views/multiplayer_battle_view.dart';
 import '../modules/writing_exam/views/writing_exam_menu_view.dart';
 import '../modules/writing_exam/controllers/writing_exam_menu_controller.dart';
+import '../modules/settings/views/settings_view.dart';
+import '../modules/settings/bindings/settings_binding.dart';
 import 'app_routes.dart';
 
 class AppPages {
@@ -210,6 +212,12 @@ class AppPages {
       page: () => const MultiplayerBattleView(),
       binding: MultiplayerBattleBinding(),
       transition: Transition.zoom,
+    ),
+    GetPage(
+      name: Routes.SETTINGS,
+      page: () => const SettingsView(),
+      binding: SettingsBinding(),
+      transition: Transition.rightToLeft,
     ),
   ];
 }

@@ -37,4 +37,7 @@ abstract class Routes {
   static const MULTIPLAYER_MENU = '/multiplayer-menu';
   static const MULTIPLAYER_LOBBY = '/multiplayer-lobby';
   static const MULTIPLAYER_BATTLE = '/multiplayer-battle';
+  
+  // Settings
+  static const SETTINGS = '/settings';
 }
