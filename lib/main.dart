@@ -11,20 +11,19 @@ import 'app/services/sfx_service.dart';
 import 'app/services/log_service.dart';
 import 'app/services/gemini_service.dart';
 import 'app/services/mongodb_service.dart';
-import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  
-  // Load file .env untuk mengamankan API Key
-  await dotenv.load(fileName: ".env");
-  
+
+
   // Konfigurasi agar AudioPlayers tidak mematikan suara satu sama lain
-  await AudioPlayer.global.setAudioContext(AudioContextConfig(
-    respectSilence: true,
-    focus: AudioContextConfigFocus.mixWithOthers,
-  ).build());
-  
+  await AudioPlayer.global.setAudioContext(
+    AudioContextConfig(
+      respectSilence: true,
+      focus: AudioContextConfigFocus.mixWithOthers,
+    ).build(),
+  );
+
   // Initialize services
   Get.put(SfxService());
   await Get.putAsync(() => ProgressService().init());
@@ -34,7 +33,6 @@ void main() async {
   await Get.putAsync(() => GeminiService().init());
   await Get.putAsync(() => MongoDbService().init());
   Get.put(BackgroundMusicService());
-
 
   runApp(const MyApp());
 }
@@ -53,7 +51,8 @@ class MyApp extends StatelessWidget {
         if (routing != null) {
           final bgm = Get.find<BackgroundMusicService>();
           // Play music only on LOGIN and HOME
-          if (routing.current == Routes.HOME || routing.current == Routes.LOGIN) {
+          if (routing.current == Routes.HOME ||
+              routing.current == Routes.LOGIN) {
             bgm.playBgm();
           } else {
             bgm.pauseBgm();
