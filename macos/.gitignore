@@ -5,8 +5,3 @@
 # Xcode-related
 **/dgph
 **/xcuserdata/
-
-# Android signing
-*.jks
-*.keystore
-key.properties
