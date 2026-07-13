@@ -1,0 +1,68 @@
+# 🤖 Dokumentasi Arsitektur & Alur Fitur AI Edutech
+
+Aplikasi Edutech ini menggunakan pendekatan *Hybrid AI Architecture*, di mana proses pengenalan pola yang berat dan *real-time* dilakukan secara langsung di *smartphone* (On-Device ML), sementara evaluasi psikologis, sintaksis, dan pelaporan (Big Data) dilakukan di awan (Cloud/Server).
+
+Berikut adalah 4 Fitur AI utama di dalam Edutech beserta lokasi kode (*source code*)-nya.
+
+---
+
+## 1. AI Deteksi Benda (YOLOv11 Nano)
+Fitur ini digunakan pada menu **Detektif Benda** dan **Tebak Benda**. Ia dapat mendeteksi benda secara *real-time* dari sorotan kamera (seperti kursi, botol, buku, dll) tanpa memerlukan koneksi internet.
+
+### 🔄 Alur Sistem:
+1. Kamera *smartphone* menangkap *frame* video (*Live Feed*).
+2. *Frame* tersebut dikirimkan ke model `yolo11n` yang sudah dikonversi ke format TFLite (Ultralytics).
+3. YOLO mengembalikan koordinat kotak batas (*Bounding Box*) dan *Confidence Score* benda yang terdeteksi.
+4. Sistem mencocokkan *Label* bahasa Inggris YOLO dengan nama benda target yang ditugaskan ke anak (misal: "Bottle" -> "Botol").
+
+### 📁 Letak Kode (Flutter):
+- **User Interface (UI Kamera):** [object_hunt_camera_view.dart](file:///c:/D4%20TI/matkul%20s6/Kepstone/edutech/lib/app/modules/object_hunt/views/object_hunt_camera_view.dart)
+- **Logika & Pemrosesan Frame:** [object_hunt_controller.dart](file:///c:/D4%20TI/matkul%20s6/Kepstone/edutech/lib/app/modules/object_hunt/controllers/object_hunt_controller.dart) (Fungsi `onYoloResult()`)
+
+---
+
+## 2. AI Pengenal Tulisan Tangan (Digital Ink)
+Fitur ini digunakan pada menu **Ujian Menulis**. Daripada memotret kanvas, aplikasi ini menangkap arah dan titik koordinat coretan jari anak menggunakan teknologi **Google ML Kit Digital Ink**.
+
+### 🔄 Alur Sistem:
+1. Anak mencoret kanvas di layar. Layar mencatat setiap `Stroke` (titik X, Y, dan waktu).
+2. Kumpulan `Stroke` tersebut dibungkus menjadi `Ink` dan dikirim ke *engine* ML Kit.
+3. ML Kit mengembalikan prediksi berupa _String_ teks (misal: "A" atau "Bola").
+4. _String_ prediksi ini kemudian dikirim ke *Backend* Flask (Gemini AI) untuk dinilai.
+
+### 📁 Letak Kode (Flutter):
+- **User Interface (Kanvas Coretan):** [writing_exam_view.dart](file:///c:/D4%20TI/matkul%20s6/Kepstone/edutech/lib/app/modules/writing_exam/views/writing_exam_view.dart)
+- **Logika Inisialisasi & Deteksi ML Kit:** [writing_exam_controller.dart](file:///c:/D4%20TI/matkul%20s6/Kepstone/edutech/lib/app/modules/writing_exam/controllers/writing_exam_controller.dart) (Fungsi `_recognizeText()`)
+
+---
+
+## 3. AI Pengenal Suara (Speech-to-Text)
+Fitur ini digunakan pada menu **Ujian Mengeja**. Berfungsi untuk melatih artikulasi dan pelafalan (Spelling) anak melalui mikrofon.
+
+### 🔄 Alur Sistem:
+1. Anak menekan tombol *Mic* dan mulai berbicara.
+2. Suara ditangkap dan diubah menjadi teks (*String*) menggunakan pustaka `speech_to_text` (mengandalkan mesin bawaan Android/Google Voice).
+3. Teks hasil pendengaran (*Spoken Word*) tersebut kemudian dikirim ke *Backend* Flask (Gemini AI) untuk dinilai.
+
+### 📁 Letak Kode (Flutter):
+- **Logika Pemrosesan Suara:** [spelling_exam_controller.dart](file:///c:/D4%20TI/matkul%20s6/Kepstone/edutech/lib/app/modules/spelling_exam/controllers/spelling_exam_controller.dart) (Terdapat pada instansiasi objek `SpeechToText`)
+
+---
+
+## 4. AI Guru Evaluator & Analitik (Gemini 3.5 Flash)
+Ini adalah "Otak Utama" pendidik di aplikasi Edutech. Gemini menerima hasil mentah dari Digital Ink (Menulis) dan Speech-to-Text (Mengeja), lalu merumuskan respon layaknya seorang guru TK.
+
+### 🔄 Alur Sistem:
+1. Aplikasi Flutter mengirim *HTTP POST Request* berisi "Kata Target" dan "Kata yang ditulis/diucapkan anak".
+2. *Backend* (Flask) merakit *Prompt* khusus, menyuruh Gemini untuk merumuskan kata-kata penyemangat (jika salah ditegur halus, jika benar dipuji).
+3. Gemini membalas dalam wujud **JSON Murni** yang berisi `voice_feedback` (kalimat pujian) dan `analytics_data` (skor akurasi dan jenis kesalahan).
+4. Aplikasi Flutter membacakan JSON `voice_feedback` tersebut menggunakan fitur Text-To-Speech (suara robotik/Google TTS) agar anak bisa mendengarnya.
+
+### 📁 Letak Kode:
+- **Pengirim (Flutter - Client):** [gemini_service.dart](file:///c:/D4%20TI/matkul%20s6/Kepstone/edutech/lib/app/services/gemini_service.dart) (Berisi fungsi `evaluateWriting` & `evaluateSpelling`)
+- **Penerima (Flask - Server):** [routes.py](file:///c:/D4%20TI/matkul%20s6/Kepstone/flask-edutech/app/routes.py) (Cari _Endpoint_ `@main.route('/api/evaluate-ai')`)
+
+---
+
+> [!TIP]
+> **Saran Presentasi:** Jika dosen Anda bertanya mengapa AI-nya banyak (ada YOLO, Digital Ink, STT, dan Gemini), Anda bisa menjawab: *"Itu karena kami merancang sistem Pipeline AI. AI kecil (seperti YOLO dan Digital Ink) dipasang di perangkat HP karena sangat cepat dan hemat kuota. Sedangkan AI besar (Gemini/LLM) dipasang di Server untuk bertindak sebagai otak yang memberikan nilai dan analisis layaknya manusia."*
