@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../../data/edu_theme.dart';
+import '../controllers/profile_controller.dart';
+import '../../../services/log_service.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
-class ProfileView extends GetView {
+class ProfileView extends GetView<ProfileController> {
   const ProfileView({super.key});
 
   @override
@@ -21,12 +24,12 @@ class ProfileView extends GetView {
               const SizedBox(height: 24),
 
               // ================= KARTU INFO SINGKAT =================
-              Row(
+              Obx(() => Row(
                 children: [
                   Expanded(
                     child: _buildQuickStatCard(
                       emoji: '⭐',
-                      value: '1.240',
+                      value: '${controller.totalPoints}',
                       label: 'Bintang',
                       color: EduTheme.gold,
                     ),
@@ -35,7 +38,7 @@ class ProfileView extends GetView {
                   Expanded(
                     child: _buildQuickStatCard(
                       emoji: '🔥',
-                      value: '7 Hari',
+                      value: '${controller.streakDays} Hari',
                       label: 'Beruntun',
                       color: EduTheme.orange,
                     ),
@@ -44,13 +47,13 @@ class ProfileView extends GetView {
                   Expanded(
                     child: _buildQuickStatCard(
                       emoji: '💎',
-                      value: '42',
+                      value: '${controller.totalMissions}',
                       label: 'Misi',
                       color: EduTheme.blue,
                     ),
                   ),
                 ],
-              ),
+              )),
 
               const SizedBox(height: 28),
 
@@ -73,15 +76,9 @@ class ProfileView extends GetView {
                 title: 'Edit Profil',
                 subtitle: 'Ganti nama atau avatarmu',
                 color: EduTheme.blue,
-                onTap: () {},
-              ),
-
-              _buildMenuButton(
-                emoji: '🏆',
-                title: 'Pencapaianku',
-                subtitle: 'Lihat piala dan medali',
-                color: EduTheme.gold,
-                onTap: () {},
+                onTap: () {
+                  Get.toNamed('/edit-profile');
+                },
               ),
 
               _buildMenuButton(
@@ -95,11 +92,13 @@ class ProfileView extends GetView {
               ),
 
               _buildMenuButton(
-                emoji: '🕵️',
-                title: 'Jejak Petualangan',
-                subtitle: 'Aktivitas terakhir yang kamu mainkan',
+                emoji: '📜',
+                title: 'Riwayat Petualangan',
+                subtitle: 'Lihat log poin dan aktivitasmu',
                 color: EduTheme.purple,
-                onTap: () {},
+                onTap: () {
+                  Get.toNamed('/activity-log');
+                },
               ),
 
               _buildMenuButton(
@@ -107,7 +106,9 @@ class ProfileView extends GetView {
                 title: 'Pengaturan',
                 subtitle: 'Suara, musik, dan privasi',
                 color: EduTheme.textLight,
-                onTap: () {},
+                onTap: () {
+                  Get.toNamed('/settings');
+                },
               ),
 
               const SizedBox(height: 20),
@@ -127,7 +128,11 @@ class ProfileView extends GetView {
                     confirmTextColor: Colors.white,
                     cancelTextColor: EduTheme.textDark,
                     buttonColor: EduTheme.red,
-                    onConfirm: () => Get.offAllNamed('/login'),
+                    onConfirm: () async {
+                      final prefs = await SharedPreferences.getInstance();
+                      await prefs.clear();
+                      Get.offAllNamed('/login');
+                    },
                   );
                 },
                 child: Container(
@@ -189,10 +194,10 @@ class ProfileView extends GetView {
                   color: Colors.white,
                   shape: BoxShape.circle,
                 ),
-                child: const CircleAvatar(
+                child: CircleAvatar(
                   radius: 42,
-                  backgroundColor: Color(0xFFFFD166),
-                  child: Text("🧒", style: TextStyle(fontSize: 48)),
+                  backgroundColor: const Color(0xFFFFD166),
+                  child: Obx(() => Text(controller.userAvatar.value, style: const TextStyle(fontSize: 48))),
                 ),
               ),
               Positioned(
@@ -224,14 +229,14 @@ class ProfileView extends GetView {
             ],
           ),
           const SizedBox(height: 22),
-          const Text(
-            'Gilang',
-            style: TextStyle(
+          Obx(() => Text(
+            controller.userName.value,
+            style: const TextStyle(
               fontSize: 24,
               fontWeight: FontWeight.w900,
               color: Colors.white,
             ),
-          ),
+          )),
           const SizedBox(height: 6),
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
@@ -239,14 +244,14 @@ class ProfileView extends GetView {
               color: Colors.white.withOpacity(0.2),
               borderRadius: BorderRadius.circular(16),
             ),
-            child: const Text(
-              'Si Petualang Hebat! 🚀',
-              style: TextStyle(
+            child: Obx(() => Text(
+              controller.userEmail.value,
+              style: const TextStyle(
                 color: Colors.white,
                 fontWeight: FontWeight.w700,
                 fontSize: 13,
               ),
-            ),
+            )),
           ),
         ],
       ),
@@ -364,4 +369,5 @@ class ProfileView extends GetView {
       ),
     );
   }
+
 }

@@ -28,27 +28,22 @@ class StatsBarWidget extends StatelessWidget {
       child: Obx(() => Row(
         mainAxisAlignment: MainAxisAlignment.spaceAround,
         children: [
-          // XP / Stars
           _StatItem(
             emoji: "⭐",
-            value: "${controller.totalXP.value}",
-            label: "Bintang",
-            color: const Color(0xFFFFB703),
+            color: const Color(0xFFFFD166),
+            value: "${controller.pointService.totalPoints.value}",
+            label: "XP",
           ),
-
-          // Divider vertikal
           Container(
-            height: 36,
-            width: 1.5,
+            width: 1,
+            height: 40,
             color: const Color(0xFFE5E7EB),
           ),
-
-          // Streak
           _StatItem(
             emoji: "🔥",
-            value: "${controller.streakDays.value}",
+            color: const Color(0xFFFF9F1C),
+            value: "${controller.pointService.streakDays.value}",
             label: "Hari",
-            color: const Color(0xFFFF6B35),
           ),
 
           // Divider vertikal
@@ -61,7 +56,7 @@ class StatsBarWidget extends StatelessWidget {
           // Level
           _StatItem(
             emoji: "🏅",
-            value: "Lv.${controller.currentLevel.value}",
+            value: "Lv.${controller.currentLevel}",
             label: "Level",
             color: const Color(0xFF6C63FF),
           ),
@@ -75,7 +70,7 @@ class StatsBarWidget extends StatelessWidget {
 
           // Progress
           _ProgressItem(
-            completed: controller.completedMissions.length,
+            completed: controller.progress.completedMissions.length,
             total: controller.missionNodes.length,
           ),
         ],

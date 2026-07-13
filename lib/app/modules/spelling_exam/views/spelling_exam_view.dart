@@ -1,187 +1,246 @@
-import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:lottie/lottie.dart';
 
 import '../controllers/spelling_exam_controller.dart';
 
 class SpellingExamView extends GetView<SpellingExamController> {
   const SpellingExamView({super.key});
 
+  static const _primaryBlue = Color(0xFF1CB0F6);
+  static const _darkBlue = Color(0xFF1899D6);
+  static const _successGreen = Color(0xFF58CC02);
+  static const _errorRed = Color(0xFFFF4B4B);
+  static const _gold = Color(0xFFFFD900);
+  static const _textDark = Color(0xFF3A2F6B);
+  static const _textMuted = Color(0xFF8B88A0);
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF7F7F7),
-
+      backgroundColor: const Color(0xFFF0F4F8), // Background gamified yang lebih lembut
       body: SafeArea(
-        child: Obx(() {
-          switch (controller.examState.value) {
-            case ExamState.idle:
-              return _buildIdleScreen();
-
-            case ExamState.countdown:
-              return _buildCountdownScreen();
-
-            case ExamState.listening:
-              return _buildListeningScreen();
-
-            case ExamState.checking:
-              return _buildCheckingScreen();
-
-            case ExamState.result:
-              return _buildResultScreen();
-          }
-        }),
+        child: Stack(
+          children: [
+            Positioned.fill(
+              child: Obx(() {
+                switch (controller.examState.value) {
+                  case ExamState.idle:
+                  case ExamState.listening:
+                    return _buildMainScreen();
+                  case ExamState.checking:
+                    return _buildCheckingScreen();
+                  case ExamState.evaluating:
+                    return _buildEvaluatingScreen();
+                  case ExamState.result:
+                    return _buildResultScreen(context);
+                  case ExamState.countdown:
+                    return const SizedBox();
+                }
+              }),
+            ),
+          ],
+        ),
       ),
     );
   }
 
-  // ───────────────── IDLE SCREEN ─────────────────
-  Widget _buildIdleScreen() {
+  Widget _buildHeader({bool showScore = false}) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Row(
+            children: [
+              IconButton(
+                icon: const Icon(Icons.arrow_back_ios_new_rounded, color: _textDark, size: 28),
+                onPressed: () => Get.back(),
+              ),
+              const SizedBox(width: 8),
+              Text(
+                controller.examTitle,
+                style: const TextStyle(
+                  fontSize: 24,
+                  fontWeight: FontWeight.w900,
+                  color: _textDark,
+                ),
+              ),
+            ],
+          ),
+          if (showScore)
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(20),
+                boxShadow: [
+                  BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 10, offset: const Offset(0, 4)),
+                ],
+              ),
+              child: Row(
+                children: [
+                  const Icon(Icons.star_rounded, color: _gold, size: 24),
+                  const SizedBox(width: 6),
+                  Obx(() => Text(
+                    '${controller.score.value}',
+                    style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: _textDark),
+                  )),
+                ],
+              ),
+            ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildMainScreen() {
+    final q = controller.currentQuestion;
     return Column(
       children: [
-        _buildHeader(showProgress: false),
-
+        _buildHeader(showScore: true),
         Expanded(
-          child: SingleChildScrollView(
-            padding: const EdgeInsets.all(24),
-
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
             child: Column(
               children: [
-                const SizedBox(height: 20),
-
-                TweenAnimationBuilder<double>(
-                  tween: Tween(begin: 0.8, end: 1.0),
-                  duration: const Duration(milliseconds: 700),
-                  curve: Curves.elasticOut,
-
-                  builder: (_, value, child) {
-                    return Transform.scale(scale: value, child: child);
-                  },
-
-                  child: Container(
-                    width: 160,
-                    height: 160,
-
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      shape: BoxShape.circle,
-
-                      boxShadow: [
-                        BoxShadow(
-                          color: const Color(0xFF6C63FF).withOpacity(0.25),
-                          blurRadius: 30,
-                          spreadRadius: 5,
-                        ),
-                      ],
-                    ),
-
-                    child: const Center(
-                      child: Text("🎤", style: TextStyle(fontSize: 80)),
-                    ),
-                  ),
-                ),
-
-                const SizedBox(height: 28),
-
-                Text(
-                  controller.examTitle,
-                  style: const TextStyle(
-                    fontSize: 30,
-                    fontWeight: FontWeight.w900,
-                    color: Color(0xFF3A2F6B),
-                  ),
-                ),
-
-                const SizedBox(height: 10),
-
-                const Text(
-                  "Lihat kata lalu ucapkan dengan benar 😊",
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                    fontSize: 15,
-                    color: Color(0xFF7B7B9A),
-                    height: 1.5,
-                  ),
-                ),
-
-                const SizedBox(height: 32),
-
-                Container(
-                  padding: const EdgeInsets.all(20),
-
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(24),
-
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withOpacity(0.06),
-                        blurRadius: 20,
-                        offset: const Offset(0, 8),
-                      ),
-                    ],
-                  ),
-
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                    children: [
-                      _infoChip("📝", "${controller.questions.length}", "Soal"),
-
-                      _divider(),
-
-                      _infoChip("⭐", "100", "Nilai"),
-
-                      _divider(),
-
-                      _infoChip("🎤", "Voice", "Mode"),
-                    ],
-                  ),
-                ),
-
-                const SizedBox(height: 36),
-
-                GestureDetector(
-                  onTap: controller.startExam,
-
+                // Kartu Pertanyaan (3D Game Style)
+                Expanded(
                   child: Container(
                     width: double.infinity,
-                    height: 64,
-
                     decoration: BoxDecoration(
-                      gradient: const LinearGradient(
-                        colors: [Color(0xFF1CB0F6), Color(0xFF1899D6)],
-                      ),
-
-                      borderRadius: BorderRadius.circular(24),
-
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(32),
+                      border: Border.all(color: _primaryBlue.withOpacity(0.1), width: 3),
                       boxShadow: [
-                        BoxShadow(
-                          color: const Color(0xFF6C63FF).withOpacity(0.45),
-                          blurRadius: 18,
-                          offset: const Offset(0, 8),
-                        ),
+                        BoxShadow(color: _primaryBlue.withOpacity(0.15), blurRadius: 24, offset: const Offset(0, 10)),
                       ],
                     ),
-
-                    child: const Row(
+                    child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Text("🚀", style: TextStyle(fontSize: 26)),
-
-                        SizedBox(width: 12),
-
-                        Text(
-                          "Mulai Ujian!",
-                          style: TextStyle(
-                            fontSize: 20,
-                            fontWeight: FontWeight.w900,
-                            color: Colors.white,
+                        // Gambar/Ikon/Maskot di dalam kartu
+                        if (q['icon'] != null)
+                          Text(
+                            q['icon'],
+                            style: const TextStyle(fontSize: 100),
+                          )
+                        else
+                          Lottie.asset(
+                            controller.category == 'word' ? 'assets/lotties/owl.json' : 'assets/lotties/cute-cat.json',
+                            height: 120,
+                          ),
+                        const SizedBox(height: 20),
+                        
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
+                          decoration: BoxDecoration(
+                            color: const Color(0xFFF8FBFF),
+                            borderRadius: BorderRadius.circular(24),
+                            border: Border.all(color: _primaryBlue.withOpacity(0.3), width: 2),
+                          ),
+                          child: Text(
+                            q['answer'],
+                            style: const TextStyle(
+                              fontSize: 64,
+                              fontWeight: FontWeight.w900,
+                              color: _primaryBlue,
+                              letterSpacing: 2,
+                            ),
                           ),
                         ),
+                        
+                        const SizedBox(height: 40),
+                        
+                        Obx(() {
+                          final isEmpty = controller.spokenText.value.isEmpty;
+                          return AnimatedContainer(
+                            duration: const Duration(milliseconds: 300),
+                            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+                            decoration: BoxDecoration(
+                              color: isEmpty ? Colors.transparent : _primaryBlue.withOpacity(0.1),
+                              borderRadius: BorderRadius.circular(20),
+                            ),
+                            child: Text(
+                              isEmpty 
+                                  ? (controller.isListening.value ? "Mendengarkan..." : "Tekan Lafalkan lalu ucapkan") 
+                                  : controller.spokenText.value,
+                              textAlign: TextAlign.center,
+                              style: TextStyle(
+                                fontSize: 24,
+                                fontWeight: FontWeight.w700,
+                                color: isEmpty ? _textMuted : _primaryBlue,
+                              ),
+                            ),
+                          );
+                        }),
                       ],
                     ),
                   ),
                 ),
+                
+                const SizedBox(height: 24),
+                
+                // Tombol Microphone (Gamified 3D)
+                SizedBox(
+                  width: double.infinity,
+                  height: 70,
+                  child: Obx(() {
+                    final isListening = controller.isListening.value;
+                    return GestureDetector(
+                      onTap: () {
+                        if (isListening) {
+                          controller.stopListening();
+                        } else {
+                          controller.startListening();
+                        }
+                      },
+                      child: AnimatedContainer(
+                        duration: const Duration(milliseconds: 200),
+                        decoration: BoxDecoration(
+                          gradient: LinearGradient(
+                            colors: isListening ? [_errorRed, const Color(0xFFD32F2F)] : [_primaryBlue, _darkBlue],
+                          ),
+                          borderRadius: BorderRadius.circular(24),
+                          boxShadow: [
+                            BoxShadow(
+                              color: (isListening ? _errorRed : _primaryBlue).withOpacity(0.4),
+                              blurRadius: isListening ? 20 : 8,
+                              spreadRadius: isListening ? 4 : 0,
+                              offset: const Offset(0, 4),
+                            ),
+                            BoxShadow(
+                              color: isListening ? const Color(0xFFB71C1C) : const Color(0xFF1480B0),
+                              blurRadius: 0,
+                              offset: const Offset(0, 6),
+                            ),
+                          ],
+                        ),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(
+                              isListening ? Icons.mic_rounded : Icons.mic_none_rounded, 
+                              color: Colors.white, 
+                              size: 32
+                            ),
+                            const SizedBox(width: 12),
+                            Text(
+                              isListening ? "BERHENTI" : "LAFALKAN", 
+                              style: const TextStyle(
+                                fontWeight: FontWeight.w900, 
+                                fontSize: 22, 
+                                color: Colors.white,
+                                letterSpacing: 1,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    );
+                  }),
+                ),
+                const SizedBox(height: 16),
               ],
             ),
           ),
@@ -190,528 +249,201 @@ class SpellingExamView extends GetView<SpellingExamController> {
     );
   }
 
-  // ───────────────── COUNTDOWN ─────────────────
-  Widget _buildCountdownScreen() {
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-
-        children: [
-          const Text(
-            "Bersiap!",
-            style: TextStyle(
-              fontSize: 28,
-              fontWeight: FontWeight.w900,
-              color: Color(0xFF3A2F6B),
-            ),
-          ),
-
-          const SizedBox(height: 30),
-
-          Obx(
-            () => Container(
-              width: 140,
-              height: 140,
-
-              decoration: BoxDecoration(
-                gradient: const LinearGradient(
-                  colors: [Color(0xFF1CB0F6), Color(0xFF1899D6)],
-                ),
-
-                shape: BoxShape.circle,
-              ),
-
-              child: Center(
-                child: Text(
-                  "${controller.countdown.value}",
-                  style: const TextStyle(
-                    fontSize: 72,
-                    fontWeight: FontWeight.w900,
-                    color: Colors.white,
-                  ),
-                ),
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  // ───────────────── LISTENING SCREEN ─────────────────
-  Widget _buildListeningScreen() {
-    final q = controller.currentQuestion;
-
-    return Column(
-      children: [
-        _buildHeader(showProgress: true),
-
-        Expanded(
-          child: Padding(
-            padding: const EdgeInsets.all(24),
-
-            child: Container(
-              width: double.infinity,
-
-              padding: const EdgeInsets.all(24),
-
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(30),
-
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withOpacity(0.06),
-                    blurRadius: 20,
-                    offset: const Offset(0, 8),
-                  ),
-                ],
-              ),
-
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-
-                children: [
-                  const Text(
-                    "📖 Bacakan Kata Berikut",
-                    style: TextStyle(
-                      fontSize: 24,
-                      fontWeight: FontWeight.w900,
-                      color: Color(0xFF3A2F6B),
-                    ),
-                  ),
-
-                  const SizedBox(height: 40),
-
-                  // KATA
-                  Container(
-                    width: double.infinity,
-                    padding: const EdgeInsets.symmetric(vertical: 30),
-
-                    decoration: BoxDecoration(
-                      gradient: const LinearGradient(
-                        colors: [Color(0xFF1CB0F6), Color(0xFF1899D6)],
-                      ),
-
-                      borderRadius: BorderRadius.circular(24),
-                    ),
-
-                    child: Center(
-                      child: Text(
-                        q['answer'],
-                        style: const TextStyle(
-                          fontSize: 44,
-                          fontWeight: FontWeight.w900,
-                          color: Colors.white,
-                          letterSpacing: 3,
-                        ),
-                      ),
-                    ),
-                  ),
-
-                  const SizedBox(height: 40),
-
-                  const Text(
-                    "Tekan tombol mikrofon lalu ucapkan kata di atas",
-                    textAlign: TextAlign.center,
-                    style: TextStyle(fontSize: 15, color: Color(0xFF7B7B9A)),
-                  ),
-
-                  const SizedBox(height: 30),
-
-                  // TOMBOL MIC
-                  GestureDetector(
-                    onTap: () async {
-                      if (controller.isListening.value) {
-                        await controller.stopListening();
-                      } else {
-                        await controller.startListening();
-                      }
-                    },
-
-                    child: Obx(
-                      () => AnimatedContainer(
-                        duration: const Duration(milliseconds: 300),
-
-                        width: 130,
-                        height: 130,
-
-                        decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-
-                          gradient: LinearGradient(
-                            colors: controller.isListening.value
-                                ? [
-                                    const Color(0xFFFF416C),
-                                    const Color(0xFFFF4B2B),
-                                  ]
-                                : [
-                                      const Color(0xFF1CB0F6),
-                                      const Color(0xFF1899D6),
-                                  ],
-                          ),
-
-                          boxShadow: [
-                            BoxShadow(
-                              color: controller.isListening.value
-                                  ? Colors.red.withOpacity(0.4)
-                                  : const Color(0xFF6C63FF).withOpacity(0.35),
-
-                              blurRadius: 20,
-                              spreadRadius: 3,
-                            ),
-                          ],
-                        ),
-
-                        child: Icon(
-                          controller.isListening.value
-                              ? Icons.mic
-                              : Icons.mic_none_rounded,
-
-                          color: Colors.white,
-                          size: 60,
-                        ),
-                      ),
-                    ),
-                  ),
-
-                  const SizedBox(height: 18),
-
-                  Obx(
-                    () => Text(
-                      controller.isListening.value
-                          ? "🎙️ Sedang mendengarkan..."
-                          : "🎤 Tekan untuk mulai bicara",
-
-                      style: TextStyle(
-                        fontSize: 15,
-                        fontWeight: FontWeight.w800,
-                        color: controller.isListening.value
-                            ? Colors.red
-                            : const Color(0xFF6C63FF),
-                      ),
-                    ),
-                  ),
-
-                  const SizedBox(height: 24),
-
-                  // HASIL SUARA USER
-                  Obx(
-                    () => Text(
-                      controller.spokenText.value.isEmpty
-                          ? "Belum ada suara"
-                          : controller.spokenText.value,
-
-                      textAlign: TextAlign.center,
-
-                      style: const TextStyle(
-                        fontSize: 20,
-                        fontWeight: FontWeight.w700,
-                        color: Color(0xFF3A2F6B),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-        ),
-      ],
-    );
-  }
-
-  // ───────────────── CHECKING ─────────────────
   Widget _buildCheckingScreen() {
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
-
         children: [
-          const _SpinningLoader(),
-
+          Lottie.asset('assets/lotties/fish.json', height: 150),
           const SizedBox(height: 24),
-
           const Text(
-            "Memeriksa Jawaban...",
-            style: TextStyle(
-              fontSize: 20,
-              fontWeight: FontWeight.w900,
-              color: Color(0xFF3A2F6B),
-            ),
+            "Mengecek Suaramu...", 
+            style: TextStyle(fontSize: 24, fontWeight: FontWeight.w900, color: _primaryBlue),
           ),
         ],
       ),
     );
   }
 
-  // ───────────────── RESULT ─────────────────
-  Widget _buildResultScreen() {
-    final isCorrect = controller.isCorrect.value;
+  Widget _buildEvaluatingScreen() {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Lottie.asset(
+            controller.category == 'word' ? 'assets/lotties/owl.json' : 'assets/lotties/cute-cat.json',
+            height: 180,
+          ),
+          const SizedBox(height: 24),
+          const Text(
+            "Menganalisa Ejaan...", 
+            style: TextStyle(fontSize: 24, fontWeight: FontWeight.w900, color: _primaryBlue),
+          ),
+        ],
+      ),
+    );
+  }
 
+  Widget _buildResultScreen(BuildContext context) {
+    final isOk = controller.isCorrect.value;
+    
     return Column(
       children: [
-        _buildHeader(showProgress: true),
-
+        _buildHeader(showScore: true),
         Expanded(
           child: Center(
-            child: Padding(
-              padding: const EdgeInsets.all(24),
-
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
               child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-
                 children: [
-                  Text(
-                    isCorrect ? "🎉" : "😢",
-                    style: const TextStyle(fontSize: 100),
+                  // Emoji reaksi dengan animasi / Maskot Evaluasi
+                  ScaleTransition(
+                    scale: controller.starsAnim,
+                    child: isOk 
+                        ? const Text('🌟', style: TextStyle(fontSize: 90))
+                        : Lottie.asset(
+                            controller.category == 'word' ? 'assets/lotties/owl.json' : 'assets/lotties/cute-cat.json',
+                            height: 150,
+                          ),
                   ),
-
-                  const SizedBox(height: 20),
-
+                  const SizedBox(height: 14),
                   Text(
-                    isCorrect ? "Jawaban Benar!" : "Jawaban Salah",
+                    isOk ? 'Benar! Hebat! 🎉' : 'Hampir Benar! Yuk Coba Lagi',
                     style: TextStyle(
-                      fontSize: 28,
+                      fontSize: 26,
                       fontWeight: FontWeight.w900,
-                      color: isCorrect
-                          ? const Color(0xFF11998E)
-                          : const Color(0xFFFF6B6B),
+                      color: isOk ? _successGreen : _errorRed,
                     ),
                   ),
+                  const SizedBox(height: 12),
+                  Text(
+                    isOk
+                        ? 'Kamu mengeja "${controller.currentQuestion['answer']}" dengan tepat!'
+                        : 'Latihan lagi ya, kamu pasti bisa!',
+                    textAlign: TextAlign.center,
+                    style: const TextStyle(fontSize: 16, color: _textMuted, height: 1.4),
+                  ),
+                  const SizedBox(height: 32),
 
-                  const SizedBox(height: 10),
-
-                  Obx(
-                    () => Text(
-                      "Jawaban kamu:\n${controller.spokenText.value}",
-                      textAlign: TextAlign.center,
-
-                      style: const TextStyle(
-                        fontSize: 16,
-                        color: Color(0xFF7B7B9A),
-                      ),
+                  // Badge skor
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(22),
+                      boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 16, offset: const Offset(0, 6))],
+                    ),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        const Text('⭐ Skor: ', style: TextStyle(fontSize: 18, color: _textMuted, fontWeight: FontWeight.w600)),
+                        Obx(() => Text('${controller.score.value}',
+                            style: const TextStyle(fontSize: 32, fontWeight: FontWeight.w900, color: _textDark))),
+                      ],
                     ),
                   ),
+                  const SizedBox(height: 48),
 
-                  const SizedBox(height: 30),
-
-                  GestureDetector(
-                    onTap: controller.nextQuestion,
-
-                    child: Container(
-                      width: double.infinity,
-                      height: 60,
-
-                      decoration: BoxDecoration(
-                        gradient: const LinearGradient(
-                          colors: [Color(0xFF1CB0F6), Color(0xFF1899D6)],
-                        ),
-
-                        borderRadius: BorderRadius.circular(22),
-                      ),
-
-                      child: Center(
-                        child: Text(
-                          controller.isLastQuestion
-                              ? "🏁 Selesai"
-                              : "➡️ Soal Berikutnya",
-
-                          style: const TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.w900,
-                            color: Colors.white,
+                  // Tombol Aksi (Lanjut / Kembali / Coba Lagi)
+                  if (isOk)
+                    Row(
+                      children: [
+                        Expanded(
+                          child: GestureDetector(
+                            onTap: controller.backToMenu,
+                            child: Container(
+                              height: 65,
+                              decoration: BoxDecoration(
+                                color: Colors.white,
+                                borderRadius: BorderRadius.circular(22),
+                                border: Border.all(color: _primaryBlue.withOpacity(0.2), width: 2),
+                              ),
+                              child: const Center(
+                                child: Text('Kembali', style: TextStyle(fontSize: 18, fontWeight: FontWeight.w900, color: _primaryBlue)),
+                              ),
+                            ),
                           ),
                         ),
-                      ),
+                        const SizedBox(width: 16),
+                        Expanded(
+                          child: GestureDetector(
+                            onTap: controller.goToNextLevel,
+                            child: Container(
+                              height: 65,
+                              decoration: BoxDecoration(
+                                gradient: const LinearGradient(colors: [_primaryBlue, _darkBlue]),
+                                borderRadius: BorderRadius.circular(22),
+                                boxShadow: [
+                                  BoxShadow(color: _primaryBlue.withOpacity(0.35), blurRadius: 8, offset: const Offset(0, 3)),
+                                  const BoxShadow(color: Color(0xFF1480B0), blurRadius: 0, offset: Offset(0, 4)),
+                                ],
+                              ),
+                              child: const Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Text('Lanjut', style: TextStyle(fontSize: 18, fontWeight: FontWeight.w900, color: Colors.white)),
+                                  SizedBox(width: 8),
+                                  Text('🚀', style: TextStyle(fontSize: 20)),
+                                ],
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
+                    )
+                  else
+                    Row(
+                      children: [
+                        Expanded(
+                          child: GestureDetector(
+                            onTap: controller.backToMenu,
+                            child: Container(
+                              height: 65,
+                              decoration: BoxDecoration(
+                                color: Colors.white,
+                                borderRadius: BorderRadius.circular(22),
+                                border: Border.all(color: _errorRed.withOpacity(0.2), width: 2),
+                              ),
+                              child: const Center(
+                                child: Text('Kembali', style: TextStyle(fontSize: 18, fontWeight: FontWeight.w900, color: _errorRed)),
+                              ),
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 16),
+                        Expanded(
+                          child: GestureDetector(
+                            onTap: controller.retryLevel,
+                            child: Container(
+                              height: 65,
+                              decoration: BoxDecoration(
+                                gradient: const LinearGradient(colors: [_gold, Color(0xFFF39C12)]),
+                                borderRadius: BorderRadius.circular(22),
+                                boxShadow: [
+                                  BoxShadow(color: _gold.withOpacity(0.35), blurRadius: 8, offset: const Offset(0, 3)),
+                                  const BoxShadow(color: Color(0xFFD68910), blurRadius: 0, offset: Offset(0, 4)),
+                                ],
+                              ),
+                              child: const Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Text('Coba Lagi', style: TextStyle(fontSize: 18, fontWeight: FontWeight.w900, color: Colors.white)),
+                                  SizedBox(width: 8),
+                                  Text('🔄', style: TextStyle(fontSize: 20)),
+                                ],
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
-                  ),
                 ],
               ),
             ),
           ),
         ),
       ],
-    );
-  }
-
-  // ───────────────── HEADER ─────────────────
-  Widget _buildHeader({required bool showProgress}) {
-    return Container(
-      padding: const EdgeInsets.fromLTRB(8, 12, 20, 16),
-
-      decoration: const BoxDecoration(
-        gradient: LinearGradient(
-          colors: [Color(0xFF1CB0F6), Color(0xFF1899D6)],
-        ),
-
-        borderRadius: BorderRadius.vertical(bottom: Radius.circular(30)),
-      ),
-
-      child: Column(
-        children: [
-          Row(
-            children: [
-              IconButton(
-                icon: const Icon(Icons.close_rounded, color: Colors.white),
-
-                onPressed: () => Get.back(),
-              ),
-
-              Expanded(
-                child: Text(
-                  "🔤 ${controller.examTitle}",
-                  style: const TextStyle(
-                    fontSize: 20,
-                    fontWeight: FontWeight.w900,
-                    color: Colors.white,
-                  ),
-                ),
-              ),
-
-              Obx(
-                () => Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 14,
-                    vertical: 8,
-                  ),
-
-                  decoration: BoxDecoration(
-                    color: Colors.white.withOpacity(0.25),
-                    borderRadius: BorderRadius.circular(16),
-                  ),
-
-                  child: Text(
-                    "⭐ ${controller.score.value}",
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontWeight: FontWeight.w900,
-                    ),
-                  ),
-                ),
-              ),
-            ],
-          ),
-
-          if (showProgress) ...[
-            const SizedBox(height: 10),
-
-            Obx(() {
-              final progress =
-                  (controller.currentQuestionIndex.value + 1) /
-                  controller.questions.length;
-
-              return ClipRRect(
-                borderRadius: BorderRadius.circular(10),
-
-                child: LinearProgressIndicator(
-                  value: progress,
-                  minHeight: 8,
-
-                  backgroundColor: Colors.white.withOpacity(0.3),
-
-                  valueColor: const AlwaysStoppedAnimation<Color>(Colors.white),
-                ),
-              );
-            }),
-          ],
-        ],
-      ),
-    );
-  }
-
-  Widget _infoChip(String icon, String value, String label) {
-    return Column(
-      children: [
-        Text(icon, style: const TextStyle(fontSize: 28)),
-
-        const SizedBox(height: 4),
-
-        Text(
-          value,
-          style: const TextStyle(
-            fontSize: 20,
-            fontWeight: FontWeight.w900,
-            color: Color(0xFF3A2F6B),
-          ),
-        ),
-
-        Text(
-          label,
-          style: const TextStyle(fontSize: 11, color: Color(0xFF9090A0)),
-        ),
-      ],
-    );
-  }
-
-  Widget _divider() {
-    return Container(width: 1, height: 50, color: const Color(0xFFEEEEF5));
-  }
-}
-
-// ───────────────── LOADER ─────────────────
-class _SpinningLoader extends StatefulWidget {
-  const _SpinningLoader();
-
-  @override
-  State<_SpinningLoader> createState() => _SpinningLoaderState();
-}
-
-class _SpinningLoaderState extends State<_SpinningLoader>
-    with SingleTickerProviderStateMixin {
-  late AnimationController _ctrl;
-
-  @override
-  void initState() {
-    super.initState();
-
-    _ctrl = AnimationController(
-      vsync: this,
-      duration: const Duration(seconds: 2),
-    )..repeat();
-  }
-
-  @override
-  void dispose() {
-    _ctrl.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return AnimatedBuilder(
-      animation: _ctrl,
-
-      builder: (_, __) {
-        return Transform.rotate(
-          angle: _ctrl.value * 2 * math.pi,
-
-          child: Container(
-            width: 100,
-            height: 100,
-
-            decoration: const BoxDecoration(
-              gradient: SweepGradient(
-                colors: [
-                  Color(0xFF1CB0F6),
-                  Color(0xFF1899D6),
-                  Colors.transparent,
-                ],
-              ),
-
-              shape: BoxShape.circle,
-            ),
-
-            child: const Center(
-              child: CircleAvatar(
-                radius: 38,
-                backgroundColor: Color(0xFFF0F4FF),
-
-                child: Text("🤖", style: TextStyle(fontSize: 36)),
-              ),
-            ),
-          ),
-        );
-      },
     );
   }
 }

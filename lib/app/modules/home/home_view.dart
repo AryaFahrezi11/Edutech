@@ -1,13 +1,18 @@
 import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:lottie/lottie.dart';
 import 'home_controller.dart';
 
 import '../leaderboard/views/leaderboard_view.dart';
 import '../profile/views/profile_view.dart';
+import '../multiplayer/views/multiplayer_menu_view.dart';
 import 'widgets/mission_node_widget.dart';
 import 'widgets/mission_path_painter.dart';
 import 'widgets/stats_bar_widget.dart';
+
+import '/app/services/point_service.dart';
+import '../../routes/app_routes.dart';
 
 class HomeView extends GetView<HomeController> {
   const HomeView({Key? key}) : super(key: key);
@@ -21,6 +26,7 @@ class HomeView extends GetView<HomeController> {
           index: controller.tabIndex.value,
           children: [
             _buildMissionMapContent(),
+            const MultiplayerMenuView(), // NEW TAB
             const LeaderboardView(),
             const ProfileView(),
           ],
@@ -44,9 +50,7 @@ class HomeView extends GetView<HomeController> {
           const SizedBox(height: 8),
 
           // Mission Map (scrollable)
-          Expanded(
-            child: _buildMissionMap(),
-          ),
+          Expanded(child: _buildMissionMap()),
         ],
       ),
     );
@@ -73,7 +77,9 @@ class HomeView extends GetView<HomeController> {
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
           ),
-          borderRadius: const BorderRadius.vertical(bottom: Radius.circular(28)),
+          borderRadius: const BorderRadius.vertical(
+            bottom: Radius.circular(28),
+          ),
           boxShadow: [
             BoxShadow(
               color: const Color(0xFF1CB0F6).withOpacity(0.3),
@@ -97,10 +103,10 @@ class HomeView extends GetView<HomeController> {
                   ),
                 ],
               ),
-              child: const CircleAvatar(
+              child: CircleAvatar(
                 radius: 22,
-                backgroundColor: Color(0xFFFFD166),
-                child: Text("🧒", style: TextStyle(fontSize: 26)),
+                backgroundColor: const Color(0xFFFFD166),
+                child: Obx(() => Text(controller.userAvatar.value, style: const TextStyle(fontSize: 26))),
               ),
             ),
             const SizedBox(width: 14),
@@ -109,50 +115,61 @@ class HomeView extends GetView<HomeController> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text(
-                    "Halo, Petualang! 🌟",
-                    style: TextStyle(
+                  Obx(() => Text(
+                    "Halo, ${controller.userName.value} ! 🌟",
+                    style: const TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.w900,
                       color: Colors.white,
                     ),
-                  ),
-                  const SizedBox(height: 2),
-                  Obx(() => Text(
-                    "Misi ${controller.completedMissions.length}/${controller.missionNodes.length} selesai",
-                    style: TextStyle(
-                      fontSize: 12,
-                      fontWeight: FontWeight.w700,
-                      color: Colors.white.withOpacity(0.85),
-                    ),
                   )),
+                  const SizedBox(height: 2),
+                  Obx(
+                    () => Text(
+                      "Misi ${controller.progress.completedMissions.length}/${controller.missionNodes.length} selesai",
+                      style: TextStyle(
+                        fontSize: 12,
+                        fontWeight: FontWeight.w700,
+                        color: Colors.white.withOpacity(0.85),
+                      ),
+                    ),
+                  ),
                 ],
               ),
             ),
-            // XP Badge
-            Obx(() => Container(
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-              decoration: BoxDecoration(
-                color: Colors.white.withOpacity(0.2),
-                borderRadius: BorderRadius.circular(16),
-                border: Border.all(color: Colors.white.withOpacity(0.3), width: 1),
-              ),
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  const Text("⭐", style: TextStyle(fontSize: 16)),
-                  const SizedBox(width: 4),
-                  Text(
-                    "${controller.totalXP.value}",
-                    style: const TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w900,
-                      color: Colors.white,
-                    ),
+            // Coin Badge
+            Obx(() {
+              final points = Get.find<PointService>().totalPoints.value;
+              return Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 8,
+                ),
+                decoration: BoxDecoration(
+                  color: Colors.white.withOpacity(0.2),
+                  borderRadius: BorderRadius.circular(16),
+                  border: Border.all(
+                    color: Colors.white.withOpacity(0.3),
+                    width: 1,
                   ),
-                ],
-              ),
-            )),
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const Text("⭐", style: TextStyle(fontSize: 16)),
+                    const SizedBox(width: 4),
+                    Text(
+                      "$points",
+                      style: const TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w900,
+                        color: Colors.white,
+                      ),
+                    ),
+                  ],
+                ),
+              );
+            }),
           ],
         ),
       ),
@@ -170,7 +187,7 @@ class HomeView extends GetView<HomeController> {
 
     // Delay scroll ke current node
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      final currentIndex = controller.currentMissionIndex.value;
+      final currentIndex = controller.progress.currentMissionIndex.value;
       // Reversed index karena list ditampilkan terbalik (bawah ke atas)
       final reversedIndex = nodeCount - 1 - currentIndex;
       final targetScroll = reversedIndex * nodeSpacing - 200;
@@ -185,8 +202,9 @@ class HomeView extends GetView<HomeController> {
 
     return Obx(() {
       // Force rebuild saat completedMissions berubah
-      final _ = controller.completedMissions.length +
-          controller.currentMissionIndex.value;
+      final _ =
+          controller.progress.completedMissions.length +
+          controller.progress.currentMissionIndex.value;
 
       return Stack(
         children: [
@@ -208,7 +226,7 @@ class HomeView extends GetView<HomeController> {
                     child: CustomPaint(
                       painter: MissionPathPainter(
                         nodeCount: nodeCount,
-                        currentNodeIndex: controller.currentMissionIndex.value,
+                        currentNodeIndex: controller.progress.currentMissionIndex.value,
                         nodeSpacing: nodeSpacing,
                         zigzagOffset: zigzagOffset,
                       ),
@@ -216,58 +234,80 @@ class HomeView extends GetView<HomeController> {
                   ),
 
                   // Mission Node Widgets — ditampilkan dari atas (node terakhir) ke bawah (node pertama)
-                  // Tapi secara logika: node index 0 di paling bawah, node terakhir di paling atas
                   ...List.generate(nodeCount, (i) {
-                    // Reverse: node 0 di bawah, node terakhir di atas
-                    // Tapi painter gambar dari atas ke bawah (index 0 di atas)
-                    // Jadi kita reverse saat menampilkan
                     final reversedIndex = nodeCount - 1 - i;
                     final node = controller.missionNodes[reversedIndex];
 
-                    // Posisi Y
                     final yPos = i * nodeSpacing + nodeSpacing / 2 - 34;
 
-                    // Posisi X zigzag
                     final screenWidth = Get.width;
                     final centerX = screenWidth / 2;
-                    final patterns = [
-                      -zigzagOffset,
-                      0.0,
-                      zigzagOffset,
-                      0.0,
-                    ];
+                    final patterns = [-zigzagOffset, 0.0, zigzagOffset, 0.0];
                     final xOffset = patterns[i % patterns.length];
-                    final xPos = centerX + xOffset - 50; // 50 = setengah lebar node
+                    final xPos = centerX + xOffset - 50;
 
-                    return Positioned(
-                      left: xPos,
-                      top: yPos,
-                      child: TweenAnimationBuilder<double>(
-                        tween: Tween(begin: 0, end: 1),
-                        duration: Duration(milliseconds: 400 + (i * 60)),
-                        curve: Curves.easeOutBack,
-                        builder: (_, v, child) {
-                          return Transform.scale(
-                            scale: v.clamp(0.0, 1.2),
-                            child: Opacity(
-                              opacity: v.clamp(0.0, 1.0),
-                              child: child,
+                    // Tentukan Lottie untuk lekukan
+                    String? lottieAsset;
+                    double? lottieX;
+                    if (i % 2 == 0) { // di lekukan (kiri/kanan), bukan di tengah (0.0)
+                       final lotties = [
+                        'assets/lotties/search.json',
+                        'assets/lotties/cute-cat.json',
+                        'assets/lotties/dog.json',
+                        'assets/lotties/owl.json',
+                        'assets/lotties/pencil.json',
+                        'assets/lotties/rabbit.json',
+                      ];
+                      lottieAsset = lotties[(i ~/ 2) % lotties.length];
+                      if (xOffset < 0) {
+                        lottieX = centerX + zigzagOffset + 10; // node kiri, lottie kanan
+                      } else if (xOffset > 0) {
+                        lottieX = centerX - zigzagOffset - 80; // node kanan, lottie kiri
+                      }
+                    }
+
+                    return [
+                      if (lottieAsset != null && lottieX != null)
+                        Positioned(
+                          left: lottieX,
+                          top: yPos - 10,
+                          child: Opacity(
+                            opacity: 0.85,
+                            child: Lottie.asset(lottieAsset, width: 80, height: 80),
+                          ),
+                        ),
+                      Positioned(
+                        left: xPos,
+                        top: yPos,
+                        child: TweenAnimationBuilder<double>(
+                          tween: Tween(begin: 0, end: 1),
+                          duration: Duration(milliseconds: 400 + (i * 60)),
+                          curve: Curves.easeOutBack,
+                          builder: (_, v, child) {
+                            return Transform.scale(
+                              scale: v.clamp(0.0, 1.2),
+                              child: Opacity(
+                                opacity: v.clamp(0.0, 1.0),
+                                child: child,
+                              ),
+                            );
+                          },
+                          child: SizedBox(
+                            width: 100,
+                            child: MissionNodeWidget(
+                              node: node,
+                              isCompleted: controller.isNodeCompleted(reversedIndex),
+                              isCurrent: controller.isCurrentNode(reversedIndex),
+                              isUnlocked: controller.isNodeUnlocked(reversedIndex),
+                              animateUnlock: controller.isCurrentNode(reversedIndex) && 
+                                           controller.progress.hasNewUnlockedNode.value,
+                              onTap: () => controller.navigateToNode(reversedIndex),
                             ),
-                          );
-                        },
-                        child: SizedBox(
-                          width: 100,
-                          child: MissionNodeWidget(
-                            node: node,
-                            isCompleted: controller.isNodeCompleted(reversedIndex),
-                            isCurrent: controller.isCurrentNode(reversedIndex),
-                            isUnlocked: controller.isNodeUnlocked(reversedIndex),
-                            onTap: () => controller.navigateToNode(reversedIndex),
                           ),
                         ),
                       ),
-                    );
-                  }),
+                    ];
+                  }).expand((e) => e),
 
                   // Dekorasi: awan dan bintang di sepanjang path
                   ..._buildDecorations(nodeCount, nodeSpacing),
@@ -307,12 +347,13 @@ class HomeView extends GetView<HomeController> {
 
     for (int i = 0; i < nodeCount * 2; i++) {
       final yPos = random.nextDouble() * (nodeCount * nodeSpacing);
-      final xPos = random.nextBool()
-          ? random.nextDouble() * 50 + 10  // kiri
-          : Get.width - random.nextDouble() * 50 - 40; // kanan
+      final isLeft = random.nextBool();
+      final xPos = isLeft
+          ? random.nextDouble() * 50 + 10 // kiri
+          : Get.width - random.nextDouble() * 50 - 60; // kanan
+
       final emoji = emojis[random.nextInt(emojis.length)];
       final size = 14.0 + random.nextDouble() * 10;
-
       decorations.add(
         Positioned(
           left: xPos,
@@ -353,12 +394,22 @@ class HomeView extends GetView<HomeController> {
             elevation: 0,
             selectedItemColor: const Color(0xFF1CB0F6),
             unselectedItemColor: const Color(0xFFCBD5E1),
-            selectedLabelStyle: const TextStyle(fontWeight: FontWeight.w900, fontSize: 12),
-            unselectedLabelStyle: const TextStyle(fontWeight: FontWeight.w700, fontSize: 11),
+            selectedLabelStyle: const TextStyle(
+              fontWeight: FontWeight.w900,
+              fontSize: 12,
+            ),
+            unselectedLabelStyle: const TextStyle(
+              fontWeight: FontWeight.w700,
+              fontSize: 11,
+            ),
             items: const [
               BottomNavigationBarItem(
                 icon: Icon(Icons.map_rounded, size: 28),
                 label: 'Peta Misi',
+              ),
+              BottomNavigationBarItem(
+                icon: Icon(Icons.sports_esports_rounded, size: 28),
+                label: 'Arena Duel',
               ),
               BottomNavigationBarItem(
                 icon: Icon(Icons.emoji_events_rounded, size: 28),

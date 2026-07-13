@@ -4,6 +4,11 @@ import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:path_drawing/path_drawing.dart';
 import '../data/letter_paths.dart';
+import '../../../services/progress_service.dart';
+import '../../../services/point_service.dart';
+import '../../../services/tts_service.dart';
+import '../../../services/sfx_service.dart';
+import '../../../widgets/point_animation.dart';
 
 class LetterData {
   final String letter;
@@ -27,24 +32,47 @@ class WordPracticeController extends GetxController {
   var currentLetterIndex = 0.obs;
   var lettersData = <LetterData>[].obs;
 
+  late int wordIndex;
+  int? missionIndex;
+
   @override
   void onInit() {
     super.onInit();
-    // Kunci layar ke mode Landscape
     SystemChrome.setPreferredOrientations([
       DeviceOrientation.landscapeRight,
       DeviceOrientation.landscapeLeft,
     ]);
     
     word = Get.arguments?['word'] ?? 'BOLA';
+    wordIndex = Get.arguments?['index'] ?? 0;
+    missionIndex = Get.arguments?['mission_index'];
     _initLetters();
+    _announceStart();
+  }
+
+  void _announceStart() async {
+    final tts = Get.find<TtsService>();
+    await tts.speakAndWait("Sekarang kita akan belajar menulis kata");
+    await tts.speak("Kata $word");
   }
 
   void _initLetters() {
     List<LetterData> tempData = [];
     for (int i = 0; i < word.length; i++) {
       String char = word[i].toUpperCase();
-      final pathStr = LetterPaths.uppercasePaths[char] ?? '';
+      // Khusus untuk huruf I dan J, gunakan huruf kecil agar ada titiknya sesuai permintaan user
+      // dan tidak ada sabuk/garis horizontal di atas/bawah
+      if (char == 'I' || char == 'J') {
+        char = char.toLowerCase();
+      }
+
+      String pathStr = '';
+      if (char == 'i') {
+        pathStr = LetterPaths.lowercasePaths['i'] ?? '';
+      } else {
+        pathStr = LetterPaths.uppercasePaths[char] ?? '';
+      }
+      
       Path path = pathStr.isNotEmpty ? parseSvgPathData(pathStr) : Path();
       List<PathMetric> metrics = path.computeMetrics().toList();
       
@@ -110,6 +138,19 @@ class WordPracticeController extends GetxController {
   }
 
   void checkGoresanAudit() {
+    // Advance progress
+    Get.find<ProgressService>().completeWritingWord(wordIndex);
+    
+    if (missionIndex != null && Get.find<ProgressService>().unlockedWritingWord.value >= 5) {
+      Get.find<ProgressService>().completeMissionNode(missionIndex!);
+    }
+
+    // Hitung Poin
+    int earned = Get.find<PointService>().completeActivity('write_word_$word', isWord: true);
+
+    Get.find<SfxService>().playSuccess();
+    Get.find<TtsService>().speak("Luar biasa! Kamu berhasil menulis kata $word!");
+
     Get.dialog(
       Dialog(
         backgroundColor: Colors.transparent,
@@ -168,8 +209,10 @@ class WordPracticeController extends GetxController {
                     elevation: 5,
                   ),
                   onPressed: () {
-                    Get.back(); // Tutup popup
-                    Get.back(); // Kembali ke pemilihan kata
+                    Get.back(); // Tutup popup bintang
+                    PointAnimation.showPointAnimation(earned, onComplete: () {
+                      Get.back(); // Kembali ke pemilihan kata
+                    });
                   },
                   child: const Text(
                     "Selesai",
