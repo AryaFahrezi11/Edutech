@@ -23,6 +23,9 @@ class LoginController extends GetxController {
 
   // Variabel untuk animasi loading di tombol
   var isLoading = false.obs;
+  var isPasswordHidden = true.obs;
+
+  void togglePasswordVisibility() => isPasswordHidden.toggle();
 
   // Token dan Data User disimpan di RAM (Memory).
   // Akan otomatis terhapus (hilang) jika aplikasi di-kill/di-close dari Recent Apps.

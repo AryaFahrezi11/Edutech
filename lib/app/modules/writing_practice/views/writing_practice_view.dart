@@ -18,9 +18,7 @@ class WritingPracticeView extends GetView<WritingPracticeController> {
             _buildHeader(),
             const SizedBox(height: 20),
             Expanded(child: _buildCanvas()),
-            const SizedBox(height: 20),
-            _buildBottomControls(),
-            const SizedBox(height: 16),
+            const SizedBox(height: 24),
           ],
         ),
       ),
@@ -204,47 +202,6 @@ class WritingPracticeView extends GetView<WritingPracticeController> {
     );
   }
 
-  // ─── BOTTOM CONTROLS ──────────────────────────────────────────────────────
-  Widget _buildBottomControls() {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 24),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Expanded(
-            child: GestureDetector(
-              onTap: controller.checkGoresanAudit,
-              child: Container(
-                height: 58,
-                decoration: BoxDecoration(
-                  color: const Color(0xFF1CB0F6),
-                  borderRadius: BorderRadius.circular(22),
-                  boxShadow: [
-                    BoxShadow(
-                      color: const Color(0xFF1CB0F6).withOpacity(0.35),
-                      blurRadius: 12,
-                      offset: const Offset(0, 5),
-                    ),
-                  ],
-                ),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: const [
-                    Text("🎉", style: TextStyle(fontSize: 22)),
-                    SizedBox(width: 10),
-                    Text(
-                      "Selesai Mewarnai!",
-                      style: TextStyle(fontSize: 18, fontWeight: FontWeight.w900, color: Colors.white),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
 
   Widget _navButton({required IconData icon, required Color color, required VoidCallback onTap}) {
     return GestureDetector(

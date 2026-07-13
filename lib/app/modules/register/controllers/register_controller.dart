@@ -22,6 +22,11 @@ class RegisterController extends GetxController {
   }
 
   var isLoading = false.obs;
+  var isPasswordHidden = true.obs;
+  var isKonfirmasiHidden = true.obs;
+
+  void togglePasswordVisibility() => isPasswordHidden.toggle();
+  void toggleKonfirmasiVisibility() => isKonfirmasiHidden.toggle();
 
   Future<void> registerProcess() async {
     if (namaController.text.isEmpty || emailController.text.isEmpty || 

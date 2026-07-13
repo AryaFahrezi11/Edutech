@@ -117,7 +117,7 @@ class RegisterView extends GetView<RegisterController> {
                       title: 'Password',
                       hint: 'Masukkan password',
                       icon: Icons.lock_outline,
-                      obscure: true,
+                      isPassword: true,
                       inputController: controller.passwordController,
                     ),
                     const SizedBox(height: 16),
@@ -126,7 +126,7 @@ class RegisterView extends GetView<RegisterController> {
                       title: 'Konfirmasi Password',
                       hint: 'Ulangi password',
                       icon: Icons.check_circle_outline,
-                      obscure: true,
+                      isKonfirmasi: true,
                       inputController: controller.konfirmasiController,
                     ),
                     const SizedBox(height: 24),
@@ -201,38 +201,59 @@ class RegisterView extends GetView<RegisterController> {
     required String title,
     required String hint,
     required IconData icon,
-    bool obscure = false,
+    bool isPassword = false,
+    bool isKonfirmasi = false,
     required TextEditingController inputController,
   }) {
+    Widget buildTextField(bool obscure) {
+      return TextField(
+        controller: inputController,
+        obscureText: obscure,
+        decoration: InputDecoration(
+          hintText: hint,
+          hintStyle: const TextStyle(color: EduTheme.textLight),
+          prefixIcon: Icon(icon, color: EduTheme.primary),
+          suffixIcon: (isPassword || isKonfirmasi)
+              ? IconButton(
+                  icon: Icon(
+                    obscure ? Icons.visibility_off_outlined : Icons.visibility_outlined,
+                    color: EduTheme.primary,
+                  ),
+                  onPressed: isPassword 
+                      ? controller.togglePasswordVisibility 
+                      : controller.toggleKonfirmasiVisibility,
+                )
+              : null,
+          filled: true,
+          fillColor: const Color(0xFFF7F7F7),
+          contentPadding: const EdgeInsets.symmetric(vertical: 14),
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(EduTheme.radiusMd),
+            borderSide: BorderSide.none,
+          ),
+          enabledBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(EduTheme.radiusMd),
+            borderSide: const BorderSide(color: EduTheme.border, width: 2),
+          ),
+          focusedBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(EduTheme.radiusMd),
+            borderSide: const BorderSide(color: EduTheme.primary, width: 2),
+          ),
+        ),
+      );
+    }
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(title, style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 14, color: EduTheme.textDark)),
         const SizedBox(height: 8),
-        TextField(
-          controller: inputController,
-          obscureText: obscure,
-          decoration: InputDecoration(
-            hintText: hint,
-            hintStyle: const TextStyle(color: EduTheme.textLight),
-            prefixIcon: Icon(icon, color: EduTheme.primary),
-            filled: true,
-            fillColor: const Color(0xFFF7F7F7),
-            contentPadding: const EdgeInsets.symmetric(vertical: 14),
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(EduTheme.radiusMd),
-              borderSide: BorderSide.none,
-            ),
-            enabledBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(EduTheme.radiusMd),
-              borderSide: const BorderSide(color: EduTheme.border, width: 2),
-            ),
-            focusedBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(EduTheme.radiusMd),
-              borderSide: const BorderSide(color: EduTheme.primary, width: 2),
-            ),
-          ),
-        ),
+        if (isPassword)
+          Obx(() => buildTextField(controller.isPasswordHidden.value))
+        else if (isKonfirmasi)
+          Obx(() => buildTextField(controller.isKonfirmasiHidden.value))
+        else
+          buildTextField(false),
       ],
     );
   }

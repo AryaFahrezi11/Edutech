@@ -159,7 +159,7 @@ class LoginView extends GetView<LoginController> {
                         title: 'Password',
                         hint: 'Masukkan password',
                         icon: Icons.lock_outline,
-                        obscure: true,
+                        isPassword: true,
                         controller: controller.passwordController,
                       ),
                       const SizedBox(height: 12),
@@ -284,9 +284,45 @@ class LoginView extends GetView<LoginController> {
     required String title,
     required String hint,
     required IconData icon,
-    bool obscure = false,
+    bool isPassword = false,
     TextEditingController? controller,
   }) {
+    Widget buildTextField(bool obscure) {
+      return TextField(
+        controller: controller,
+        obscureText: obscure,
+        decoration: InputDecoration(
+          hintText: hint,
+          hintStyle: const TextStyle(color: EduTheme.textLight),
+          prefixIcon: Icon(icon, color: EduTheme.primary),
+          suffixIcon: isPassword
+              ? IconButton(
+                  icon: Icon(
+                    obscure ? Icons.visibility_off_outlined : Icons.visibility_outlined,
+                    color: EduTheme.primary,
+                  ),
+                  onPressed: this.controller.togglePasswordVisibility,
+                )
+              : null,
+          filled: true,
+          fillColor: const Color(0xFFF7F7F7),
+          contentPadding: const EdgeInsets.symmetric(vertical: 14),
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(EduTheme.radiusMd),
+            borderSide: BorderSide.none,
+          ),
+          enabledBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(EduTheme.radiusMd),
+            borderSide: const BorderSide(color: EduTheme.border, width: 2),
+          ),
+          focusedBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(EduTheme.radiusMd),
+            borderSide: const BorderSide(color: EduTheme.primary, width: 2),
+          ),
+        ),
+      );
+    }
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -295,30 +331,7 @@ class LoginView extends GetView<LoginController> {
           style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 14, color: EduTheme.textDark),
         ),
         const SizedBox(height: 8),
-        TextField(
-          controller: controller,
-          obscureText: obscure,
-          decoration: InputDecoration(
-            hintText: hint,
-            hintStyle: const TextStyle(color: EduTheme.textLight),
-            prefixIcon: Icon(icon, color: EduTheme.primary),
-            filled: true,
-            fillColor: const Color(0xFFF7F7F7),
-            contentPadding: const EdgeInsets.symmetric(vertical: 14),
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(EduTheme.radiusMd),
-              borderSide: BorderSide.none,
-            ),
-            enabledBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(EduTheme.radiusMd),
-              borderSide: const BorderSide(color: EduTheme.border, width: 2),
-            ),
-            focusedBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(EduTheme.radiusMd),
-              borderSide: const BorderSide(color: EduTheme.primary, width: 2),
-            ),
-          ),
-        ),
+        isPassword ? Obx(() => buildTextField(this.controller.isPasswordHidden.value)) : buildTextField(false),
       ],
     );
   }
