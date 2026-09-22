@@ -2,13 +2,11 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:get/get.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import '../../config/api_endpoints.dart';
 
 class MongoDbService extends GetxService {
-  // IP 192.168.1.94 adalah IP Laptop Mas saat ini agar bisa diakses dari HP
-  static const String _flaskApiUrl =
-      'https://be-edutech.vercel.app/api/analytics';
-  static const String _flaskRaportUrl =
-      'https://be-edutech.vercel.app/api/raport';
+  static const String _flaskApiUrl = '${ApiEndpoints.baseUrl}/analytics';
+  static const String _flaskRaportUrl = '${ApiEndpoints.baseUrl}/raport';
 
   Future<MongoDbService> init() async {
     return this;

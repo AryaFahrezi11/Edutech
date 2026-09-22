@@ -17,8 +17,12 @@ class TtsService extends GetxService {
     isTtsEnabled.value = prefs.getBool('tts_enabled') ?? true;
 
     await flutterTts.setLanguage("id-ID");
-    if (GetPlatform.isAndroid) {
-      await flutterTts.setEngine("com.google.android.tts");
+    try {
+      if (GetPlatform.isAndroid) {
+        await flutterTts.setEngine("com.google.android.tts");
+      }
+    } catch (e) {
+      print("TTS setEngine fallback to default system engine: $e");
     }
     await flutterTts.setSpeechRate(0.45);
     await flutterTts.setPitch(1.1);
@@ -57,6 +61,7 @@ class TtsService extends GetxService {
 
   Future<void> speak(String text) async {
     if (!isTtsEnabled.value) return;
+    isSpeaking.value = true;
     await flutterTts.speak(text);
   }
 

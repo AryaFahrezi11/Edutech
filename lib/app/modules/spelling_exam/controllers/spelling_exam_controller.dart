@@ -9,6 +9,8 @@ import '../../../services/progress_service.dart';
 import '../../../widgets/point_animation.dart';
 import '../../../services/gemini_service.dart';
 import '../../../services/mongodb_service.dart';
+import '../../../widgets/bu_guru_avatar_dialog.dart';
+
 
 enum ExamState { idle, countdown, listening, checking, evaluating, result }
 
@@ -327,16 +329,27 @@ class SpellingExamController extends GetxController with GetSingleTickerProvider
       examState.value = ExamState.result; // Tampilkan result screen (salah) agar bisa pencet tombol
       animController.forward(from: 0); // Trigger animasi pop-up
 
-      if (geminiResult != null) {
-        if (geminiResult['analytics_data'] != null) {
-          await mongoService.saveAnalytics(geminiResult['analytics_data']);
-        }
-        
-        final voiceFeedback = geminiResult['voice_feedback'] ?? "Aduh, masih kurang tepat. Coba ucapkan dengan lebih jelas ya!";
-        await Get.find<TtsService>().speakAndWait(voiceFeedback);
-      } else {
-        await Get.find<TtsService>().speakAndWait("Aduh, masih kurang tepat. Coba ucapkan dengan lebih jelas ya!");
+      if (geminiResult != null && geminiResult['analytics_data'] != null) {
+        await mongoService.saveAnalytics(geminiResult['analytics_data']);
       }
+
+      final voiceFeedback = (geminiResult != null && geminiResult['voice_feedback'] != null)
+          ? geminiResult['voice_feedback'] as String
+          : "Aduh, masih kurang tepat. Coba ucapkan dengan lebih jelas ya!";
+      final videoUrl = geminiResult != null ? geminiResult['video_url'] as String? : null;
+      final talkId = geminiResult != null ? geminiResult['talk_id'] as String? : null;
+      final avatarImg = geminiResult != null ? geminiResult['avatar_image'] as String? : null;
+
+      if (Get.context != null) {
+        await BuGuruAvatarDialog.show(
+          context: Get.context!,
+          videoUrl: videoUrl,
+          talkId: talkId,
+          voiceFeedback: voiceFeedback,
+          avatarImageUrl: avatarImg,
+        );
+      }
+
     }
   }
 

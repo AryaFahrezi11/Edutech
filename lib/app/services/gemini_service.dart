@@ -15,6 +15,7 @@ class GeminiService extends GetxService {
   }) async {
     try {
       final url = Uri.parse(ApiEndpoints.evaluateAi);
+      print("📡 Requesting Evaluate AI to: $url");
       final response = await http.post(
         url,
         headers: {"Content-Type": "application/json"},
@@ -23,7 +24,10 @@ class GeminiService extends GetxService {
           "inputWord": writtenWord,
           "mode": "writing"
         }),
-      );
+      ).timeout(const Duration(seconds: 90));
+
+      print("📩 Evaluate AI Response Code: ${response.statusCode}");
+      print("📩 Evaluate AI Response Body: ${response.body}");
 
       if (response.statusCode == 200) {
         return jsonDecode(response.body);
@@ -31,7 +35,7 @@ class GeminiService extends GetxService {
         print("❌ Error Evaluate AI (Writing): ${response.body}");
       }
     } catch (e) {
-      print("❌ Error Exception Evaluate AI: $e");
+      print("❌ Error Exception Evaluate AI (Writing): $e");
     }
     return null;
   }
@@ -43,6 +47,7 @@ class GeminiService extends GetxService {
   }) async {
     try {
       final url = Uri.parse(ApiEndpoints.evaluateAi);
+      print("📡 Requesting Evaluate AI (Spelling) to: $url");
       final response = await http.post(
         url,
         headers: {"Content-Type": "application/json"},
@@ -51,7 +56,10 @@ class GeminiService extends GetxService {
           "inputWord": spokenWord,
           "mode": "spelling"
         }),
-      );
+      ).timeout(const Duration(seconds: 90));
+
+      print("📩 Evaluate AI Response Code: ${response.statusCode}");
+      print("📩 Evaluate AI Response Body: ${response.body}");
 
       if (response.statusCode == 200) {
         return jsonDecode(response.body);
@@ -59,7 +67,7 @@ class GeminiService extends GetxService {
         print("❌ Error Evaluate AI (Spelling): ${response.body}");
       }
     } catch (e) {
-      print("❌ Error Exception Evaluate AI: $e");
+      print("❌ Error Exception Evaluate AI (Spelling): $e");
     }
     return null;
   }

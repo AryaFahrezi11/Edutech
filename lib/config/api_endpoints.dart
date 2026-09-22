@@ -1,6 +1,7 @@
 class ApiEndpoints {
   // --- BASE URL ---
-  static const String baseUrl = "https://be-edutech.vercel.app/api";
+  // Menghubungkan langsung ke Server Python Lokal (python run.py) agar tidak terputus timeout Vercel (10s)
+  static const String baseUrl = "http://192.168.0.108:5000/api";
 
   // --- AUTHENTICATION ---
   static const String register = "$baseUrl/register";

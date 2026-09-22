@@ -270,13 +270,14 @@ class SpellingExamView extends GetView<SpellingExamController> {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Lottie.asset(
-            controller.category == 'word' ? 'assets/lotties/owl.json' : 'assets/lotties/cute-cat.json',
-            height: 180,
+          Image.asset(
+            'assets/images/teacher_mascot.png',
+            height: 160,
+            fit: BoxFit.contain,
           ),
           const SizedBox(height: 24),
           const Text(
-            "Menganalisa Ejaan...", 
+            "Bu Guru Ani Menganalisa...", 
             style: TextStyle(fontSize: 24, fontWeight: FontWeight.w900, color: _primaryBlue),
           ),
         ],

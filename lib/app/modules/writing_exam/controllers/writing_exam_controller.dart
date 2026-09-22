@@ -7,7 +7,9 @@ import '../../../services/point_service.dart';
 import '../../../services/gemini_service.dart';
 import '../../../services/mongodb_service.dart';
 import '../../../services/progress_service.dart';
+import '../../../widgets/bu_guru_avatar_dialog.dart';
 import 'package:google_mlkit_digital_ink_recognition/google_mlkit_digital_ink_recognition.dart';
+
 
 enum ExamState { idle, drawing, checking, evaluating, result }
 
@@ -318,16 +320,27 @@ class WritingExamController extends GetxController
         writtenWord: recognizedText.isEmpty ? "(tidak terdeteksi)" : recognizedText,
       );
 
-      if (geminiResult != null) {
-        if (geminiResult['analytics_data'] != null) {
-          await mongoService.saveAnalytics(geminiResult['analytics_data']);
-        }
-        
-        final voiceFeedback = geminiResult['voice_feedback'] ?? "Aduh, masih kurang tepat. Tetap semangat ya!";
-        await Get.find<TtsService>().speakAndWait(voiceFeedback);
-      } else {
-        await Get.find<TtsService>().speakAndWait("Aduh, masih kurang tepat. Coba tulis ulang dengan lebih pelan ya!");
+      if (geminiResult != null && geminiResult['analytics_data'] != null) {
+        await mongoService.saveAnalytics(geminiResult['analytics_data']);
       }
+
+      final voiceFeedback = (geminiResult != null && geminiResult['voice_feedback'] != null)
+          ? geminiResult['voice_feedback'] as String
+          : "Aduh, masih kurang tepat. Tetap semangat ya!";
+      final videoUrl = geminiResult != null ? geminiResult['video_url'] as String? : null;
+      final talkId = geminiResult != null ? geminiResult['talk_id'] as String? : null;
+      final avatarImg = geminiResult != null ? geminiResult['avatar_image'] as String? : null;
+
+      if (Get.context != null) {
+        await BuGuruAvatarDialog.show(
+          context: Get.context!,
+          videoUrl: videoUrl,
+          talkId: talkId,
+          voiceFeedback: voiceFeedback,
+          avatarImageUrl: avatarImg,
+        );
+      }
+
       
       resetCanvas();
       examState.value = ExamState.drawing;

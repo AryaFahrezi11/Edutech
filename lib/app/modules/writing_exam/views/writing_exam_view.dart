@@ -67,11 +67,10 @@ class WritingExamView extends GetView<WritingExamController> {
                           BoxShadow(color: Colors.black.withOpacity(0.15), blurRadius: 20, offset: const Offset(0, 10)),
                         ],
                       ),
-                      child: Lottie.asset(
-                        'assets/lotties/owl.json',
-                        height: 180,
+                      child: Image.asset(
+                        'assets/images/teacher_mascot.png',
+                        height: 140,
                         fit: BoxFit.contain,
-                        animate: true,
                       ),
                     ),
                   ),

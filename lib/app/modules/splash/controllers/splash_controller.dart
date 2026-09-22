@@ -6,7 +6,7 @@ import '../../../routes/app_routes.dart';
 import '../../../services/tts_service.dart';
 
 class SplashController extends GetxController {
-  late VideoPlayerController videoController;
+  VideoPlayerController? videoController;
   final isVideoInitialized = false.obs;
 
   @override
@@ -18,32 +18,41 @@ class SplashController extends GetxController {
   Future<void> _initializeVideo() async {
     try {
       videoController = VideoPlayerController.asset('assets/video/splash.MOV');
-      await videoController.initialize();
+      // Timeout 3 detik jika format .MOV tidak didukung oleh browser web (Edge/Chrome)
+      await videoController!.initialize().timeout(const Duration(seconds: 3));
       
       isVideoInitialized.value = true;
-      videoController.setLooping(false);
+      videoController!.setLooping(false);
       
       // Beri jeda sedikit agar widget VideoPlayer di UI selesai di-render oleh Obx
       await Future.delayed(const Duration(milliseconds: 100));
-      await videoController.play();
+      await videoController!.play();
       
       // Mainkan suara sambutan awal
-      Get.find<TtsService>().speak("Edutech, aplikasi belajar anak berbasis AI!");
+      try {
+        Get.find<TtsService>().speak("Edutech, aplikasi belajar anak hebat!");
+      } catch (_) {}
       
       // Listen to the video position
-      videoController.addListener(_checkVideoProgress);
+      videoController!.addListener(_checkVideoProgress);
     } catch (e) {
       print("Error initializing splash video: $e");
-      // Jika video gagal diload, langsung pindah ke halaman berikutnya
+      // Tetap mainkan suara sambutan awal
+      try {
+        Get.find<TtsService>().speak("Edutech, aplikasi belajar anak hebat!");
+      } catch (_) {}
+      
+      await Future.delayed(const Duration(milliseconds: 1500));
+      // Jika video gagal/timeout diload, langsung pindah ke halaman berikutnya
       _navigateToNextScreen();
     }
   }
 
   void _checkVideoProgress() {
-    if (videoController.value.isInitialized) {
-      if (videoController.value.position >= videoController.value.duration) {
+    if (videoController != null && videoController!.value.isInitialized) {
+      if (videoController!.value.position >= videoController!.value.duration) {
         // Video finished
-        videoController.removeListener(_checkVideoProgress);
+        videoController!.removeListener(_checkVideoProgress);
         _navigateToNextScreen();
       }
     }
@@ -64,7 +73,7 @@ class SplashController extends GetxController {
 
   @override
   void onClose() {
-    videoController.dispose();
+    videoController?.dispose();
     super.onClose();
   }
 }
