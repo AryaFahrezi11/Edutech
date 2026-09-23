@@ -341,7 +341,8 @@ class WritingExamView extends GetView<WritingExamController> {
             // Canvas tempat anak menggambar (di-block jika sedang evaluasi/checking)
             Obx(() => AbsorbPointer(
               absorbing: controller.examState.value == ExamState.evaluating || 
-                         controller.examState.value == ExamState.checking,
+                         controller.examState.value == ExamState.checking ||
+                         controller.isDownloadingModel.value,
               child: GestureDetector(
                 onPanStart: controller.onPanStart,
                 onPanUpdate: controller.onPanUpdate,
@@ -352,6 +353,45 @@ class WritingExamView extends GetView<WritingExamController> {
                 ),
               ),
             )),
+            
+            // Indikator Download Model AI
+            Obx(() {
+              if (controller.isDownloadingModel.value) {
+                return Container(
+                  decoration: BoxDecoration(
+                    color: Colors.white.withOpacity(0.85),
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                  child: Center(
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        const CircularProgressIndicator(color: _primaryBlue),
+                        const SizedBox(height: 16),
+                        const Text(
+                          'Menyiapkan AI Pembaca Tulisan...',
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w700,
+                            color: _textDark,
+                          ),
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          'Download model (~30MB)\nHarap tunggu sebentar ya! 🚀',
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                            fontSize: 13,
+                            color: _textMuted.withOpacity(0.8),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                );
+              }
+              return const SizedBox.shrink();
+            }),
           ],
         ),
       ),

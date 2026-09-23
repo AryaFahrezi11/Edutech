@@ -114,17 +114,29 @@ class WritingExamController extends GetxController
 
   final DigitalInkRecognizerModelManager _modelManager = DigitalInkRecognizerModelManager();
   DigitalInkRecognizer? _recognizer;
+  final isDownloadingModel = false.obs;
 
   Future<void> _initDigitalInk() async {
     const language = 'en-US'; // Gunakan en-US untuk akurasi pengenalan huruf Latin (A-Z, a-z) terbaik
     try {
       bool isDownloaded = await _modelManager.isModelDownloaded(language);
       if (!isDownloaded) {
+        isDownloadingModel.value = true;
         await _modelManager.downloadModel(language);
+        isDownloadingModel.value = false;
       }
       _recognizer = DigitalInkRecognizer(languageCode: language);
     } catch (e) {
+      isDownloadingModel.value = false;
       print('Gagal inisiasi Digital Ink: $e');
+      Get.snackbar(
+        'Gagal Download AI ⚠️',
+        'Pastikan internet lancar. Error: ${e.toString().split('\n')[0]}',
+        snackPosition: SnackPosition.TOP,
+        backgroundColor: const Color(0xFFFF6B6B),
+        colorText: Colors.white,
+        duration: const Duration(seconds: 5),
+      );
     }
   }
 
@@ -198,6 +210,19 @@ class WritingExamController extends GetxController
       return;
     }
 
+    if (_recognizer == null) {
+      Get.snackbar(
+        'Sabar Ya!',
+        'AI Pembaca Tulisan sedang disiapkan (Download)... Coba klik lagi dalam beberapa detik 🚀',
+        snackPosition: SnackPosition.TOP,
+        backgroundColor: Colors.white,
+        colorText: const Color(0xFF3A2F6B),
+      );
+      // Coba inisiasi ulang jika sebelumnya gagal
+      _initDigitalInk();
+      return;
+    }
+
     examState.value = ExamState.checking;
     final ink = Ink();
     Stroke stroke = Stroke();
@@ -210,10 +235,12 @@ class WritingExamController extends GetxController
           y: point.dy,
           t: timestamp,
         ));
+        timestamp += 20; // Simulasi waktu (20ms) antar titik
       } else {
         if (stroke.points.isNotEmpty) {
           ink.strokes.add(stroke);
           stroke = Stroke();
+          timestamp += 200; // Jeda waktu (200ms) antar goresan
         }
       }
     }
@@ -229,7 +256,7 @@ class WritingExamController extends GetxController
       try {
         final candidates = await _recognizer!.recognize(ink);
         
-        final topCandidates = candidates.take(2).toList();
+        final topCandidates = candidates.take(5).toList();
         
         for (final candidate in topCandidates) {
           String candText = candidate.text.toLowerCase().replaceAll(RegExp(r'[^\w\s]'), '').trim();
