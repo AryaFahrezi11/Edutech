@@ -1,7 +1,7 @@
 class ApiEndpoints {
   // --- BASE URL ---
   // Menghubungkan langsung ke Server Python Lokal (python run.py) agar tidak terputus timeout Vercel (10s)
-  static const String baseUrl = "http://192.168.0.108:5000/api";
+  static const String baseUrl = "https://be-edutech.vercel.app/api";
 
   // --- AUTHENTICATION ---
   static const String register = "$baseUrl/register";
@@ -12,6 +12,7 @@ class ApiEndpoints {
   static const String forgotPassword = "$baseUrl/forgot-password";
   static const String resetPassword = "$baseUrl/reset-password";
   static const String evaluateAi = "$baseUrl/evaluate-ai";
+  static const String chatAi = "$baseUrl/chat-ai";
 
   // --- FITUR UJIAN ---
   static const String ujianMengeja = "$baseUrl/ujian-membaca";

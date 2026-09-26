@@ -4,6 +4,7 @@ import 'dart:math' as math;
 import 'package:lottie/lottie.dart';
 import '../controllers/spelling_exam_menu_controller.dart';
 import '../controllers/spelling_exam_controller.dart';
+import '../../../data/edu_theme.dart';
 
 class SpellingExamMenuView extends GetView<SpellingExamMenuController> {
   const SpellingExamMenuView({super.key});
@@ -48,13 +49,14 @@ class SpellingExamMenuView extends GetView<SpellingExamMenuController> {
                 : controller.category.value == 'lowercase'
                     ? 'Mengeja Huruf Kecil'
                     : 'Mengeja Kata',
-            style: const TextStyle(fontWeight: FontWeight.w900, color: _textDark),
+            style: const TextStyle(fontWeight: FontWeight.w900, color: Colors.white),
           ),
           centerTitle: true,
-          backgroundColor: Colors.white.withOpacity(0.9),
+          backgroundColor: EduTheme.primary,
           elevation: 0,
+          shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(bottom: Radius.circular(30))),
           leading: IconButton(
-            icon: const Icon(Icons.arrow_back_ios_new_rounded, color: _textDark),
+            icon: const Icon(Icons.arrow_back_ios_new_rounded, color: Colors.white),
             onPressed: () => Get.back(),
           ),
         ),

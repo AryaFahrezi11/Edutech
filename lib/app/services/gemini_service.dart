@@ -71,4 +71,31 @@ class GeminiService extends GetxService {
     }
     return null;
   }
+
+  /// Fitur Ngobrol Bareng Owel
+  Future<String?> chatWithOwel(String message, String userName) async {
+    try {
+      final url = Uri.parse(ApiEndpoints.chatAi);
+      print("📡 Requesting Chat AI to: $url");
+      final response = await http.post(
+        url,
+        headers: {"Content-Type": "application/json"},
+        body: jsonEncode({"message": message, "user_name": userName}),
+      ).timeout(const Duration(seconds: 30));
+
+      print("📩 Chat AI Response Code: ${response.statusCode}");
+      
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        if (data['status'] == 'success') {
+          return data['reply'];
+        }
+      } else {
+        print("❌ Error Chat AI: ${response.body}");
+      }
+    } catch (e) {
+      print("❌ Error Exception Chat AI: $e");
+    }
+    return null;
+  }
 }

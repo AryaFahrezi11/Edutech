@@ -35,15 +35,15 @@ class LoginView extends GetView<LoginController> {
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     Container(
-                      padding: const EdgeInsets.all(8),
+                      padding: const EdgeInsets.all(10),
                       decoration: BoxDecoration(
                         color: EduTheme.primary,
-                        shape: BoxShape.circle,
+                        borderRadius: BorderRadius.circular(14),
                         boxShadow: EduTheme.buttonShadow(EduTheme.primary),
                       ),
-                      child: const Icon(Icons.school_rounded, color: Colors.white, size: 24),
+                      child: const Icon(Icons.school_rounded, color: Colors.white, size: 28),
                     ),
-                    const SizedBox(width: 10),
+                    const SizedBox(width: 12),
                     const Text(
                       'Edutech',
                       style: TextStyle(
@@ -114,7 +114,10 @@ class LoginView extends GetView<LoginController> {
                     SizedBox(height: 6),
                     Text(
                       'Masuk untuk melanjutkan petualanganmu!',
-                      style: TextStyle(fontSize: 14, color: EduTheme.textMedium),
+                      style: TextStyle(
+                        fontSize: 14,
+                        color: EduTheme.textMedium,
+                      ),
                     ),
                   ],
                 ),
@@ -163,7 +166,7 @@ class LoginView extends GetView<LoginController> {
                         controller: controller.passwordController,
                       ),
                       const SizedBox(height: 12),
-                      
+
                       Align(
                         alignment: Alignment.centerRight,
                         child: GestureDetector(
@@ -187,12 +190,53 @@ class LoginView extends GetView<LoginController> {
                           width: double.infinity,
                           height: 56,
                           child: controller.isLoading.value
-                              ? const Center(child: CircularProgressIndicator(color: EduTheme.primary))
+                              ? const Center(
+                                  child: CircularProgressIndicator(
+                                    color: EduTheme.primary,
+                                  ),
+                                )
                               : _buildGreenButton(
                                   label: 'MASUK',
                                   emoji: '',
                                   onTap: controller.loginProcess,
                                 ),
+                        ),
+                      ),
+
+                      const SizedBox(height: 24),
+                      const Text(
+                        "atau",
+                        style: TextStyle(
+                          color: EduTheme.textMedium,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      const SizedBox(height: 24),
+
+                      SizedBox(
+                        width: double.infinity,
+                        height: 56,
+                        child: OutlinedButton.icon(
+                          onPressed: controller.loginWithGoogle,
+                          icon: Image.network(
+                            'https://tse4.mm.bing.net/th/id/OIP.HgH-NjiOdFOrkmwjsZCCfAHaHl?rs=1&pid=ImgDetMain&o=7&rm=3',
+                            height: 24,
+                          ),
+                          label: const Text(
+                            "Masuk dengan Google",
+                            style: TextStyle(
+                              color: EduTheme.textDark,
+                              fontWeight: FontWeight.w700,
+                              fontSize: 16,
+                            ),
+                          ),
+                          style: OutlinedButton.styleFrom(
+                            backgroundColor: Colors.white,
+                            side: const BorderSide(color: EduTheme.border, width: 2),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(EduTheme.radiusLg),
+                            ),
+                          ),
                         ),
                       ),
 
@@ -298,7 +342,9 @@ class LoginView extends GetView<LoginController> {
           suffixIcon: isPassword
               ? IconButton(
                   icon: Icon(
-                    obscure ? Icons.visibility_off_outlined : Icons.visibility_outlined,
+                    obscure
+                        ? Icons.visibility_off_outlined
+                        : Icons.visibility_outlined,
                     color: EduTheme.primary,
                   ),
                   onPressed: this.controller.togglePasswordVisibility,
@@ -328,10 +374,16 @@ class LoginView extends GetView<LoginController> {
       children: [
         Text(
           title,
-          style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 14, color: EduTheme.textDark),
+          style: const TextStyle(
+            fontWeight: FontWeight.w700,
+            fontSize: 14,
+            color: EduTheme.textDark,
+          ),
         ),
         const SizedBox(height: 8),
-        isPassword ? Obx(() => buildTextField(this.controller.isPasswordHidden.value)) : buildTextField(false),
+        isPassword
+            ? Obx(() => buildTextField(this.controller.isPasswordHidden.value))
+            : buildTextField(false),
       ],
     );
   }

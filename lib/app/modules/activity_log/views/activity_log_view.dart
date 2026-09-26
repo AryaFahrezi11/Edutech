@@ -16,10 +16,12 @@ class ActivityLogView extends StatelessWidget {
     return Scaffold(
       backgroundColor: const Color(0xFFF7F7F7),
       appBar: AppBar(
-        title: const Text('📜 Riwayat Petualangan'),
+        title: const Text('Riwayat Petualangan', style: TextStyle(fontWeight: FontWeight.w900, color: Colors.white)),
         centerTitle: true,
         backgroundColor: EduTheme.primary,
         elevation: 0,
+        shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(bottom: Radius.circular(30))),
+        iconTheme: const IconThemeData(color: Colors.white),
         actions: [
           IconButton(
             icon: const Icon(Icons.refresh),

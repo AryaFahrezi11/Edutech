@@ -200,7 +200,6 @@ class WritingExamController extends GetxController
       return;
     }
 
-    examState.value = ExamState.checking;
     final ink = Ink();
     Stroke stroke = Stroke();
     int timestamp = DateTime.now().millisecondsSinceEpoch;
@@ -309,39 +308,36 @@ class WritingExamController extends GetxController
 
       await Get.find<TtsService>().speakAndWait("Wah, benar! Hebat sekali! Kamu dapat $earned bintang!");
     } else {
-      examState.value = ExamState.evaluating;
       Get.find<SfxService>().playWrong();
       
       final geminiService = Get.find<GeminiService>();
       final mongoService = Get.find<MongoDbService>();
       
-      final geminiResult = await geminiService.evaluateWriting(
-        targetWord: targetWord,
-        writtenWord: recognizedText.isEmpty ? "(tidak terdeteksi)" : recognizedText,
-      );
+      Future<String?> getFeedback() async {
+        final geminiResult = await geminiService.evaluateWriting(
+          targetWord: targetWord,
+          writtenWord: recognizedText.isEmpty ? "(tidak terdeteksi)" : recognizedText,
+        );
 
-      if (geminiResult != null && geminiResult['analytics_data'] != null) {
-        await mongoService.saveAnalytics(geminiResult['analytics_data']);
+        if (geminiResult != null && geminiResult['analytics_data'] != null) {
+          await mongoService.saveAnalytics(geminiResult['analytics_data']);
+        }
+
+        return (geminiResult != null && geminiResult['voice_feedback'] != null)
+            ? geminiResult['voice_feedback'] as String
+            : "Aduh, masih kurang tepat. Tetap semangat ya!";
       }
-
-      final voiceFeedback = (geminiResult != null && geminiResult['voice_feedback'] != null)
-          ? geminiResult['voice_feedback'] as String
-          : "Aduh, masih kurang tepat. Tetap semangat ya!";
-      final videoUrl = geminiResult != null ? geminiResult['video_url'] as String? : null;
-      final talkId = geminiResult != null ? geminiResult['talk_id'] as String? : null;
-      final avatarImg = geminiResult != null ? geminiResult['avatar_image'] as String? : null;
 
       if (Get.context != null) {
         await BuGuruAvatarDialog.show(
           context: Get.context!,
-          videoUrl: videoUrl,
-          talkId: talkId,
-          voiceFeedback: voiceFeedback,
-          avatarImageUrl: avatarImg,
+          voiceFeedbackFuture: getFeedback(),
+          userAnswer: recognizedText.isEmpty ? "(Kosong)" : recognizedText,
+          correctAnswer: targetWord,
+          userPoints: userPoints.toList(),
         );
       }
 
-      
       resetCanvas();
       examState.value = ExamState.drawing;
     }

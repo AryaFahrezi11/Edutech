@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../../routes/app_routes.dart';
+import '../../../data/edu_theme.dart';
 
 class MultiplayerMenuView extends StatelessWidget {
   const MultiplayerMenuView({Key? key}) : super(key: key);
@@ -10,7 +11,7 @@ class MultiplayerMenuView extends StatelessWidget {
     final missionIndex = Get.arguments?['mission_index'] as int?;
 
     return Container(
-      color: const Color(0xFFF0F7FF), // Same background as Home
+      color: EduTheme.bgPrimaryTint,
       child: SafeArea(
         child: Column(
           children: [
@@ -19,20 +20,22 @@ class MultiplayerMenuView extends StatelessWidget {
               width: double.infinity,
               padding: const EdgeInsets.fromLTRB(20, 16, 20, 16),
               decoration: BoxDecoration(
-                gradient: const LinearGradient(
-                  colors: [Color(0xFF1CB0F6), Color(0xFF1899D6)],
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                ),
-                borderRadius: const BorderRadius.vertical(bottom: Radius.circular(28)),
+                color: EduTheme.primary,
+                borderRadius: const BorderRadius.vertical(bottom: Radius.circular(30)),
                 boxShadow: [
-                  BoxShadow(color: const Color(0xFF1CB0F6).withOpacity(0.3), blurRadius: 16, offset: const Offset(0, 6)),
+                  BoxShadow(color: EduTheme.primary.withOpacity(0.4), blurRadius: 16, offset: const Offset(0, 6)),
                 ],
               ),
-              child: const Text(
-                "Arena Duel ⚔️",
-                style: TextStyle(fontSize: 22, fontWeight: FontWeight.w900, color: Colors.white),
-                textAlign: TextAlign.center,
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const Icon(Icons.sports_esports_rounded, color: Colors.white, size: 28),
+                  const SizedBox(width: 8),
+                  const Text(
+                    "Arena Duel",
+                    style: TextStyle(fontSize: 22, fontWeight: FontWeight.w900, color: Colors.white),
+                  ),
+                ],
               ),
             ),
             
@@ -46,7 +49,7 @@ class MultiplayerMenuView extends StatelessWidget {
                 style: TextStyle(
                   fontSize: 24,
                   fontWeight: FontWeight.w900,
-                  color: Color(0xFF2C3E50),
+                  color: EduTheme.textDark,
                 ),
               ),
             ),
@@ -63,28 +66,28 @@ class MultiplayerMenuView extends StatelessWidget {
                 children: [
                   _buildMenuBox(
                     title: "Susun Kata",
-                    emoji: "🧩",
-                    gradient: const [Color(0xFFFF416C), Color(0xFFFF4B2B)],
+                    icon: Icons.extension_rounded,
+                    color: EduTheme.red,
                     onTap: () => Get.toNamed(Routes.MULTIPLAYER_LOBBY, arguments: {'mission_index': missionIndex}),
                   ),
                   _buildMenuBox(
                     title: "Balap Nulis",
-                    emoji: "✏️",
-                    gradient: [Colors.grey.shade400, Colors.grey.shade500],
+                    icon: Icons.edit_note_rounded,
+                    color: Colors.grey.shade400,
                     isLocked: true,
                     onTap: () => _showLockedMsg(),
                   ),
                   _buildMenuBox(
                     title: "Adu Eja",
-                    emoji: "🗣️",
-                    gradient: [Colors.grey.shade400, Colors.grey.shade500],
+                    icon: Icons.record_voice_over_rounded,
+                    color: Colors.grey.shade400,
                     isLocked: true,
                     onTap: () => _showLockedMsg(),
                   ),
                   _buildMenuBox(
                     title: "Detektif Cepat",
-                    emoji: "🔍",
-                    gradient: [Colors.grey.shade400, Colors.grey.shade500],
+                    icon: Icons.search_rounded,
+                    color: Colors.grey.shade400,
                     isLocked: true,
                     onTap: () => _showLockedMsg(),
                   ),
@@ -99,8 +102,8 @@ class MultiplayerMenuView extends StatelessWidget {
 
   Widget _buildMenuBox({
     required String title,
-    required String emoji,
-    required List<Color> gradient,
+    required IconData icon,
+    required Color color,
     required VoidCallback onTap,
     bool isLocked = false,
   }) {
@@ -108,16 +111,12 @@ class MultiplayerMenuView extends StatelessWidget {
       onTap: onTap,
       child: Container(
         decoration: BoxDecoration(
-          gradient: LinearGradient(
-            colors: gradient,
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-          ),
+          color: color,
           borderRadius: BorderRadius.circular(24),
           boxShadow: [
             if (!isLocked)
               BoxShadow(
-                color: gradient[0].withOpacity(0.4),
+                color: color.withOpacity(0.4),
                 blurRadius: 12,
                 offset: const Offset(0, 6),
               ),
@@ -129,11 +128,11 @@ class MultiplayerMenuView extends StatelessWidget {
             Stack(
               alignment: Alignment.center,
               children: [
-                Text(emoji, style: const TextStyle(fontSize: 50)),
+                Icon(icon, size: 50, color: Colors.white),
                 if (isLocked)
                   Container(
                     padding: const EdgeInsets.all(8),
-                    decoration: BoxDecoration(
+                    decoration: const BoxDecoration(
                       color: Colors.black54,
                       shape: BoxShape.circle,
                     ),

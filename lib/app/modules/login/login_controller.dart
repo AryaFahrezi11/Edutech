@@ -27,6 +27,15 @@ class LoginController extends GetxController {
 
   void togglePasswordVisibility() => isPasswordHidden.toggle();
 
+  void loginWithGoogle() {
+    _showModernSnackbar(
+      "Info",
+      "Fitur Login dengan Google sedang dalam pengembangan.",
+      Colors.blue,
+      Icons.info_outline_rounded,
+    );
+  }
+
   // Token dan Data User disimpan di RAM (Memory).
   // Akan otomatis terhapus (hilang) jika aplikasi di-kill/di-close dari Recent Apps.
   static String token = "";

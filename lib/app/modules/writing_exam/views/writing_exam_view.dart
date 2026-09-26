@@ -5,6 +5,7 @@ import 'package:google_mlkit_digital_ink_recognition/google_mlkit_digital_ink_re
 import 'package:lottie/lottie.dart';
 import '../../../services/tts_service.dart';
 import '../controllers/writing_exam_controller.dart';
+import '../../../data/edu_theme.dart';
 
 class WritingExamView extends GetView<WritingExamController> {
   const WritingExamView({Key? key}) : super(key: key);
@@ -16,8 +17,8 @@ class WritingExamView extends GetView<WritingExamController> {
   static const _inkPurple = Color(0xFF6C63FF);
   static const _textDark = Color(0xFF3A2F6B);
   static const _textMuted = Color(0xFF9090A0);
-  static const _successGreen = Color(0xFF11998E);
-  static const _errorRed = Color(0xFFFF6B6B);
+  static const _successGreen = EduTheme.green;
+  static const _errorRed = EduTheme.red;
   static const _gold = Color(0xFFFFD166);
 
   @override
@@ -67,10 +68,13 @@ class WritingExamView extends GetView<WritingExamController> {
                           BoxShadow(color: Colors.black.withOpacity(0.15), blurRadius: 20, offset: const Offset(0, 10)),
                         ],
                       ),
-                      child: Image.asset(
-                        'assets/images/teacher_mascot.png',
-                        height: 140,
-                        fit: BoxFit.contain,
+                      child: ClipOval(
+                        child: Image.asset(
+                          'assets/images/teacher_mascot.png',
+                          height: 140,
+                          width: 140,
+                          fit: BoxFit.cover,
+                        ),
                       ),
                     ),
                   ),
@@ -383,7 +387,9 @@ class WritingExamView extends GetView<WritingExamController> {
                   const BoxShadow(color: Color(0xFFCC4444), blurRadius: 0, offset: Offset(0, 4)),
                 ],
               ),
-              child: const Center(child: Text("🗑️", style: TextStyle(fontSize: 24))),
+              child: const Center(
+                child: Icon(Icons.delete_rounded, color: Colors.white, size: 28),
+              ),
             ),
           ),
           const SizedBox(width: 14),
@@ -394,18 +400,18 @@ class WritingExamView extends GetView<WritingExamController> {
               child: Container(
                 height: 60,
                 decoration: BoxDecoration(
-                  gradient: const LinearGradient(colors: [_successGreen, Color(0xFF38EF7D)]),
+                  color: _successGreen,
                   borderRadius: BorderRadius.circular(20),
                   boxShadow: [
                     BoxShadow(color: _successGreen.withOpacity(0.35), blurRadius: 8, offset: const Offset(0, 3)),
-                    const BoxShadow(color: Color(0xFF0D7D6C), blurRadius: 0, offset: Offset(0, 4)),
+                    const BoxShadow(color: EduTheme.greenDark, blurRadius: 0, offset: Offset(0, 4)),
                   ],
                 ),
                 child: const Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Text("✅", style: TextStyle(fontSize: 20)),
-                    SizedBox(width: 10),
+                    Icon(Icons.check_circle_rounded, color: Colors.white, size: 24),
+                    SizedBox(width: 8),
                     Text("Selesai!", style: TextStyle(fontSize: 18, fontWeight: FontWeight.w900, color: Colors.white)),
                   ],
                 ),

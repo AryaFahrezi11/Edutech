@@ -270,10 +270,23 @@ class SpellingExamView extends GetView<SpellingExamController> {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Image.asset(
-            'assets/images/teacher_mascot.png',
-            height: 160,
-            fit: BoxFit.contain,
+          Container(
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              shape: BoxShape.circle,
+              boxShadow: [
+                BoxShadow(color: Colors.black.withOpacity(0.1), blurRadius: 16, offset: const Offset(0, 8)),
+              ],
+            ),
+            child: ClipOval(
+              child: Image.asset(
+                'assets/images/teacher_mascot.png',
+                height: 160,
+                width: 160,
+                fit: BoxFit.cover,
+              ),
+            ),
           ),
           const SizedBox(height: 24),
           const Text(

@@ -14,21 +14,21 @@ class ProfileView extends GetView<ProfileController> {
       backgroundColor: EduTheme.bgLight,
       body: SafeArea(
         child: SingleChildScrollView(
-          physics: const BouncingScrollPhysics(),
-          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
           child: Column(
             children: [
-              // ================= HEADER KARTU PROFIL =================
-              _buildProfileCard(),
+              // ================= HEADER KARTU PROFIL (Full Width) =================
+              _buildProfileHeader(),
               
-              const SizedBox(height: 24),
-
-              // ================= KARTU INFO SINGKAT =================
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
+                child: Column(
+                  children: [
+                    // ================= KARTU INFO SINGKAT =================
               Obx(() => Row(
                 children: [
                   Expanded(
                     child: _buildQuickStatCard(
-                      emoji: '⭐',
+                      icon: Icons.star_rounded,
                       value: '${controller.totalPoints}',
                       label: 'Bintang',
                       color: EduTheme.gold,
@@ -37,7 +37,7 @@ class ProfileView extends GetView<ProfileController> {
                   const SizedBox(width: 14),
                   Expanded(
                     child: _buildQuickStatCard(
-                      emoji: '🔥',
+                      icon: Icons.local_fire_department_rounded,
                       value: '${controller.streakDays} Hari',
                       label: 'Beruntun',
                       color: EduTheme.orange,
@@ -46,7 +46,7 @@ class ProfileView extends GetView<ProfileController> {
                   const SizedBox(width: 14),
                   Expanded(
                     child: _buildQuickStatCard(
-                      emoji: '💎',
+                      icon: Icons.diamond_rounded,
                       value: '${controller.totalMissions}',
                       label: 'Misi',
                       color: EduTheme.blue,
@@ -72,7 +72,7 @@ class ProfileView extends GetView<ProfileController> {
               const SizedBox(height: 14),
 
               _buildMenuButton(
-                emoji: '🎨',
+                icon: Icons.palette_rounded,
                 title: 'Edit Profil',
                 subtitle: 'Ganti nama atau avatarmu',
                 color: EduTheme.blue,
@@ -82,7 +82,7 @@ class ProfileView extends GetView<ProfileController> {
               ),
 
               _buildMenuButton(
-                emoji: '📊',
+                icon: Icons.bar_chart_rounded,
                 title: 'Rapor Belajar',
                 subtitle: 'Cek perkembangan hebatmu',
                 color: EduTheme.primary,
@@ -92,7 +92,7 @@ class ProfileView extends GetView<ProfileController> {
               ),
 
               _buildMenuButton(
-                emoji: '📜',
+                icon: Icons.history_edu_rounded,
                 title: 'Riwayat Petualangan',
                 subtitle: 'Lihat log poin dan aktivitasmu',
                 color: EduTheme.purple,
@@ -102,10 +102,10 @@ class ProfileView extends GetView<ProfileController> {
               ),
 
               _buildMenuButton(
-                emoji: '⚙️',
+                icon: Icons.settings_rounded,
                 title: 'Pengaturan',
                 subtitle: 'Suara, musik, dan privasi',
-                color: EduTheme.textLight,
+                color: EduTheme.textMedium,
                 onTap: () {
                   Get.toNamed('/settings');
                 },
@@ -117,7 +117,7 @@ class ProfileView extends GetView<ProfileController> {
               GestureDetector(
                 onTap: () {
                   Get.defaultDialog(
-                    title: "Mau Istirahat? 😴",
+                    title: "Mau Istirahat?",
                     titleStyle: const TextStyle(fontWeight: FontWeight.w900, color: EduTheme.textDark),
                     middleText: "Kamu yakin ingin keluar sekarang?",
                     middleTextStyle: const TextStyle(color: EduTheme.textMedium),
@@ -151,7 +151,7 @@ class ProfileView extends GetView<ProfileController> {
                   child: const Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Text('🚪', style: TextStyle(fontSize: 20)),
+                      Icon(Icons.logout_rounded, color: Colors.white, size: 24),
                       SizedBox(width: 10),
                       Text(
                         'KELUAR',
@@ -165,22 +165,32 @@ class ProfileView extends GetView<ProfileController> {
                     ],
                   ),
                 ),
-              ),
+              ), // Closes GestureDetector
               const SizedBox(height: 30),
             ],
-          ),
-        ),
-      ),
-    );
+          ), // Closes inner Column
+        ), // Closes Padding
+      ],
+    ), // Closes outer Column
+  ), // Closes SingleChildScrollView
+), // Closes SafeArea
+    ); // Closes Scaffold
   }
 
-  Widget _buildProfileCard() {
+  Widget _buildProfileHeader() {
     return Container(
-      padding: const EdgeInsets.all(24),
+      width: double.infinity,
+      padding: const EdgeInsets.fromLTRB(24, 30, 24, 30),
       decoration: BoxDecoration(
-        gradient: EduTheme.primaryGradient,
-        borderRadius: BorderRadius.circular(EduTheme.radiusLg),
-        boxShadow: EduTheme.buttonShadow(EduTheme.primary),
+        color: EduTheme.primary,
+        borderRadius: const BorderRadius.vertical(bottom: Radius.circular(30)),
+        boxShadow: [
+          BoxShadow(
+            color: EduTheme.primary.withOpacity(0.4),
+            blurRadius: 16,
+            offset: const Offset(0, 6),
+          ),
+        ],
       ),
       child: Column(
         children: [
@@ -196,7 +206,7 @@ class ProfileView extends GetView<ProfileController> {
                 ),
                 child: CircleAvatar(
                   radius: 42,
-                  backgroundColor: const Color(0xFFFFD166),
+                  backgroundColor: EduTheme.orange,
                   child: Obx(() => Text(controller.userAvatar.value, style: const TextStyle(fontSize: 48))),
                 ),
               ),
@@ -207,7 +217,6 @@ class ProfileView extends GetView<ProfileController> {
                   decoration: BoxDecoration(
                     color: EduTheme.gold,
                     borderRadius: BorderRadius.circular(20),
-                    border: Border.all(color: Colors.white, width: 3),
                     boxShadow: const [
                       BoxShadow(
                         color: EduTheme.goldDark,
@@ -259,7 +268,7 @@ class ProfileView extends GetView<ProfileController> {
   }
 
   Widget _buildQuickStatCard({
-    required String emoji,
+    required IconData icon,
     required String value,
     required String label,
     required Color color,
@@ -274,7 +283,7 @@ class ProfileView extends GetView<ProfileController> {
       ),
       child: Column(
         children: [
-          Text(emoji, style: const TextStyle(fontSize: 24)),
+          Icon(icon, color: color, size: 28),
           const SizedBox(height: 6),
           Text(
             value,
@@ -299,7 +308,7 @@ class ProfileView extends GetView<ProfileController> {
   }
 
   Widget _buildMenuButton({
-    required String emoji,
+    required IconData icon,
     required String title,
     required String subtitle,
     required Color color,
@@ -327,7 +336,7 @@ class ProfileView extends GetView<ProfileController> {
                   borderRadius: BorderRadius.circular(16),
                 ),
                 child: Center(
-                  child: Text(emoji, style: const TextStyle(fontSize: 24)),
+                  child: Icon(icon, color: color, size: 24),
                 ),
               ),
               const SizedBox(width: 14),

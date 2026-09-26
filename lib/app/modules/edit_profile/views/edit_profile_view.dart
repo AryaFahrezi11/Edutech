@@ -12,12 +12,13 @@ class EditProfileView extends GetView<EditProfileController> {
       backgroundColor: EduTheme.bgLight,
       appBar: AppBar(
         title: const Text(
-          'Edit Profil 🎨',
+          'Edit Profil',
           style: TextStyle(fontWeight: FontWeight.w900, color: Colors.white),
         ),
         backgroundColor: EduTheme.primary,
         elevation: 0,
         centerTitle: true,
+        shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(bottom: Radius.circular(30))),
         leading: IconButton(
           icon: const Icon(Icons.arrow_back_ios_new, color: Colors.white),
           onPressed: () => Get.back(),

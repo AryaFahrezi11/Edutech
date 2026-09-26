@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import '../../../routes/app_routes.dart';
+import '../../../data/edu_theme.dart';
 
 class MultiplayerLobbyView extends StatefulWidget {
   const MultiplayerLobbyView({Key? key}) : super(key: key);
@@ -56,9 +57,11 @@ class _MultiplayerLobbyViewState extends State<MultiplayerLobbyView> {
     return Scaffold(
       backgroundColor: const Color(0xFFF0F7FF), // Terang
       appBar: AppBar(
-        title: const Text('Persiapan Duel', style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white)),
-        backgroundColor: const Color(0xFF1CB0F6),
+        title: const Text('Persiapan Duel', style: TextStyle(fontWeight: FontWeight.w900, color: Colors.white)),
+        backgroundColor: EduTheme.primary,
+        centerTitle: true,
         elevation: 0,
+        shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(bottom: Radius.circular(30))),
         iconTheme: const IconThemeData(color: Colors.white),
       ),
       body: SafeArea(
