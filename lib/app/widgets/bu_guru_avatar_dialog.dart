@@ -90,12 +90,16 @@ class _BuGuruAvatarDialogState extends State<BuGuruAvatarDialog> {
 
   Future<void> _initVideo() async {
     try {
-      print("🎬 Memuat video lokal: assets/video/owel.mp4, idle.mp4, dan thinking.mp4");
+      print(
+        "🎬 Memuat video lokal: assets/video/owel.mp4, idle.mp4, dan thinking.mp4",
+      );
       _speakingController = VideoPlayerController.asset(
         'assets/video/owel.mp4',
       );
       _idleController = VideoPlayerController.asset('assets/video/idle.mp4');
-      _thinkingController = VideoPlayerController.asset('assets/video/thinking.mp4');
+      _thinkingController = VideoPlayerController.asset(
+        'assets/video/thinking.mp4',
+      );
 
       await Future.wait([
         _speakingController!.initialize(),
@@ -146,7 +150,7 @@ class _BuGuruAvatarDialogState extends State<BuGuruAvatarDialog> {
         try {
           final feedback = await widget.voiceFeedbackFuture!;
           _resolvedFeedback = feedback;
-          
+
           if (feedback != null && feedback.isNotEmpty) {
             if (mounted) {
               setState(() {
@@ -158,9 +162,9 @@ class _BuGuruAvatarDialogState extends State<BuGuruAvatarDialog> {
               _idleController?.pause();
               _speakingController?.play();
             }
-            
+
             await Get.find<TtsService>().speakAndWait(feedback);
-            
+
             if (mounted) {
               setState(() {
                 _canClose = true;
@@ -191,7 +195,8 @@ class _BuGuruAvatarDialogState extends State<BuGuruAvatarDialog> {
             _idleController?.play();
           }
         }
-      } else if (widget.voiceFeedback != null && widget.voiceFeedback!.isNotEmpty) {
+      } else if (widget.voiceFeedback != null &&
+          widget.voiceFeedback!.isNotEmpty) {
         _resolvedFeedback = widget.voiceFeedback;
         if (mounted) {
           setState(() {
@@ -230,7 +235,7 @@ class _BuGuruAvatarDialogState extends State<BuGuruAvatarDialog> {
       setState(() {
         _hasError = true;
       });
-      
+
       String? feedback = widget.voiceFeedback;
       if (widget.voiceFeedbackFuture != null) {
         try {
@@ -276,6 +281,11 @@ class _BuGuruAvatarDialogState extends State<BuGuruAvatarDialog> {
   @override
   Widget build(BuildContext context) {
     final tts = Get.find<TtsService>();
+    final isSmallScreen = MediaQuery.of(context).size.height < 500;
+    final double boardHeight = isSmallScreen ? 160 : 274;
+    final double boxHeight = isSmallScreen ? 50 : 100;
+    final double boxWidth = isSmallScreen ? 80 : 140;
+    final double correctFontSize = isSmallScreen ? 48 : 80;
 
     return WillPopScope(
       onWillPop: () async => _canClose,
@@ -334,7 +344,7 @@ class _BuGuruAvatarDialogState extends State<BuGuruAvatarDialog> {
                     Expanded(
                       flex: 3,
                       child: Container(
-                        constraints: const BoxConstraints(minHeight: 274),
+                        constraints: BoxConstraints(minHeight: boardHeight),
                         padding: const EdgeInsets.all(8),
                         decoration: BoxDecoration(
                           color: const Color(
@@ -357,96 +367,100 @@ class _BuGuruAvatarDialogState extends State<BuGuruAvatarDialog> {
                           crossAxisAlignment: CrossAxisAlignment.center,
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: _isEvaluating
-                            ? [ const SizedBox.shrink() ]
-                            : [
-                                const Text(
-                                  "Kesalahan:",
-                                  style: TextStyle(
-                                    color: Colors.white70,
-                                    fontSize: 12,
-                                  ),
-                                ),
-                                if (widget.userPoints != null &&
-                                    widget.userPoints!.isNotEmpty)
-                                  Container(
-                                    height: 100,
-                                    width: 140,
-                                    margin: const EdgeInsets.symmetric(vertical: 4),
-                                    decoration: BoxDecoration(
-                                      color: Colors.white,
-                                      borderRadius: BorderRadius.circular(8),
+                              ? [const SizedBox.shrink()]
+                              : [
+                                  const Text(
+                                    "Kesalahan:",
+                                    style: TextStyle(
+                                      color: Colors.white70,
+                                      fontSize: 12,
                                     ),
-                                    child: ClipRRect(
-                                      borderRadius: BorderRadius.circular(8),
-                                      child: FittedBox(
-                                        fit: BoxFit.contain,
-                                        child: SizedBox(
-                                          width: 300,
-                                          height: 300,
-                                          child: CustomPaint(
-                                            painter: _DialogCanvasPainter(
-                                              points: widget.userPoints!,
-                                              strokeColor: Colors.redAccent,
+                                  ),
+                                  if (widget.userPoints != null &&
+                                      widget.userPoints!.isNotEmpty)
+                                    Container(
+                                      height: boxHeight,
+                                      width: boxWidth,
+                                      margin: const EdgeInsets.symmetric(
+                                        vertical: 4,
+                                      ),
+                                      decoration: BoxDecoration(
+                                        color: Colors.white,
+                                        borderRadius: BorderRadius.circular(8),
+                                      ),
+                                      child: ClipRRect(
+                                        borderRadius: BorderRadius.circular(8),
+                                        child: FittedBox(
+                                          fit: BoxFit.contain,
+                                          child: SizedBox(
+                                            width: 300,
+                                            height: 300,
+                                            child: CustomPaint(
+                                              painter: _DialogCanvasPainter(
+                                                points: widget.userPoints!,
+                                                strokeColor: Colors.redAccent,
+                                              ),
                                             ),
                                           ),
                                         ),
                                       ),
+                                    )
+                                  else
+                                    Text(
+                                      widget.userAnswer ?? "?",
+                                      style: const TextStyle(
+                                        color: Colors.redAccent,
+                                        fontSize: 24,
+                                        fontWeight: FontWeight.bold,
+                                        decoration: TextDecoration.lineThrough,
+                                      ),
+                                      textAlign: TextAlign.center,
                                     ),
-                                  )
-                                else
-                                  Text(
-                                    widget.userAnswer ?? "?",
-                                    style: const TextStyle(
-                                      color: Colors.redAccent,
-                                      fontSize: 24,
-                                      fontWeight: FontWeight.bold,
-                                      decoration: TextDecoration.lineThrough,
+                                  const SizedBox(height: 12),
+                                  const Text(
+                                    "Seharusnya:",
+                                    style: TextStyle(
+                                      color: Colors.white70,
+                                      fontSize: 12,
                                     ),
-                                    textAlign: TextAlign.center,
                                   ),
-                                const SizedBox(height: 12),
-                                const Text(
-                                  "Seharusnya:",
-                                  style: TextStyle(
-                                    color: Colors.white70,
-                                    fontSize: 12,
-                                  ),
-                                ),
-                                if (widget.userPoints != null &&
-                                    widget.userPoints!.isNotEmpty)
-                                  Container(
-                                    height: 100,
-                                    width: 140,
-                                    margin: const EdgeInsets.symmetric(vertical: 4),
-                                    decoration: BoxDecoration(
-                                      color: Colors.white,
-                                      borderRadius: BorderRadius.circular(8),
-                                    ),
-                                    child: Center(
-                                      child: Text(
-                                        widget.correctAnswer ?? "!",
-                                        style: const TextStyle(
-                                          color: Colors.green,
-                                          fontSize: 80,
-                                          fontWeight: FontWeight.bold,
-                                          fontFamily:
-                                              'KGPrimaryDots', // If they have it, else it fallbacks
-                                          height: 1.0,
+                                  if (widget.userPoints != null &&
+                                      widget.userPoints!.isNotEmpty)
+                                    Container(
+                                      height: boxHeight,
+                                      width: boxWidth,
+                                      margin: const EdgeInsets.symmetric(
+                                        vertical: 4,
+                                      ),
+                                      decoration: BoxDecoration(
+                                        color: Colors.white,
+                                        borderRadius: BorderRadius.circular(8),
+                                      ),
+                                      child: Center(
+                                        child: Text(
+                                          widget.correctAnswer ?? "!",
+                                          style: TextStyle(
+                                            color: Colors.green,
+                                            fontSize: correctFontSize,
+                                            fontWeight: FontWeight.bold,
+                                            fontFamily:
+                                                'KGPrimaryDots', // If they have it, else it fallbacks
+                                            height: 1.0,
+                                          ),
                                         ),
                                       ),
+                                    )
+                                  else
+                                    Text(
+                                      widget.correctAnswer ?? "!",
+                                      style: const TextStyle(
+                                        color: Colors.greenAccent,
+                                        fontSize: 28,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                      textAlign: TextAlign.center,
                                     ),
-                                  )
-                                else
-                                  Text(
-                                    widget.correctAnswer ?? "!",
-                                    style: const TextStyle(
-                                      color: Colors.greenAccent,
-                                      fontSize: 28,
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                    textAlign: TextAlign.center,
-                                  ),
-                              ],
+                                ],
                         ),
                       ),
                     ),
@@ -457,14 +471,16 @@ class _BuGuruAvatarDialogState extends State<BuGuruAvatarDialog> {
                       child: ClipRRect(
                         borderRadius: BorderRadius.circular(16),
                         child: Container(
-                          height: 274, // Sama dengan tinggi natural papan tulis
+                          // height: boardHeight, (Dihapus agar kotak mengikuti rasio video)
                           color: Colors.white,
                           child: GestureDetector(
                             onTap: () {
                               if (_isInitialized) {
-                                final currentCtrl = _isEvaluating 
-                                    ? _thinkingController 
-                                    : (_isSpeaking ? _speakingController : _idleController);
+                                final currentCtrl = _isEvaluating
+                                    ? _thinkingController
+                                    : (_isSpeaking
+                                          ? _speakingController
+                                          : _idleController);
                                 if (currentCtrl != null) {
                                   if (currentCtrl.value.isPlaying) {
                                     currentCtrl.pause();
@@ -481,54 +497,55 @@ class _BuGuruAvatarDialogState extends State<BuGuruAvatarDialog> {
                                     _speakingController != null &&
                                     _idleController != null &&
                                     _thinkingController != null)
-                                  SizedBox.expand(
+                                  AspectRatio(
+                                    aspectRatio: 800 / 900, // Crop menjadi potrait (mengambil 800px tengah dari video 1600px)
                                     child: FittedBox(
-                                      fit: BoxFit.cover,
+                                      fit: BoxFit.cover, // Cover agar memenuhi kotak potrait
                                       child: SizedBox(
                                         width:
-                                            (_isEvaluating 
-                                                        ? _thinkingController! 
+                                            (_isEvaluating
+                                                        ? _thinkingController!
                                                         : (_isSpeaking
-                                                            ? _speakingController!
-                                                            : _idleController!))
+                                                              ? _speakingController!
+                                                              : _idleController!))
                                                     .value
                                                     .size
                                                     .width >
                                                 0
-                                            ? (_isEvaluating 
-                                                      ? _thinkingController! 
+                                            ? (_isEvaluating
+                                                      ? _thinkingController!
                                                       : (_isSpeaking
-                                                          ? _speakingController!
-                                                          : _idleController!))
+                                                            ? _speakingController!
+                                                            : _idleController!))
                                                   .value
                                                   .size
                                                   .width
                                             : 1600,
                                         height:
-                                            (_isEvaluating 
-                                                        ? _thinkingController! 
+                                            (_isEvaluating
+                                                        ? _thinkingController!
                                                         : (_isSpeaking
-                                                            ? _speakingController!
-                                                            : _idleController!))
+                                                              ? _speakingController!
+                                                              : _idleController!))
                                                     .value
                                                     .size
                                                     .height >
                                                 0
-                                            ? (_isEvaluating 
-                                                      ? _thinkingController! 
+                                            ? (_isEvaluating
+                                                      ? _thinkingController!
                                                       : (_isSpeaking
-                                                          ? _speakingController!
-                                                          : _idleController!))
+                                                            ? _speakingController!
+                                                            : _idleController!))
                                                   .value
                                                   .size
                                                   .height
                                             : 900,
                                         child: VideoPlayer(
-                                          _isEvaluating 
-                                              ? _thinkingController! 
+                                          _isEvaluating
+                                              ? _thinkingController!
                                               : (_isSpeaking
-                                                  ? _speakingController!
-                                                  : _idleController!),
+                                                    ? _speakingController!
+                                                    : _idleController!),
                                         ),
                                       ),
                                     ),
@@ -614,11 +631,14 @@ class _BuGuruAvatarDialogState extends State<BuGuruAvatarDialog> {
                             borderRadius: BorderRadius.circular(12),
                           ),
                         ),
-                        icon: _isEvaluating 
+                        icon: _isEvaluating
                             ? const SizedBox(
                                 width: 20,
                                 height: 20,
-                                child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2),
+                                child: CircularProgressIndicator(
+                                  color: Colors.white,
+                                  strokeWidth: 2,
+                                ),
                               )
                             : const Icon(
                                 Icons.check_circle_rounded,

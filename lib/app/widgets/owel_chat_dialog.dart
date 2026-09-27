@@ -5,6 +5,7 @@ import 'package:speech_to_text/speech_to_text.dart' as stt;
 import 'package:shared_preferences/shared_preferences.dart';
 import '../services/tts_service.dart';
 import '../services/gemini_service.dart';
+import '../services/bgm_service.dart';
 
 class OwlChatDialog extends StatefulWidget {
   const OwlChatDialog({super.key});
@@ -37,6 +38,7 @@ class _OwlChatDialogState extends State<OwlChatDialog> {
   @override
   void initState() {
     super.initState();
+    Get.find<BackgroundMusicService>().pauseBgm();
     _initVideo();
     _initSpeech();
   }
@@ -208,6 +210,7 @@ class _OwlChatDialogState extends State<OwlChatDialog> {
 
   @override
   void dispose() {
+    Get.find<BackgroundMusicService>().resumeBgm();
     Get.find<TtsService>().stop();
     _speakingController?.dispose();
     _idleController?.dispose();
