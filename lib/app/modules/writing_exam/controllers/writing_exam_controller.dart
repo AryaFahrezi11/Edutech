@@ -275,11 +275,11 @@ class WritingExamController extends GetxController
       }
 
       if (missionIndex != null) {
-        if (cat == 'capital' && progressService.unlockedWritingExamLetter.value >= 5) {
+        if (cat == 'capital' && progressService.unlockedWritingExamLetter.value >= 1) {
           progressService.completeMissionNode(missionIndex!);
-        } else if (cat == 'lowercase' && progressService.unlockedWritingExamLowercase.value >= 5) {
+        } else if (cat == 'lowercase' && progressService.unlockedWritingExamLowercase.value >= 1) {
           progressService.completeMissionNode(missionIndex!);
-        } else if (cat == 'word' && progressService.unlockedWritingExamWord.value >= 5) {
+        } else if (cat == 'word' && progressService.unlockedWritingExamWord.value >= 1) {
           progressService.completeMissionNode(missionIndex!);
         }
       }

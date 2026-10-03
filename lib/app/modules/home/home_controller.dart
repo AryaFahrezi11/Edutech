@@ -33,7 +33,9 @@ class HomeController extends GetxController {
     if (earned > 0) {
       Get.dialog(
         Dialog(
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(20),
+          ),
           child: Padding(
             padding: const EdgeInsets.all(24.0),
             child: Column(
@@ -48,18 +50,12 @@ class HomeController extends GetxController {
                   ),
                 ),
                 const SizedBox(height: 16),
-                const Text(
-                  "⭐",
-                  style: TextStyle(fontSize: 60),
-                ),
+                const Text("⭐", style: TextStyle(fontSize: 60)),
                 const SizedBox(height: 16),
                 Text(
                   "Kamu mendapatkan +$earned Bintang karena rajin belajar hari ini!",
                   textAlign: TextAlign.center,
-                  style: const TextStyle(
-                    fontSize: 16,
-                    color: Colors.black87,
-                  ),
+                  style: const TextStyle(fontSize: 16, color: Colors.black87),
                 ),
                 const SizedBox(height: 24),
                 ElevatedButton(
@@ -69,20 +65,27 @@ class HomeController extends GetxController {
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(12),
                     ),
-                    padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 12),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 32,
+                      vertical: 12,
+                    ),
                   ),
                   child: const Text(
                     "Asyik!",
-                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white),
+                    style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white,
+                    ),
                   ),
-                )
+                ),
               ],
             ),
           ),
         ),
         barrierDismissible: false,
       );
-      
+
       // Putar suara success/coin
       try {
         Get.find<SfxService>().playSuccess();
@@ -291,8 +294,8 @@ class HomeController extends GetxController {
   void navigateToNode(int index) {
     if (!isNodeUnlocked(index)) {
       Get.snackbar(
-        "Terkunci 🔒", 
-        "Selesaikan misi sebelumnya dulu ya!",
+        "Terkunci 🔒",
+        "Selesaikan 1 misi sebelumnya dulu ya!",
         snackPosition: SnackPosition.TOP,
         backgroundColor: Colors.orange.withOpacity(0.9),
         colorText: Colors.white,
@@ -300,13 +303,18 @@ class HomeController extends GetxController {
       return;
     }
 
-    if (index == progress.currentMissionIndex.value && progress.hasNewUnlockedNode.value) {
+    if (index == progress.currentMissionIndex.value &&
+        progress.hasNewUnlockedNode.value) {
       progress.hasNewUnlockedNode.value = false;
-      SharedPreferences.getInstance().then((prefs) => prefs.setBool('has_new_unlocked_node', false));
+      SharedPreferences.getInstance().then(
+        (prefs) => prefs.setBool('has_new_unlocked_node', false),
+      );
     }
 
     final node = missionNodes[index];
-    final args = node.arguments != null ? Map<String, dynamic>.from(node.arguments!) : <String, dynamic>{};
+    final args = node.arguments != null
+        ? Map<String, dynamic>.from(node.arguments!)
+        : <String, dynamic>{};
     args['mission_index'] = index;
 
     Get.toNamed(node.routeName, arguments: args);

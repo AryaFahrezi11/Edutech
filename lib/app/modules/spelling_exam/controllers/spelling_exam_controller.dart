@@ -281,9 +281,9 @@ class SpellingExamController extends GetxController with GetSingleTickerProvider
       }
 
       if (missionIndex != null) {
-        if (category == 'word' && progressService.unlockedSpellingExamWord.value >= 5) {
+        if (category == 'word' && progressService.unlockedSpellingExamWord.value >= 1) {
           progressService.completeMissionNode(missionIndex!);
-        } else if (category != 'word' && progressService.unlockedSpellingExamLetter.value >= 5) {
+        } else if (category != 'word' && progressService.unlockedSpellingExamLetter.value >= 1) {
           progressService.completeMissionNode(missionIndex!);
         }
       }

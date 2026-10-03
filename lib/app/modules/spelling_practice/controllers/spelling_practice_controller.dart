@@ -368,12 +368,12 @@ class SpellingPracticeController extends GetxController {
     // Advance progress
     if (isLetterMode) {
       Get.find<ProgressService>().completeSpellingLetter(currentIndex.value);
-      if (missionIndex != null && Get.find<ProgressService>().unlockedSpellingLetter.value >= 5) {
+      if (missionIndex != null && Get.find<ProgressService>().unlockedSpellingLetter.value >= 1) {
         Get.find<ProgressService>().completeMissionNode(missionIndex!);
       }
     } else {
       Get.find<ProgressService>().completeSpellingWord(currentIndex.value);
-      if (missionIndex != null && Get.find<ProgressService>().unlockedSpellingWord.value >= 5) {
+      if (missionIndex != null && Get.find<ProgressService>().unlockedSpellingWord.value >= 1) {
         Get.find<ProgressService>().completeMissionNode(missionIndex!);
       }
     }

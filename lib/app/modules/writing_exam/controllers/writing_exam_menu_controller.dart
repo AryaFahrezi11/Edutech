@@ -55,7 +55,7 @@ class WritingExamMenuController extends GetxController {
     if (index > unlockedIndex) {
       Get.snackbar(
         'Level Terkunci! 🔒',
-        'Selesaikan level sebelumnya dulu ya!',
+        'Selesaikan 1 level sebelumnya dulu ya!',
         snackPosition: SnackPosition.TOP,
         backgroundColor: Get.theme.primaryColor.withOpacity(0.8),
         colorText: Get.theme.colorScheme.onPrimary,
