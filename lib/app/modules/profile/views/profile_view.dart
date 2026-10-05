@@ -20,7 +20,7 @@ class ProfileView extends GetView<ProfileController> {
               _buildProfileHeader(),
               
               Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
+                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
                 child: Column(
                   children: [
                     // ================= KARTU INFO SINGKAT =================
@@ -55,7 +55,7 @@ class ProfileView extends GetView<ProfileController> {
                 ],
               )),
 
-              const SizedBox(height: 28),
+              const SizedBox(height: 20),
 
               // ================= DAFTAR MENU PETUALANGAN =================
               const Align(
@@ -71,47 +71,42 @@ class ProfileView extends GetView<ProfileController> {
               ),
               const SizedBox(height: 14),
 
-              _buildMenuButton(
-                icon: Icons.palette_rounded,
-                title: 'Edit Profil',
-                subtitle: 'Ganti nama atau avatarmu',
-                color: EduTheme.blue,
-                onTap: () {
-                  Get.toNamed('/edit-profile');
-                },
+              GridView.count(
+                shrinkWrap: true,
+                physics: const NeverScrollableScrollPhysics(),
+                crossAxisCount: 2,
+                crossAxisSpacing: 12,
+                mainAxisSpacing: 12,
+                childAspectRatio: 1.5,
+                children: [
+                  _buildGridMenuButton(
+                    icon: Icons.palette_rounded,
+                    title: 'Edit Profil',
+                    color: EduTheme.blue,
+                    onTap: () => Get.toNamed('/edit-profile'),
+                  ),
+                  _buildGridMenuButton(
+                    icon: Icons.bar_chart_rounded,
+                    title: 'Rapor Belajar',
+                    color: EduTheme.primary,
+                    onTap: () => Get.toNamed('/raport'),
+                  ),
+                  _buildGridMenuButton(
+                    icon: Icons.history_edu_rounded,
+                    title: 'Riwayat',
+                    color: EduTheme.purple,
+                    onTap: () => Get.toNamed('/activity-log'),
+                  ),
+                  _buildGridMenuButton(
+                    icon: Icons.settings_rounded,
+                    title: 'Pengaturan',
+                    color: EduTheme.textMedium,
+                    onTap: () => Get.toNamed('/settings'),
+                  ),
+                ],
               ),
 
-              _buildMenuButton(
-                icon: Icons.bar_chart_rounded,
-                title: 'Rapor Belajar',
-                subtitle: 'Cek perkembangan hebatmu',
-                color: EduTheme.primary,
-                onTap: () {
-                  Get.toNamed('/raport');
-                },
-              ),
-
-              _buildMenuButton(
-                icon: Icons.history_edu_rounded,
-                title: 'Riwayat Petualangan',
-                subtitle: 'Lihat log poin dan aktivitasmu',
-                color: EduTheme.purple,
-                onTap: () {
-                  Get.toNamed('/activity-log');
-                },
-              ),
-
-              _buildMenuButton(
-                icon: Icons.settings_rounded,
-                title: 'Pengaturan',
-                subtitle: 'Suara, musik, dan privasi',
-                color: EduTheme.textMedium,
-                onTap: () {
-                  Get.toNamed('/settings');
-                },
-              ),
-
-              const SizedBox(height: 20),
+              const SizedBox(height: 16),
 
               // ================= TOMBOL LOGOUT =================
               GestureDetector(
@@ -166,7 +161,7 @@ class ProfileView extends GetView<ProfileController> {
                   ),
                 ),
               ), // Closes GestureDetector
-              const SizedBox(height: 30),
+              const SizedBox(height: 16),
             ],
           ), // Closes inner Column
         ), // Closes Padding
@@ -180,7 +175,7 @@ class ProfileView extends GetView<ProfileController> {
   Widget _buildProfileHeader() {
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.fromLTRB(24, 30, 24, 30),
+      padding: const EdgeInsets.fromLTRB(24, 20, 24, 20),
       decoration: BoxDecoration(
         color: EduTheme.primary,
         borderRadius: const BorderRadius.vertical(bottom: Radius.circular(30)),
@@ -199,15 +194,15 @@ class ProfileView extends GetView<ProfileController> {
             alignment: Alignment.bottomCenter,
             children: [
               Container(
-                padding: const EdgeInsets.all(5),
+                padding: const EdgeInsets.all(4),
                 decoration: const BoxDecoration(
                   color: Colors.white,
                   shape: BoxShape.circle,
                 ),
                 child: CircleAvatar(
-                  radius: 42,
+                  radius: 36,
                   backgroundColor: EduTheme.orange,
-                  child: Obx(() => Text(controller.userAvatar.value, style: const TextStyle(fontSize: 48))),
+                  child: Obx(() => Text(controller.userAvatar.value, style: const TextStyle(fontSize: 40))),
                 ),
               ),
               Positioned(
@@ -237,7 +232,7 @@ class ProfileView extends GetView<ProfileController> {
               ),
             ],
           ),
-          const SizedBox(height: 22),
+          const SizedBox(height: 16),
           Obx(() => Text(
             controller.userName.value,
             style: const TextStyle(
@@ -274,7 +269,7 @@ class ProfileView extends GetView<ProfileController> {
     required Color color,
   }) {
     return Container(
-      padding: const EdgeInsets.symmetric(vertical: 14),
+      padding: const EdgeInsets.symmetric(vertical: 10),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(EduTheme.radiusMd),
@@ -307,73 +302,43 @@ class ProfileView extends GetView<ProfileController> {
     );
   }
 
-  Widget _buildMenuButton({
+  Widget _buildGridMenuButton({
     required IconData icon,
     required String title,
-    required String subtitle,
     required Color color,
     required VoidCallback onTap,
   }) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 12),
-      child: GestureDetector(
-        onTap: onTap,
-        child: Container(
-          padding: const EdgeInsets.all(14),
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(EduTheme.radiusMd),
-            border: Border.all(color: EduTheme.border, width: 2),
-            boxShadow: EduTheme.softShadow(),
-          ),
-          child: Row(
-            children: [
-              Container(
-                width: 50,
-                height: 50,
-                decoration: BoxDecoration(
-                  color: color.withOpacity(0.12),
-                  borderRadius: BorderRadius.circular(16),
-                ),
-                child: Center(
-                  child: Icon(icon, color: color, size: 24),
-                ),
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(EduTheme.radiusMd),
+          border: Border.all(color: EduTheme.border, width: 2),
+          boxShadow: EduTheme.softShadow(),
+        ),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Container(
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                color: color.withOpacity(0.12),
+                shape: BoxShape.circle,
               ),
-              const SizedBox(width: 14),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      title,
-                      style: const TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w900,
-                        color: EduTheme.textDark,
-                      ),
-                    ),
-                    const SizedBox(height: 2),
-                    Text(
-                      subtitle,
-                      style: const TextStyle(
-                        fontSize: 11,
-                        fontWeight: FontWeight.w600,
-                        color: EduTheme.textMedium,
-                      ),
-                    ),
-                  ],
-                ),
+              child: Icon(icon, color: color, size: 24),
+            ),
+            const SizedBox(height: 6),
+            Text(
+              title,
+              textAlign: TextAlign.center,
+              style: const TextStyle(
+                fontSize: 14,
+                fontWeight: FontWeight.w900,
+                color: EduTheme.textDark,
               ),
-              Container(
-                padding: const EdgeInsets.all(8),
-                decoration: BoxDecoration(
-                  color: EduTheme.bgLight,
-                  shape: BoxShape.circle,
-                ),
-                child: Icon(Icons.arrow_forward_ios_rounded, size: 14, color: color),
-              ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );

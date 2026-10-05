@@ -25,7 +25,80 @@ class HomeController extends GetxController {
   @override
   void onReady() {
     super.onReady();
+    _checkGuidebook();
     _checkDailyReward();
+  }
+
+  void _checkGuidebook() async {
+    final prefs = await SharedPreferences.getInstance();
+    bool hasSeenGuide = prefs.getBool('has_seen_guidebook') ?? false;
+    
+    if (!hasSeenGuide) {
+      await prefs.setBool('has_seen_guidebook', true);
+      
+      // Kasih delay sedikit supaya tidak bertabrakan dengan dialog daily reward
+      Future.delayed(const Duration(milliseconds: 500), () {
+        _showGuidebookDialog();
+      });
+    }
+  }
+
+  void _showGuidebookDialog() {
+    final tts = Get.find<TtsService>();
+    final guideText = "Halo Petualang! Selamat datang di peta petualangan. Selesaikan minimal satu misi di setiap pos petualangan ya, supaya kamu bisa membuka jalan ke tempat belajar berikutnya yang lebih menantang!";
+    
+    tts.speak(guideText);
+
+    Get.dialog(
+      Dialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        child: Padding(
+          padding: const EdgeInsets.all(24.0),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Text(
+                "Peta Petualangan 🗺️",
+                style: TextStyle(
+                  fontSize: 22,
+                  fontWeight: FontWeight.bold,
+                  color: Color(0xFF3A2F6B),
+                ),
+              ),
+              const SizedBox(height: 16),
+              const Icon(Icons.map_rounded, size: 60, color: Color(0xFF48C6EF)),
+              const SizedBox(height: 16),
+              const Text(
+                "Halo Petualang! 👋\n\nSelesaikan minimal 1 misi di setiap pos untuk membuka jalan ke misi selanjutnya yang lebih seru!",
+                textAlign: TextAlign.center,
+                style: TextStyle(fontSize: 16, color: Colors.black87),
+              ),
+              const SizedBox(height: 24),
+              ElevatedButton(
+                onPressed: () {
+                  tts.stop();
+                  Get.back();
+                },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color(0xFF1CB0F6),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 12),
+                ),
+                child: const Text(
+                  "Mengerti!",
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+      barrierDismissible: false,
+    ).then((_) {
+      tts.stop();
+    });
   }
 
   void _checkDailyReward() {
