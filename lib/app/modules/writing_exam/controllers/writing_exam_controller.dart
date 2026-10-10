@@ -114,19 +114,27 @@ class WritingExamController extends GetxController
     _announceStart();
   }
 
+  final isModelReady = false.obs;
+  final List<int?> _pointTimestamps = [];
   final DigitalInkRecognizerModelManager _modelManager = DigitalInkRecognizerModelManager();
   DigitalInkRecognizer? _recognizer;
 
   Future<void> _initDigitalInk() async {
-    const language = 'en-US'; // Gunakan en-US untuk akurasi pengenalan huruf Latin (A-Z, a-z) terbaik
-    try {
-      bool isDownloaded = await _modelManager.isModelDownloaded(language);
-      if (!isDownloaded) {
-        await _modelManager.downloadModel(language);
+    const languages = ['en-US', 'en'];
+    for (final language in languages) {
+      try {
+        bool isDownloaded = await _modelManager.isModelDownloaded(language);
+        if (!isDownloaded) {
+          bool downloaded = await _modelManager.downloadModel(language);
+          if (!downloaded) continue;
+        }
+        _recognizer = DigitalInkRecognizer(languageCode: language);
+        isModelReady.value = true;
+        debugPrint('Digital Ink siap dengan model: $language');
+        return;
+      } catch (e) {
+        debugPrint('Gagal inisiasi Digital Ink ($language): $e');
       }
-      _recognizer = DigitalInkRecognizer(languageCode: language);
-    } catch (e) {
-      print('Gagal inisiasi Digital Ink: $e');
     }
   }
 
@@ -172,20 +180,24 @@ class WritingExamController extends GetxController
   void onPanStart(DragStartDetails details) {
     if (examState.value != ExamState.drawing) return;
     userPoints.add(details.localPosition);
+    _pointTimestamps.add(DateTime.now().millisecondsSinceEpoch);
   }
 
   void onPanUpdate(DragUpdateDetails details) {
     if (examState.value != ExamState.drawing) return;
     userPoints.add(details.localPosition);
+    _pointTimestamps.add(DateTime.now().millisecondsSinceEpoch);
   }
 
   void onPanEnd() {
     if (examState.value != ExamState.drawing) return;
     userPoints.add(null); // Penanda angkat tangan
+    _pointTimestamps.add(null);
   }
 
   void resetCanvas() {
     userPoints.clear();
+    _pointTimestamps.clear();
   }
 
   void submitAnswer() async {
@@ -200,16 +212,31 @@ class WritingExamController extends GetxController
       return;
     }
 
+    if (_recognizer == null) {
+      Get.snackbar(
+        'Menyiapkan AI...',
+        'Sedang menyiapkan model tulisan tangan. Tunggu sebentar ya! ⏳',
+        snackPosition: SnackPosition.TOP,
+        backgroundColor: Colors.white,
+        colorText: const Color(0xFF3A2F6B),
+      );
+      await _initDigitalInk();
+    }
+
     final ink = Ink();
     Stroke stroke = Stroke();
-    int timestamp = DateTime.now().millisecondsSinceEpoch;
+    int baseTime = DateTime.now().millisecondsSinceEpoch;
 
-    for (var point in userPoints) {
+    for (int i = 0; i < userPoints.length; i++) {
+      final point = userPoints[i];
       if (point != null) {
+        final t = (i < _pointTimestamps.length && _pointTimestamps[i] != null)
+            ? _pointTimestamps[i]!
+            : (baseTime + (i * 15));
         stroke.points.add(StrokePoint(
           x: point.dx,
           y: point.dy,
-          t: timestamp,
+          t: t,
         ));
       } else {
         if (stroke.points.isNotEmpty) {
@@ -230,7 +257,8 @@ class WritingExamController extends GetxController
       try {
         final candidates = await _recognizer!.recognize(ink);
         
-        final topCandidates = candidates.take(2).toList();
+        // Toleransi hingga 5 kandidat teratas untuk tulisan anak-anak
+        final topCandidates = candidates.take(5).toList();
         
         for (final candidate in topCandidates) {
           String candText = candidate.text.toLowerCase().replaceAll(RegExp(r'[^\w\s]'), '').trim();
@@ -243,7 +271,7 @@ class WritingExamController extends GetxController
               break;
             }
           } else {
-            if (candText.contains(target)) {
+            if (candText.contains(target) || candText == target) {
               recognizedText = candidate.text;
               isAnswerCorrect = true;
               break;
