@@ -118,6 +118,7 @@ class WritingExamController extends GetxController
   final List<int?> _pointTimestamps = [];
   final DigitalInkRecognizerModelManager _modelManager = DigitalInkRecognizerModelManager();
   DigitalInkRecognizer? _recognizer;
+  final isDownloadingModel = false.obs;
 
   Future<void> _initDigitalInk() async {
     const languages = ['en-US', 'en'];
@@ -238,10 +239,12 @@ class WritingExamController extends GetxController
           y: point.dy,
           t: t,
         ));
+        timestamp += 20; // Simulasi waktu (20ms) antar titik
       } else {
         if (stroke.points.isNotEmpty) {
           ink.strokes.add(stroke);
           stroke = Stroke();
+          timestamp += 200; // Jeda waktu (200ms) antar goresan
         }
       }
     }
