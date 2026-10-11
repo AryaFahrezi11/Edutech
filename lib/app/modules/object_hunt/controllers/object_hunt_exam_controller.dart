@@ -209,7 +209,7 @@ class ObjectHuntExamController extends GetxController {
       earned,
     );
     
-    if (missionIndex != null && foundCount.value >= 3) {
+    if (missionIndex != null && foundCount.value >= 1) {
       Get.find<ProgressService>().completeMissionNode(missionIndex!);
     }
 

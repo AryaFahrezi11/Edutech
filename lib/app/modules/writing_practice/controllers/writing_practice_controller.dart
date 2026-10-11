@@ -135,12 +135,12 @@ class WritingPracticeController extends GetxController {
     int currentIndex = alphabet.indexOf(selectedLetter.value);
     if (category.value == 'lowercase') {
       Get.find<ProgressService>().completeWritingLowercase(currentIndex);
-      if (missionIndex != null && Get.find<ProgressService>().unlockedWritingLowercase.value >= 5) {
+      if (missionIndex != null && Get.find<ProgressService>().unlockedWritingLowercase.value >= 1) {
         Get.find<ProgressService>().completeMissionNode(missionIndex!);
       }
     } else {
       Get.find<ProgressService>().completeWritingLetter(currentIndex);
-      if (missionIndex != null && Get.find<ProgressService>().unlockedWritingLetter.value >= 5) {
+      if (missionIndex != null && Get.find<ProgressService>().unlockedWritingLetter.value >= 1) {
         Get.find<ProgressService>().completeMissionNode(missionIndex!);
       }
     }

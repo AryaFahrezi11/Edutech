@@ -141,7 +141,7 @@ class WordPracticeController extends GetxController {
     // Advance progress
     Get.find<ProgressService>().completeWritingWord(wordIndex);
     
-    if (missionIndex != null && Get.find<ProgressService>().unlockedWritingWord.value >= 5) {
+    if (missionIndex != null && Get.find<ProgressService>().unlockedWritingWord.value >= 1) {
       Get.find<ProgressService>().completeMissionNode(missionIndex!);
     }
 

@@ -254,7 +254,7 @@ class _MissionNodeWidgetState extends State<MissionNodeWidget>
             const Text("🔒 ", style: TextStyle(fontSize: 20)),
             Expanded(
               child: Text(
-                "Selesaikan misi sebelumnya dulu ya!",
+                "Selesaikan 1 misi sebelumnya dulu ya!",
                 style: const TextStyle(fontWeight: FontWeight.w700),
               ),
             ),

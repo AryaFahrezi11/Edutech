@@ -20,7 +20,21 @@ class LeaderboardView extends GetView<LeaderboardController> {
           
           // Pisahkan top 3 untuk podium, sisanya untuk list
           final top3 = data.length >= 3 ? data.sublist(0, 3) : data.toList();
-          final others = data.length > 3 ? data.sublist(3) : [];
+          
+          List<Map<String, dynamic>> others = [];
+          Map<String, dynamic>? currentUserOutsideTop10;
+
+          if (data.length > 3) {
+            for (var i = 3; i < data.length; i++) {
+              final item = data[i];
+              int rank = int.tryParse(item['rank'].toString()) ?? (i + 1);
+              if (rank <= 10) {
+                others.add(item);
+              } else if (item['active'] == true) {
+                currentUserOutsideTop10 = item;
+              }
+            }
+          }
 
           // Helper untuk mengambil data atau default
           Map<String, dynamic> getRankData(int index) {
@@ -48,18 +62,14 @@ class LeaderboardView extends GetView<LeaderboardController> {
                         width: double.infinity,
                         padding: const EdgeInsets.fromLTRB(16, 20, 16, 30),
                         decoration: BoxDecoration(
-                          gradient: const LinearGradient(
-                            colors: [Color(0xFFFFB75E), Color(0xFFED8F03)],
-                            begin: Alignment.topLeft,
-                            end: Alignment.bottomRight,
-                          ),
+                          color: EduTheme.primary,
                           borderRadius: const BorderRadius.only(
-                            bottomLeft: Radius.circular(32),
-                            bottomRight: Radius.circular(32),
+                            bottomLeft: Radius.circular(30),
+                            bottomRight: Radius.circular(30),
                           ),
                           boxShadow: [
                             BoxShadow(
-                              color: const Color(0xFFED8F03).withOpacity(0.4),
+                              color: EduTheme.primary.withOpacity(0.4),
                               blurRadius: 15,
                               offset: const Offset(0, 5),
                             ),
@@ -67,16 +77,23 @@ class LeaderboardView extends GetView<LeaderboardController> {
                         ),
                         child: Column(
                           children: [
-                            const Text(
-                              '🏆 Papan Peringkat 🏆',
-                              style: TextStyle(
-                                fontSize: 24,
-                                fontWeight: FontWeight.w900,
-                                color: Colors.white,
-                                shadows: [
-                                  Shadow(color: Colors.black26, blurRadius: 4, offset: Offset(0, 2)),
-                                ],
-                              ),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                const Icon(Icons.emoji_events_rounded, color: EduTheme.gold, size: 28),
+                                const SizedBox(width: 8),
+                                const Text(
+                                  'Papan Peringkat',
+                                  style: TextStyle(
+                                    fontSize: 24,
+                                    fontWeight: FontWeight.w900,
+                                    color: Colors.white,
+                                    shadows: [
+                                      Shadow(color: Colors.black26, blurRadius: 4, offset: Offset(0, 2)),
+                                    ],
+                                  ),
+                                ),
+                              ],
                             ),
                             const SizedBox(height: 8),
                             Container(
@@ -85,13 +102,20 @@ class LeaderboardView extends GetView<LeaderboardController> {
                                 color: Colors.white.withOpacity(0.25),
                                 borderRadius: BorderRadius.circular(20),
                               ),
-                              child: const Text(
-                                'Tarik ke bawah untuk menyegarkan 🔄',
-                                style: TextStyle(
-                                  fontSize: 12,
-                                  fontWeight: FontWeight.w700,
-                                  color: Colors.white,
-                                ),
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  const Icon(Icons.swipe_down_rounded, color: Colors.white, size: 14),
+                                  const SizedBox(width: 6),
+                                  const Text(
+                                    'Tarik ke bawah untuk memuat ulang',
+                                    style: TextStyle(
+                                      fontSize: 12,
+                                      fontWeight: FontWeight.w700,
+                                      color: Colors.white,
+                                    ),
+                                  ),
+                                ],
                               ),
                             ),
                           ],
@@ -172,16 +196,19 @@ class LeaderboardView extends GetView<LeaderboardController> {
                       if (others.isNotEmpty)
                         Padding(
                           padding: const EdgeInsets.symmetric(horizontal: 18),
-                          child: const Align(
-                            alignment: Alignment.centerLeft,
-                            child: Text(
-                              '🌟 Peringkat Lainnya',
-                              style: TextStyle(
-                                fontWeight: FontWeight.w900,
-                                fontSize: 16,
-                                color: EduTheme.textDark,
+                          child: Row(
+                            children: [
+                              const Icon(Icons.list_alt_rounded, color: EduTheme.primary, size: 20),
+                              const SizedBox(width: 8),
+                              const Text(
+                                'Peringkat Lainnya',
+                                style: TextStyle(
+                                  fontWeight: FontWeight.w900,
+                                  fontSize: 16,
+                                  color: EduTheme.textDark,
+                                ),
                               ),
-                            ),
+                            ],
                           ),
                         ),
                       const SizedBox(height: 10),
@@ -220,6 +247,32 @@ class LeaderboardView extends GetView<LeaderboardController> {
                     ),
                   ),
 
+                if (currentUserOutsideTop10 != null)
+                  SliverToBoxAdapter(
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 18),
+                      child: Column(
+                        children: [
+                          const SizedBox(height: 8),
+                          const Icon(Icons.more_vert_rounded, color: EduTheme.textLight),
+                          const SizedBox(height: 18),
+                          _rankTile(
+                            rank: currentUserOutsideTop10["rank"].toString(),
+                            name: currentUserOutsideTop10["name"].toString(),
+                            score: currentUserOutsideTop10["score"].toString(),
+                            emoji: currentUserOutsideTop10["emoji"]?.toString() ?? "🧒",
+                            active: true,
+                            onTap: () => controller.playUserRank(
+                              currentUserOutsideTop10!["rank"].toString(), 
+                              currentUserOutsideTop10!["name"].toString(), 
+                              currentUserOutsideTop10!["score"].toString()
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+
                 const SliverToBoxAdapter(child: SizedBox(height: 40)),
               ],
             ),
@@ -251,7 +304,7 @@ class LeaderboardView extends GetView<LeaderboardController> {
         children: [
           // Crown untuk rank 1
           if (center) ...[
-            const Text("👑", style: TextStyle(fontSize: 24)),
+            const Icon(Icons.workspace_premium_rounded, color: EduTheme.gold, size: 28),
             const SizedBox(height: 4),
           ],
           // Avatar
@@ -286,11 +339,7 @@ class LeaderboardView extends GetView<LeaderboardController> {
             height: height,
             margin: const EdgeInsets.symmetric(horizontal: 4),
             decoration: BoxDecoration(
-              gradient: LinearGradient(
-                colors: [color, color.withOpacity(0.7)],
-                begin: Alignment.topCenter,
-                end: Alignment.bottomCenter,
-              ),
+              color: color,
               borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
               boxShadow: [
                 BoxShadow(
@@ -380,7 +429,12 @@ class LeaderboardView extends GetView<LeaderboardController> {
             child: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
-                Text("⭐ ", style: TextStyle(fontSize: active ? 12 : 14)),
+                Icon(
+                  Icons.star_rounded, 
+                  size: 16, 
+                  color: active ? Colors.white : EduTheme.gold,
+                ),
+                const SizedBox(width: 4),
                 Text(
                   score,
                   style: TextStyle(

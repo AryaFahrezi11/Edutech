@@ -15,7 +15,6 @@ import 'app/services/mongodb_service.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-
   // Konfigurasi agar AudioPlayers tidak mematikan suara satu sama lain
   await AudioPlayer.global.setAudioContext(
     AudioContextConfig(
@@ -45,7 +44,7 @@ class MyApp extends StatelessWidget {
     return GetMaterialApp(
       title: 'Edutech',
       debugShowCheckedModeBanner: false,
-      initialRoute: Routes.LOGIN,
+      initialRoute: Routes.SPLASH,
       getPages: AppPages.pages,
       routingCallback: (routing) {
         if (routing != null) {

@@ -22,6 +22,8 @@ class EduTheme {
   static const Color purple = Color(0xFFCE82FF);       // Premium / special
   static const Color gold = Color(0xFFFFC800);         // Stars / achievement
   static const Color goldDark = Color(0xFFE5B400);
+  static const Color green = Color(0xFF10B981);        // Professional Emerald Green
+  static const Color greenDark = Color(0xFF059669);
 
   // ── NEUTRAL COLORS ──
   static const Color bgLight = Color(0xFFF7F7F7);     // Background utama

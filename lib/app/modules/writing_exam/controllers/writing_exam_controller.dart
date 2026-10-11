@@ -7,7 +7,9 @@ import '../../../services/point_service.dart';
 import '../../../services/gemini_service.dart';
 import '../../../services/mongodb_service.dart';
 import '../../../services/progress_service.dart';
+import '../../../widgets/bu_guru_avatar_dialog.dart';
 import 'package:google_mlkit_digital_ink_recognition/google_mlkit_digital_ink_recognition.dart';
+
 
 enum ExamState { idle, drawing, checking, evaluating, result }
 
@@ -112,31 +114,28 @@ class WritingExamController extends GetxController
     _announceStart();
   }
 
+  final isModelReady = false.obs;
+  final List<int?> _pointTimestamps = [];
   final DigitalInkRecognizerModelManager _modelManager = DigitalInkRecognizerModelManager();
   DigitalInkRecognizer? _recognizer;
   final isDownloadingModel = false.obs;
 
   Future<void> _initDigitalInk() async {
-    const language = 'en-US'; // Gunakan en-US untuk akurasi pengenalan huruf Latin (A-Z, a-z) terbaik
-    try {
-      bool isDownloaded = await _modelManager.isModelDownloaded(language);
-      if (!isDownloaded) {
-        isDownloadingModel.value = true;
-        await _modelManager.downloadModel(language);
-        isDownloadingModel.value = false;
+    const languages = ['en-US', 'en'];
+    for (final language in languages) {
+      try {
+        bool isDownloaded = await _modelManager.isModelDownloaded(language);
+        if (!isDownloaded) {
+          bool downloaded = await _modelManager.downloadModel(language);
+          if (!downloaded) continue;
+        }
+        _recognizer = DigitalInkRecognizer(languageCode: language);
+        isModelReady.value = true;
+        debugPrint('Digital Ink siap dengan model: $language');
+        return;
+      } catch (e) {
+        debugPrint('Gagal inisiasi Digital Ink ($language): $e');
       }
-      _recognizer = DigitalInkRecognizer(languageCode: language);
-    } catch (e) {
-      isDownloadingModel.value = false;
-      print('Gagal inisiasi Digital Ink: $e');
-      Get.snackbar(
-        'Gagal Download AI ⚠️',
-        'Pastikan internet lancar. Error: ${e.toString().split('\n')[0]}',
-        snackPosition: SnackPosition.TOP,
-        backgroundColor: const Color(0xFFFF6B6B),
-        colorText: Colors.white,
-        duration: const Duration(seconds: 5),
-      );
     }
   }
 
@@ -182,20 +181,24 @@ class WritingExamController extends GetxController
   void onPanStart(DragStartDetails details) {
     if (examState.value != ExamState.drawing) return;
     userPoints.add(details.localPosition);
+    _pointTimestamps.add(DateTime.now().millisecondsSinceEpoch);
   }
 
   void onPanUpdate(DragUpdateDetails details) {
     if (examState.value != ExamState.drawing) return;
     userPoints.add(details.localPosition);
+    _pointTimestamps.add(DateTime.now().millisecondsSinceEpoch);
   }
 
   void onPanEnd() {
     if (examState.value != ExamState.drawing) return;
     userPoints.add(null); // Penanda angkat tangan
+    _pointTimestamps.add(null);
   }
 
   void resetCanvas() {
     userPoints.clear();
+    _pointTimestamps.clear();
   }
 
   void submitAnswer() async {
@@ -212,28 +215,29 @@ class WritingExamController extends GetxController
 
     if (_recognizer == null) {
       Get.snackbar(
-        'Sabar Ya!',
-        'AI Pembaca Tulisan sedang disiapkan (Download)... Coba klik lagi dalam beberapa detik 🚀',
+        'Menyiapkan AI...',
+        'Sedang menyiapkan model tulisan tangan. Tunggu sebentar ya! ⏳',
         snackPosition: SnackPosition.TOP,
         backgroundColor: Colors.white,
         colorText: const Color(0xFF3A2F6B),
       );
-      // Coba inisiasi ulang jika sebelumnya gagal
-      _initDigitalInk();
-      return;
+      await _initDigitalInk();
     }
 
-    examState.value = ExamState.checking;
     final ink = Ink();
     Stroke stroke = Stroke();
-    int timestamp = DateTime.now().millisecondsSinceEpoch;
+    int baseTime = DateTime.now().millisecondsSinceEpoch;
 
-    for (var point in userPoints) {
+    for (int i = 0; i < userPoints.length; i++) {
+      final point = userPoints[i];
       if (point != null) {
+        final t = (i < _pointTimestamps.length && _pointTimestamps[i] != null)
+            ? _pointTimestamps[i]!
+            : (baseTime + (i * 15));
         stroke.points.add(StrokePoint(
           x: point.dx,
           y: point.dy,
-          t: timestamp,
+          t: t,
         ));
         timestamp += 20; // Simulasi waktu (20ms) antar titik
       } else {
@@ -256,6 +260,7 @@ class WritingExamController extends GetxController
       try {
         final candidates = await _recognizer!.recognize(ink);
         
+        // Toleransi hingga 5 kandidat teratas untuk tulisan anak-anak
         final topCandidates = candidates.take(5).toList();
         
         for (final candidate in topCandidates) {
@@ -269,7 +274,7 @@ class WritingExamController extends GetxController
               break;
             }
           } else {
-            if (candText.contains(target)) {
+            if (candText.contains(target) || candText == target) {
               recognizedText = candidate.text;
               isAnswerCorrect = true;
               break;
@@ -301,11 +306,11 @@ class WritingExamController extends GetxController
       }
 
       if (missionIndex != null) {
-        if (cat == 'capital' && progressService.unlockedWritingExamLetter.value >= 5) {
+        if (cat == 'capital' && progressService.unlockedWritingExamLetter.value >= 1) {
           progressService.completeMissionNode(missionIndex!);
-        } else if (cat == 'lowercase' && progressService.unlockedWritingExamLowercase.value >= 5) {
+        } else if (cat == 'lowercase' && progressService.unlockedWritingExamLowercase.value >= 1) {
           progressService.completeMissionNode(missionIndex!);
-        } else if (cat == 'word' && progressService.unlockedWritingExamWord.value >= 5) {
+        } else if (cat == 'word' && progressService.unlockedWritingExamWord.value >= 1) {
           progressService.completeMissionNode(missionIndex!);
         }
       }
@@ -334,28 +339,36 @@ class WritingExamController extends GetxController
 
       await Get.find<TtsService>().speakAndWait("Wah, benar! Hebat sekali! Kamu dapat $earned bintang!");
     } else {
-      examState.value = ExamState.evaluating;
       Get.find<SfxService>().playWrong();
       
       final geminiService = Get.find<GeminiService>();
       final mongoService = Get.find<MongoDbService>();
       
-      final geminiResult = await geminiService.evaluateWriting(
-        targetWord: targetWord,
-        writtenWord: recognizedText.isEmpty ? "(tidak terdeteksi)" : recognizedText,
-      );
+      Future<String?> getFeedback() async {
+        final geminiResult = await geminiService.evaluateWriting(
+          targetWord: targetWord,
+          writtenWord: recognizedText.isEmpty ? "(tidak terdeteksi)" : recognizedText,
+        );
 
-      if (geminiResult != null) {
-        if (geminiResult['analytics_data'] != null) {
+        if (geminiResult != null && geminiResult['analytics_data'] != null) {
           await mongoService.saveAnalytics(geminiResult['analytics_data']);
         }
-        
-        final voiceFeedback = geminiResult['voice_feedback'] ?? "Aduh, masih kurang tepat. Tetap semangat ya!";
-        await Get.find<TtsService>().speakAndWait(voiceFeedback);
-      } else {
-        await Get.find<TtsService>().speakAndWait("Aduh, masih kurang tepat. Coba tulis ulang dengan lebih pelan ya!");
+
+        return (geminiResult != null && geminiResult['voice_feedback'] != null)
+            ? geminiResult['voice_feedback'] as String
+            : "Aduh, masih kurang tepat. Tetap semangat ya!";
       }
-      
+
+      if (Get.context != null) {
+        await BuGuruAvatarDialog.show(
+          context: Get.context!,
+          voiceFeedbackFuture: getFeedback(),
+          userAnswer: recognizedText.isEmpty ? "(Kosong)" : recognizedText,
+          correctAnswer: targetWord,
+          userPoints: userPoints.toList(),
+        );
+      }
+
       resetCanvas();
       examState.value = ExamState.drawing;
     }

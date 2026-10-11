@@ -9,6 +9,8 @@ import '../../../services/progress_service.dart';
 import '../../../widgets/point_animation.dart';
 import '../../../services/gemini_service.dart';
 import '../../../services/mongodb_service.dart';
+import '../../../widgets/bu_guru_avatar_dialog.dart';
+
 
 enum ExamState { idle, countdown, listening, checking, evaluating, result }
 
@@ -258,8 +260,6 @@ class SpellingExamController extends GetxController with GetSingleTickerProvider
 
   // CHECK ANSWER
   void checkAnswer() async {
-    examState.value = ExamState.checking;
-    await Future.delayed(const Duration(seconds: 1)); // Dipercepat jadi 1 detik
 
     final correctAnswer = currentQuestion['answer'].toString().toLowerCase();
     final userAnswer = spokenText.value.toLowerCase().trim();
@@ -281,9 +281,9 @@ class SpellingExamController extends GetxController with GetSingleTickerProvider
       }
 
       if (missionIndex != null) {
-        if (category == 'word' && progressService.unlockedSpellingExamWord.value >= 5) {
+        if (category == 'word' && progressService.unlockedSpellingExamWord.value >= 1) {
           progressService.completeMissionNode(missionIndex!);
-        } else if (category != 'word' && progressService.unlockedSpellingExamLetter.value >= 5) {
+        } else if (category != 'word' && progressService.unlockedSpellingExamLetter.value >= 1) {
           progressService.completeMissionNode(missionIndex!);
         }
       }
@@ -313,29 +313,36 @@ class SpellingExamController extends GetxController with GetSingleTickerProvider
 
       await Get.find<TtsService>().speakAndWait("Wah, benar! Hebat sekali! Kamu dapat $earned bintang!");
     } else {
-      examState.value = ExamState.evaluating;
       Get.find<SfxService>().playWrong();
       
       final geminiService = Get.find<GeminiService>();
       final mongoService = Get.find<MongoDbService>();
       
-      final geminiResult = await geminiService.evaluateSpelling(
-        targetWord: correctAnswer,
-        spokenWord: userAnswer.isEmpty ? "(tidak bersuara)" : userAnswer,
-      );
+      Future<String?> getFeedback() async {
+        final geminiResult = await geminiService.evaluateSpelling(
+          targetWord: correctAnswer,
+          spokenWord: userAnswer.isEmpty ? "(tidak bersuara)" : userAnswer,
+        );
+
+        if (geminiResult != null && geminiResult['analytics_data'] != null) {
+          await mongoService.saveAnalytics(geminiResult['analytics_data']);
+        }
+
+        return (geminiResult != null && geminiResult['voice_feedback'] != null)
+            ? geminiResult['voice_feedback'] as String
+            : "Aduh, masih kurang tepat. Coba ucapkan dengan lebih jelas ya!";
+      }
 
       examState.value = ExamState.result; // Tampilkan result screen (salah) agar bisa pencet tombol
       animController.forward(from: 0); // Trigger animasi pop-up
 
-      if (geminiResult != null) {
-        if (geminiResult['analytics_data'] != null) {
-          await mongoService.saveAnalytics(geminiResult['analytics_data']);
-        }
-        
-        final voiceFeedback = geminiResult['voice_feedback'] ?? "Aduh, masih kurang tepat. Coba ucapkan dengan lebih jelas ya!";
-        await Get.find<TtsService>().speakAndWait(voiceFeedback);
-      } else {
-        await Get.find<TtsService>().speakAndWait("Aduh, masih kurang tepat. Coba ucapkan dengan lebih jelas ya!");
+      if (Get.context != null) {
+        await BuGuruAvatarDialog.show(
+          context: Get.context!,
+          voiceFeedbackFuture: getFeedback(),
+          userAnswer: userAnswer.isEmpty ? "(Kosong)" : userAnswer,
+          correctAnswer: correctAnswer,
+        );
       }
     }
   }

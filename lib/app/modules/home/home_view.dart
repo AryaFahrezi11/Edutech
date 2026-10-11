@@ -13,6 +13,7 @@ import 'widgets/stats_bar_widget.dart';
 
 import '/app/services/point_service.dart';
 import '../../routes/app_routes.dart';
+import '../../widgets/owel_chat_dialog.dart';
 
 class HomeView extends GetView<HomeController> {
   const HomeView({Key? key}) : super(key: key);
@@ -31,6 +32,17 @@ class HomeView extends GetView<HomeController> {
             const ProfileView(),
           ],
         ),
+      ),
+      floatingActionButton: Obx(() => controller.tabIndex.value == 0 
+        ? FloatingActionButton.extended(
+            onPressed: () {
+              OwlChatDialog.show(context);
+            },
+            backgroundColor: Colors.blue.shade600,
+            icon: const Icon(Icons.forum_rounded, color: Colors.white),
+            label: const Text("Belajar Bareng Owl", style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+          )
+        : const SizedBox.shrink()
       ),
       bottomNavigationBar: _buildBottomNav(),
     );
@@ -72,17 +84,13 @@ class HomeView extends GetView<HomeController> {
         width: double.infinity,
         padding: const EdgeInsets.fromLTRB(20, 16, 20, 16),
         decoration: BoxDecoration(
-          gradient: const LinearGradient(
-            colors: [Color(0xFF1CB0F6), Color(0xFF1899D6)],
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-          ),
+          color: const Color(0xFF1CB0F6), // EduTheme.primary
           borderRadius: const BorderRadius.vertical(
-            bottom: Radius.circular(28),
+            bottom: Radius.circular(30),
           ),
           boxShadow: [
             BoxShadow(
-              color: const Color(0xFF1CB0F6).withOpacity(0.3),
+              color: const Color(0xFF1CB0F6).withOpacity(0.4),
               blurRadius: 16,
               offset: const Offset(0, 6),
             ),
@@ -105,7 +113,7 @@ class HomeView extends GetView<HomeController> {
               ),
               child: CircleAvatar(
                 radius: 22,
-                backgroundColor: const Color(0xFFFFD166),
+                backgroundColor: const Color(0xFFF39C12), // EduTheme.orange
                 child: Obx(() => Text(controller.userAvatar.value, style: const TextStyle(fontSize: 26))),
               ),
             ),
@@ -116,7 +124,7 @@ class HomeView extends GetView<HomeController> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Obx(() => Text(
-                    "Halo, ${controller.userName.value} ! 🌟",
+                    "Halo, ${controller.userName.value}!",
                     style: const TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.w900,

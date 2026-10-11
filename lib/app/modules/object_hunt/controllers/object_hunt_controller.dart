@@ -121,7 +121,7 @@ class ObjectHuntController extends GetxController {
             // Simpan progress
             _progressService.completeObjectHunt(targetIndex, huntItems.length);
             
-            if (missionIndex != null && _progressService.completedObjectHuntItems.length >= 5) {
+            if (missionIndex != null && _progressService.completedObjectHuntItems.length >= 1) {
               _progressService.completeMissionNode(missionIndex!);
             }
           }

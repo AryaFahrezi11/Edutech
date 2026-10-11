@@ -12,14 +12,14 @@ class SplashView extends GetView<SplashController> {
       backgroundColor: Colors.black, // or any color that matches the video borders
       body: Center(
         child: Obx(() {
-          if (controller.isVideoInitialized.value) {
+          if (controller.isVideoInitialized.value && controller.videoController != null) {
             return SizedBox.expand(
               child: FittedBox(
                 fit: BoxFit.cover,
                 child: SizedBox(
-                  width: controller.videoController.value.size.width == 0.0 ? 1920 : controller.videoController.value.size.width,
-                  height: controller.videoController.value.size.height == 0.0 ? 1080 : controller.videoController.value.size.height,
-                  child: VideoPlayer(controller.videoController),
+                  width: controller.videoController!.value.size.width == 0.0 ? 1920 : controller.videoController!.value.size.width,
+                  height: controller.videoController!.value.size.height == 0.0 ? 1080 : controller.videoController!.value.size.height,
+                  child: VideoPlayer(controller.videoController!),
                 ),
               ),
             );

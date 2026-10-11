@@ -11,7 +11,7 @@ class RaportView extends GetView<RaportController> {
     return Scaffold(
       backgroundColor: const Color(0xFFF4F7FC), // Soft modern background
       appBar: AppBar(
-        title: const Text("Laporan Belajar Anak 📊", style: TextStyle(fontWeight: FontWeight.w900, color: Colors.white)),
+        title: const Text("Laporan Belajar Anak", style: TextStyle(fontWeight: FontWeight.w900, color: Colors.white)),
         backgroundColor: const Color(0xFF1CB0F6),
         centerTitle: true,
         elevation: 0,
@@ -57,13 +57,13 @@ class RaportView extends GetView<RaportController> {
               Container(
                 padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
-                  gradient: const LinearGradient(colors: [Color(0xFF6C63FF), Color(0xFF48C6EF)]),
+                  color: const Color(0xFF6C63FF),
                   borderRadius: BorderRadius.circular(20),
                   boxShadow: [
                     BoxShadow(color: const Color(0xFF6C63FF).withValues(alpha: 0.3), blurRadius: 10, offset: const Offset(0, 4))
                   ],
                 ),
-                child: const Text("🤖", style: TextStyle(fontSize: 32)),
+                child: const Icon(Icons.smart_toy_rounded, color: Colors.white, size: 32),
               ),
               const SizedBox(width: 16),
               const Expanded(
@@ -95,7 +95,13 @@ class RaportView extends GetView<RaportController> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text("📈 Level Keterampilan", style: TextStyle(fontSize: 22, fontWeight: FontWeight.w900, color: Color(0xFF2D3142))),
+        Row(
+          children: [
+            const Icon(Icons.trending_up_rounded, color: Color(0xFF2D3142), size: 24),
+            const SizedBox(width: 8),
+            const Text("Level Keterampilan", style: TextStyle(fontSize: 22, fontWeight: FontWeight.w900, color: Color(0xFF2D3142))),
+          ],
+        ),
         const SizedBox(height: 8),
         const Text("Rata-rata akurasi dari semua latihan yang dikerjakan", style: TextStyle(color: Colors.grey, fontSize: 13, height: 1.4)),
         const SizedBox(height: 24),
@@ -112,24 +118,24 @@ class RaportView extends GetView<RaportController> {
             if (controller.skillData.isEmpty || controller.skillData.length < 4) {
               return _buildEmptyState("Belum cukup data untuk dihitung.");
             }
-            return Column(
-              children: [
-                _buildProgressBar("📝 Menulis", controller.skillData[0], const Color(0xFFFF9600), const Color(0xFFFFC107)),
-                const SizedBox(height: 20),
-                _buildProgressBar("🔤 Mengeja", controller.skillData[1], const Color(0xFF1CB0F6), const Color(0xFF48C6EF)),
-                const SizedBox(height: 20),
-                _buildProgressBar("🔍 Observasi", controller.skillData[2], const Color(0xFF58CC02), const Color(0xFF89E219)),
-                const SizedBox(height: 20),
-                _buildProgressBar("⚔️ Duel", controller.skillData[3], const Color(0xFF6C63FF), const Color(0xFF9D94FF)),
-              ],
-            );
+              return Column(
+                children: [
+                  _buildProgressBar("Menulis", controller.skillData[0], const Color(0xFFFF9600)),
+                  const SizedBox(height: 20),
+                  _buildProgressBar("Mengeja", controller.skillData[1], const Color(0xFF1CB0F6)),
+                  const SizedBox(height: 20),
+                  _buildProgressBar("Observasi", controller.skillData[2], const Color(0xFF58CC02)),
+                  const SizedBox(height: 20),
+                  _buildProgressBar("Duel", controller.skillData[3], const Color(0xFF6C63FF)),
+                ],
+              );
           }),
         ),
       ],
     );
   }
 
-  Widget _buildProgressBar(String title, double value, Color color1, Color color2) {
+  Widget _buildProgressBar(String title, double value, Color color) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -137,7 +143,7 @@ class RaportView extends GetView<RaportController> {
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             Text(title, style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 16, color: Color(0xFF4A4A4A))),
-            Text("${value.toInt()}%", style: TextStyle(fontWeight: FontWeight.w900, fontSize: 16, color: color1)),
+            Text("${value.toInt()}%", style: TextStyle(fontWeight: FontWeight.w900, fontSize: 16, color: color)),
           ],
         ),
         const SizedBox(height: 10),
@@ -157,9 +163,9 @@ class RaportView extends GetView<RaportController> {
                     curve: Curves.easeOutCubic,
                     width: constraints.maxWidth * (value / 100),
                     decoration: BoxDecoration(
-                      gradient: LinearGradient(colors: [color1, color2]),
+                      color: color,
                       borderRadius: BorderRadius.circular(10),
-                      boxShadow: [BoxShadow(color: color1.withValues(alpha: 0.4), blurRadius: 6, offset: const Offset(0, 2))],
+                      boxShadow: [BoxShadow(color: color.withValues(alpha: 0.4), blurRadius: 6, offset: const Offset(0, 2))],
                     ),
                   ),
                 ],
@@ -175,7 +181,13 @@ class RaportView extends GetView<RaportController> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text("🌟 Kelebihan Ananda", style: TextStyle(fontSize: 22, fontWeight: FontWeight.w900, color: Color(0xFF2D3142))),
+        Row(
+          children: [
+            const Icon(Icons.star_rounded, color: Color(0xFF2D3142), size: 24),
+            const SizedBox(width: 8),
+            const Text("Kelebihan Ananda", style: TextStyle(fontSize: 22, fontWeight: FontWeight.w900, color: Color(0xFF2D3142))),
+          ],
+        ),
         const SizedBox(height: 16),
         Obx(() {
           if (controller.strengths.isEmpty) {
@@ -198,7 +210,13 @@ class RaportView extends GetView<RaportController> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text("⚠️ Area Perbaikan", style: TextStyle(fontSize: 22, fontWeight: FontWeight.w900, color: Color(0xFF2D3142))),
+        Row(
+          children: [
+            const Icon(Icons.warning_amber_rounded, color: Color(0xFF2D3142), size: 24),
+            const SizedBox(width: 8),
+            const Text("Area Perbaikan", style: TextStyle(fontSize: 22, fontWeight: FontWeight.w900, color: Color(0xFF2D3142))),
+          ],
+        ),
         const SizedBox(height: 16),
         Obx(() {
           if (controller.weaknesses.isEmpty) {
@@ -221,7 +239,13 @@ class RaportView extends GetView<RaportController> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text("📈 Tren Belajar Terakhir", style: TextStyle(fontSize: 22, fontWeight: FontWeight.w900, color: Color(0xFF2D3142))),
+        Row(
+          children: [
+            const Icon(Icons.show_chart_rounded, color: Color(0xFF2D3142), size: 24),
+            const SizedBox(width: 8),
+            const Text("Tren Belajar Terakhir", style: TextStyle(fontSize: 22, fontWeight: FontWeight.w900, color: Color(0xFF2D3142))),
+          ],
+        ),
         const SizedBox(height: 8),
         const Text("Melihat histori pergerakan nilai Ananda dari tiap sesi latihan terakhir.", style: TextStyle(color: Colors.grey, fontSize: 13, height: 1.4)),
         const SizedBox(height: 24),
@@ -303,14 +327,7 @@ class RaportView extends GetView<RaportController> {
                       ),
                       belowBarData: BarAreaData(
                         show: true,
-                        gradient: LinearGradient(
-                          colors: [
-                            const Color(0xFF1CB0F6).withValues(alpha: 0.3),
-                            const Color(0xFF1CB0F6).withValues(alpha: 0.0),
-                          ],
-                          begin: Alignment.topCenter,
-                          end: Alignment.bottomCenter,
-                        ),
+                        color: const Color(0xFF1CB0F6).withValues(alpha: 0.15),
                       ),
                     ),
                   ],

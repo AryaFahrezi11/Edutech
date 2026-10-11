@@ -180,7 +180,7 @@ class GuessObjectController extends GetxController {
     currentState.value = GuessState.success;
     successCount.value++;
     
-    if (missionIndex != null && successCount.value >= 5) {
+    if (missionIndex != null && successCount.value >= 1) {
       Get.find<ProgressService>().completeMissionNode(missionIndex!);
     }
     

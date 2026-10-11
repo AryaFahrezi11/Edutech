@@ -17,8 +17,12 @@ class TtsService extends GetxService {
     isTtsEnabled.value = prefs.getBool('tts_enabled') ?? true;
 
     await flutterTts.setLanguage("id-ID");
-    if (GetPlatform.isAndroid) {
-      await flutterTts.setEngine("com.google.android.tts");
+    try {
+      if (GetPlatform.isAndroid) {
+        await flutterTts.setEngine("com.google.android.tts");
+      }
+    } catch (e) {
+      print("TTS setEngine fallback to default system engine: $e");
     }
     await flutterTts.setSpeechRate(0.45);
     await flutterTts.setPitch(1.1);
@@ -57,6 +61,7 @@ class TtsService extends GetxService {
 
   Future<void> speak(String text) async {
     if (!isTtsEnabled.value) return;
+    isSpeaking.value = true;
     await flutterTts.speak(text);
   }
 
@@ -64,10 +69,16 @@ class TtsService extends GetxService {
     if (!isTtsEnabled.value) return;
     _ttsCompleter = Completer<void>();
     try {
-      // Timeout 15 detik untuk antisipasi kalimat yang cukup panjang dari AI
+      // Waktu perkiraan durasi bicara: ~75ms per karakter
+      final int estimatedDurationMs = text.length * 85; 
+      
       await flutterTts.speak(text).timeout(const Duration(seconds: 15));
       if (_ttsCompleter != null && !_ttsCompleter!.isCompleted) {
-        await _ttsCompleter!.future.timeout(const Duration(seconds: 15));
+        // Tunggu completer dari engine, atau fallback waktu estimasi jika engine langsung selesai (bug flutter_tts di beberapa HP)
+        await Future.any([
+          _ttsCompleter!.future,
+          Future.delayed(Duration(milliseconds: estimatedDurationMs)),
+        ]).timeout(const Duration(seconds: 15));
       }
     } catch (e) {
       isSpeaking.value = false;

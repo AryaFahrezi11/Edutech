@@ -10,38 +10,20 @@ class SettingsView extends GetView<SettingsController> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: EduTheme.bgLight,
+      appBar: AppBar(
+        title: const Text("Pengaturan", style: TextStyle(fontWeight: FontWeight.w900, color: Colors.white)),
+        backgroundColor: EduTheme.primary,
+        centerTitle: true,
+        elevation: 0,
+        shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(bottom: Radius.circular(30))),
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back_ios_new_rounded, color: Colors.white, size: 22),
+          onPressed: () => Get.back(),
+        ),
+      ),
       body: SafeArea(
         child: Column(
           children: [
-            // ── HEADER ──
-            Container(
-              padding: const EdgeInsets.fromLTRB(16, 16, 20, 24),
-              decoration: const BoxDecoration(
-                gradient: LinearGradient(
-                  colors: [Color(0xFF8E2DE2), Color(0xFF4A00E0)], // Tema ungu untuk pengaturan
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                ),
-                borderRadius: BorderRadius.vertical(bottom: Radius.circular(36)),
-                boxShadow: [
-                  BoxShadow(color: Color(0x444A00E0), blurRadius: 20, offset: Offset(0, 10)),
-                ],
-              ),
-              child: Row(
-                children: [
-                  IconButton(
-                    icon: const Icon(Icons.arrow_back_ios_new_rounded, color: Colors.white, size: 22),
-                    onPressed: () => Get.back(),
-                  ),
-                  const Expanded(
-                    child: Text(
-                      "Pengaturan ⚙️",
-                      style: TextStyle(fontSize: 20, fontWeight: FontWeight.w900, color: Colors.white),
-                    ),
-                  ),
-                ],
-              ),
-            ),
             
             Expanded(
               child: SingleChildScrollView(
@@ -76,7 +58,7 @@ class SettingsView extends GetView<SettingsController> {
                               color: EduTheme.blue.withOpacity(0.1),
                               shape: BoxShape.circle,
                             ),
-                            child: const Text("🔔", style: TextStyle(fontSize: 24)),
+                            child: const Icon(Icons.notifications_active_rounded, color: EduTheme.blue, size: 24),
                           ),
                           const SizedBox(width: 16),
                           const Expanded(
@@ -129,7 +111,7 @@ class SettingsView extends GetView<SettingsController> {
                               color: EduTheme.orange.withOpacity(0.1),
                               shape: BoxShape.circle,
                             ),
-                            child: const Text("🤖", style: TextStyle(fontSize: 24)),
+                            child: const Icon(Icons.smart_toy_rounded, color: EduTheme.orange, size: 24),
                           ),
                           const SizedBox(width: 16),
                           const Expanded(

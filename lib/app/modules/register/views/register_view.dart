@@ -36,15 +36,15 @@ class RegisterView extends GetView<RegisterController> {
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     Container(
-                      padding: const EdgeInsets.all(8),
+                      padding: const EdgeInsets.all(10),
                       decoration: BoxDecoration(
                         color: EduTheme.primary,
-                        shape: BoxShape.circle,
+                        borderRadius: BorderRadius.circular(14),
                         boxShadow: EduTheme.buttonShadow(EduTheme.primary),
                       ),
-                      child: const Icon(Icons.school_rounded, color: Colors.white, size: 24),
+                      child: const Icon(Icons.school_rounded, color: Colors.white, size: 28),
                     ),
-                    const SizedBox(width: 10),
+                    const SizedBox(width: 12),
                     const Text(
                       'Edutech',
                       style: TextStyle(
@@ -67,36 +67,82 @@ class RegisterView extends GetView<RegisterController> {
                 builder: (context, value, child) {
                   return Transform.scale(scale: value, child: child);
                 },
-                child: const Text("🎒", style: TextStyle(fontSize: 64)),
+                child: Container(
+                  width: 120,
+                  height: 120,
+                  decoration: BoxDecoration(
+                    color: EduTheme.primaryLight,
+                    shape: BoxShape.circle,
+                    border: Border.all(color: EduTheme.primary, width: 3),
+                    boxShadow: EduTheme.buttonShadow(EduTheme.primary),
+                  ),
+                  child: ClipOval(
+                    child: Image.asset(
+                      'assets/images/anak.png',
+                      height: 120,
+                      width: 120,
+                      fit: BoxFit.cover,
+                    ),
+                  ),
+                ),
               ),
 
               const SizedBox(height: 12),
 
-              const Text(
-                'Mulai Petualangan! 🚀',
-                style: TextStyle(
-                  fontSize: 26,
-                  fontWeight: FontWeight.w900,
-                  color: EduTheme.textDark,
+              TweenAnimationBuilder(
+                tween: Tween<double>(begin: 0, end: 1),
+                duration: const Duration(milliseconds: 600),
+                builder: (context, value, child) {
+                  return Opacity(
+                    opacity: value,
+                    child: Transform.translate(
+                      offset: Offset(0, 20 * (1 - value)),
+                      child: child,
+                    ),
+                  );
+                },
+                child: Column(
+                  children: [
+                    const Text(
+                      'Mulai Petualangan!',
+                      style: TextStyle(
+                        fontSize: 26,
+                        fontWeight: FontWeight.w900,
+                        color: EduTheme.textDark,
+                      ),
+                    ),
+                    const SizedBox(height: 6),
+                    const Text(
+                      'Yuk daftar dan mulai belajar sambil bermain!',
+                      style: TextStyle(fontSize: 14, color: EduTheme.textMedium),
+                    ),
+                  ],
                 ),
-              ),
-              const SizedBox(height: 6),
-              const Text(
-                'Yuk daftar dan mulai belajar sambil bermain!',
-                style: TextStyle(fontSize: 14, color: EduTheme.textMedium),
               ),
               const SizedBox(height: 24),
 
               // Form Card
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 22, vertical: 24),
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(EduTheme.radiusLg),
-                  boxShadow: EduTheme.softShadow(),
-                ),
-                child: Column(
-                  children: [
+              TweenAnimationBuilder(
+                tween: Tween<double>(begin: 0, end: 1),
+                duration: const Duration(milliseconds: 700),
+                builder: (context, value, child) {
+                  return Opacity(
+                    opacity: value,
+                    child: Transform.translate(
+                      offset: Offset(0, 30 * (1 - value)),
+                      child: child,
+                    ),
+                  );
+                },
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 22, vertical: 24),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(EduTheme.radiusLg),
+                    boxShadow: EduTheme.softShadow(),
+                  ),
+                  child: Column(
+                    children: [
                     _buildInput(
                       title: 'Nama Lengkap',
                       hint: 'Masukkan nama lengkap',
@@ -153,8 +199,6 @@ class RegisterView extends GetView<RegisterController> {
                                 child: const Row(
                                   mainAxisAlignment: MainAxisAlignment.center,
                                   children: [
-                                    Text("✨", style: TextStyle(fontSize: 20)),
-                                    SizedBox(width: 8),
                                     Text(
                                       'DAFTAR SEKARANG',
                                       style: TextStyle(
@@ -173,8 +217,9 @@ class RegisterView extends GetView<RegisterController> {
                   ],
                 ),
               ),
+            ),
 
-              const SizedBox(height: 22),
+            const SizedBox(height: 22),
 
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
